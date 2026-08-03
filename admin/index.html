@@ -120,6 +120,9 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="settings">Contact Info</button>
       <button class="nav-item" data-panel="news">News</button>
       <button class="nav-item" data-panel="team">Team</button>
+      <button class="nav-item" data-panel="plots">Hot Plots</button>
+      <button class="nav-item" data-panel="sellers">Sellers</button>
+      <button class="nav-item" data-panel="reviews">Reviews</button>
       <button class="nav-item" data-panel="leads">Leads</button>
     </div>
 
@@ -367,6 +370,108 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
         </div>
       </div>
 
+      <!-- SELLERS -->
+      <div class="panel" id="panel-sellers">
+        <div class="panel-card">
+          <h3>Add / edit seller</h3>
+          <p class="desc">Tags and document types are free text, comma separated — add as many custom ones as you like.</p>
+          <form id="sellerForm">
+            <input type="hidden" name="id"/>
+            <div class="form-grid">
+              <div class="field"><label>Seller / contact name</label><input name="name" required placeholder="e.g. Kofi Mensah"/></div>
+              <div class="field"><label>Company name (optional)</label><input name="company_name" placeholder="e.g. Trulander Jsf Limited"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Company registration no. (optional)</label><input name="company_reg_no" placeholder="Only if you can verify this"/></div>
+              <div class="field"><label>Phone / WhatsApp</label><input name="phone" placeholder="233..."/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Email (optional)</label><input name="email" placeholder="seller@email.com"/></div>
+              <div class="field"><label>Avatar</label><input type="file" accept="image/*" id="sellerAvatarFile"/><input type="hidden" name="avatar_url"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Tags (comma separated)</label><input name="tags" placeholder="Verified, Premium, Recommended"/></div>
+              <div class="field"><label>Document types (comma separated)</label><input name="document_types" placeholder="Title, Certified Site Plan & Indenture, Bar-coded Site Plan & Indenture"/></div>
+            </div>
+            <div class="field"><label>Short bio (optional)</label><textarea name="bio" rows="2" placeholder="A short line about this seller..."></textarea></div>
+            <div class="form-grid">
+              <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="1"/></div>
+              <label style="font-size:13px;display:flex;gap:8px;align-items:center;margin-top:28px"><input type="checkbox" name="active" checked/> Active</label>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-accent" type="submit">Save seller</button>
+              <button class="btn" type="button" id="sellerCancelEdit" style="display:none">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>All sellers</h3>
+          <table><thead><tr><th>Name</th><th>Company</th><th>Tags</th><th>Status</th><th></th></tr></thead><tbody id="sellersTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- PLOTS -->
+      <div class="panel" id="panel-plots">
+        <div class="panel-card">
+          <h3>Add / edit plot</h3>
+          <p class="desc">Shows up in the "Hot Plots" section on the homepage.</p>
+          <form id="plotForm">
+            <input type="hidden" name="id"/>
+            <div class="field"><label>Title</label><input name="title" required placeholder="e.g. 100ft x 100ft Plot — East Legon Hills"/></div>
+            <div class="form-grid">
+              <div class="field"><label>Size</label><input name="size" required placeholder="e.g. 100ft x 100ft"/></div>
+              <div class="field"><label>Location</label><input name="location" required placeholder="e.g. East Legon Hills, Accra"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Price amount (optional)</label><input name="price_amount" type="number" step="0.01" placeholder="e.g. 45000"/></div>
+              <div class="field"><label>Currency</label>
+                <select name="currency"><option value="GHS">GHS</option><option value="USD">USD</option></select>
+              </div>
+            </div>
+            <div class="field"><label>Nearest landmark (optional)</label><input name="nearest_landmark" placeholder="e.g. 5 mins from the American House"/></div>
+            <div class="field"><label>Description (optional)</label><textarea name="description" rows="3" placeholder="More details about this plot..."></textarea></div>
+            <div class="form-grid">
+              <div class="field"><label>Main photo URL</label><input name="image_url" placeholder="https://..."/></div>
+              <div class="field"><label>Or upload main photo</label><input type="file" accept="image/*" id="plotImgFile1"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>2nd photo (optional)</label><input type="file" accept="image/*" id="plotImgFile2"/><input type="hidden" name="image_url_2"/></div>
+              <div class="field"><label>3rd photo (optional)</label><input type="file" accept="image/*" id="plotImgFile3"/><input type="hidden" name="image_url_3"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Seller</label><select name="seller_id" id="plotSellerSelect"><option value="">— No seller linked —</option></select></div>
+              <div class="field"><label>Status</label>
+                <select name="status"><option value="available">Available</option><option value="reserved">Reserved</option><option value="sold">Sold</option></select>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="1"/></div>
+              <div style="display:flex;gap:18px;align-items:center;margin-top:28px">
+                <label style="font-size:13px;display:flex;gap:8px;align-items:center"><input type="checkbox" name="featured"/> Mark as "Hot"</label>
+                <label style="font-size:13px;display:flex;gap:8px;align-items:center"><input type="checkbox" name="active" checked/> Active</label>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-accent" type="submit">Save plot</button>
+              <button class="btn" type="button" id="plotCancelEdit" style="display:none">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>All plots</h3>
+          <table><thead><tr><th>Photo</th><th>Title</th><th>Price</th><th>Status</th><th></th></tr></thead><tbody id="plotsTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- REVIEWS -->
+      <div class="panel" id="panel-reviews">
+        <div class="panel-card">
+          <h3>Reviews</h3>
+          <p class="desc">Approve a review to show it publicly in the homepage's "Client Stories" section.</p>
+          <table><thead><tr><th>Name</th><th>Rating</th><th>Comment</th><th>Status</th><th></th></tr></thead><tbody id="reviewsTable"></tbody></table>
+        </div>
+      </div>
+
       <!-- LEADS -->
       <div class="panel" id="panel-leads">
         <div class="panel-card">
@@ -490,7 +595,8 @@ document.querySelectorAll('.side .nav-item').forEach(btn => {
 
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
-  loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam(); loadLeads();
+  loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads();
 }
 
 /* ---- BANNERS ---- */
@@ -816,7 +922,7 @@ async function loadTeam(){
   const { data: userData } = await sb.auth.getUser();
   myEmail = userData && userData.user ? userData.user.email : null;
 
-  const { data, error } = await sb.from('team_directory').select('*').order('created_at');
+  const { data, error } = await sb.rpc('get_team');
   if (error) return;
 
   const me = (data||[]).find(t => myEmail && t.email.toLowerCase() === myEmail.toLowerCase());
@@ -841,6 +947,137 @@ async function removeTeamMember(email){
   const { error } = await sb.rpc('remove_admin', { target_email: email });
   if (error) return toast('Error: ' + error.message);
   toast('Removed'); loadTeam();
+}
+
+/* ---- SELLERS ---- */
+let sellersListCache = [];
+const sellerForm = document.getElementById('sellerForm');
+document.getElementById('sellerAvatarFile').addEventListener('change', async (e) => {
+  if (e.target.files[0]) sellerForm.avatar_url.value = await resizeImage(e.target.files[0], 300);
+});
+function splitList(s){ return (s||'').split(',').map(x=>x.trim()).filter(Boolean); }
+sellerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(sellerForm).entries());
+  d.active = !!sellerForm.active.checked;
+  d.sort_order = parseInt(d.sort_order||'1',10);
+  d.tags = splitList(d.tags);
+  d.document_types = splitList(d.document_types);
+  const id = d.id; delete d.id;
+  const { error } = id ? await sb.from('sellers').update(d).eq('id', id) : await sb.from('sellers').insert(d);
+  if (error) return toast('Error: ' + error.message);
+  toast('Seller saved'); sellerForm.reset(); document.getElementById('sellerCancelEdit').style.display='none';
+  await loadSellers(); loadPlots();
+});
+document.getElementById('sellerCancelEdit').addEventListener('click', () => { sellerForm.reset(); document.getElementById('sellerCancelEdit').style.display='none'; });
+async function loadSellers(){
+  const { data, error } = await sb.from('sellers').select('*').order('sort_order');
+  if (error) return;
+  sellersListCache = data || [];
+  document.getElementById('sellersTable').innerHTML = sellersListCache.map(s => `
+    <tr>
+      <td>${esc(s.name)}</td>
+      <td>${esc(s.company_name||'')}</td>
+      <td>${(s.tags||[]).map(t=>`<span class="pill on" style="margin-right:4px">${esc(t)}</span>`).join('')}</td>
+      <td><span class="pill ${s.active?'on':'off'}">${s.active?'Active':'Hidden'}</span></td>
+      <td class="row-actions">
+        <button class="btn" onclick='editSeller(${JSON.stringify(s)})'>Edit</button>
+        <button class="btn btn-danger" onclick="deleteRow('sellers','${s.id}',async()=>{await loadSellers();loadPlots();})">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5">No sellers yet.</td></tr>';
+
+  const sel = document.getElementById('plotSellerSelect');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— No seller linked —</option>' + sellersListCache.map(s => `<option value="${s.id}">${esc(s.name)}${s.company_name?' ('+esc(s.company_name)+')':''}</option>`).join('');
+  sel.value = current;
+}
+function editSeller(s){
+  sellerForm.id.value = s.id; sellerForm.name.value = s.name; sellerForm.company_name.value = s.company_name||'';
+  sellerForm.company_reg_no.value = s.company_reg_no||''; sellerForm.phone.value = s.phone||''; sellerForm.email.value = s.email||'';
+  sellerForm.avatar_url.value = s.avatar_url||''; sellerForm.tags.value = (s.tags||[]).join(', ');
+  sellerForm.document_types.value = (s.document_types||[]).join(', '); sellerForm.bio.value = s.bio||'';
+  sellerForm.sort_order.value = s.sort_order; sellerForm.active.checked = s.active;
+  document.getElementById('sellerCancelEdit').style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---- PLOTS ---- */
+const plotForm = document.getElementById('plotForm');
+document.getElementById('plotImgFile1').addEventListener('change', async (e) => {
+  if (e.target.files[0]) plotForm.image_url.value = await resizeImage(e.target.files[0], 1200);
+});
+document.getElementById('plotImgFile2').addEventListener('change', async (e) => {
+  if (e.target.files[0]) plotForm.image_url_2.value = await resizeImage(e.target.files[0], 1200);
+});
+document.getElementById('plotImgFile3').addEventListener('change', async (e) => {
+  if (e.target.files[0]) plotForm.image_url_3.value = await resizeImage(e.target.files[0], 1200);
+});
+plotForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(plotForm).entries());
+  d.active = !!plotForm.active.checked;
+  d.featured = !!plotForm.featured.checked;
+  d.sort_order = parseInt(d.sort_order||'1',10);
+  d.price_amount = d.price_amount ? parseFloat(d.price_amount) : null;
+  d.seller_id = d.seller_id || null;
+  const id = d.id; delete d.id;
+  const { error } = id ? await sb.from('plots').update(d).eq('id', id) : await sb.from('plots').insert(d);
+  if (error) return toast('Error: ' + error.message);
+  toast('Plot saved'); plotForm.reset(); document.getElementById('plotCancelEdit').style.display='none';
+  loadPlots();
+});
+document.getElementById('plotCancelEdit').addEventListener('click', () => { plotForm.reset(); document.getElementById('plotCancelEdit').style.display='none'; });
+async function loadPlots(){
+  const { data, error } = await sb.from('plots').select('*').order('sort_order');
+  if (error) return;
+  document.getElementById('plotsTable').innerHTML = (data||[]).map(p => `
+    <tr>
+      <td>${p.image_url?`<img class="thumb" src="${esc(p.image_url)}"/>`:'—'}</td>
+      <td>${esc(p.title)}</td>
+      <td>${p.price_amount!=null?esc(p.currency||'GHS')+' '+Number(p.price_amount).toLocaleString():'—'}</td>
+      <td><span class="pill ${p.status==='available'?'on':'off'}">${esc(p.status)}</span></td>
+      <td class="row-actions">
+        <button class="btn" onclick='editPlot(${JSON.stringify(p)})'>Edit</button>
+        <button class="btn btn-danger" onclick="deleteRow('plots','${p.id}',loadPlots)">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5">No plots yet.</td></tr>';
+}
+function editPlot(p){
+  plotForm.id.value = p.id; plotForm.title.value = p.title; plotForm.size.value = p.size; plotForm.location.value = p.location;
+  plotForm.price_amount.value = p.price_amount!=null?p.price_amount:''; plotForm.currency.value = p.currency||'GHS';
+  plotForm.nearest_landmark.value = p.nearest_landmark||''; plotForm.description.value = p.description||'';
+  plotForm.image_url.value = p.image_url||''; plotForm.image_url_2.value = p.image_url_2||''; plotForm.image_url_3.value = p.image_url_3||'';
+  plotForm.seller_id.value = p.seller_id||''; plotForm.status.value = p.status; plotForm.sort_order.value = p.sort_order;
+  plotForm.featured.checked = p.featured; plotForm.active.checked = p.active;
+  document.getElementById('plotCancelEdit').style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---- REVIEWS ---- */
+async function loadReviews(){
+  const { data, error } = await sb.from('reviews').select('*').order('created_at',{ascending:false});
+  if (error) return;
+  document.getElementById('reviewsTable').innerHTML = (data||[]).map(r => `
+    <tr>
+      <td>${esc(r.reviewer_name)}</td>
+      <td>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td>
+      <td style="max-width:260px">${esc(r.comment||'')}</td>
+      <td><span class="pill ${r.approved?'on':'off'}">${r.approved?'Approved':'Pending'}</span></td>
+      <td class="row-actions">
+        ${!r.approved?`<button class="btn btn-accent" onclick="approveReview('${r.id}')">Approve</button>`:`<button class="btn" onclick="unapproveReview('${r.id}')">Unapprove</button>`}
+        <button class="btn btn-danger" onclick="deleteRow('reviews','${r.id}',loadReviews)">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5">No reviews yet.</td></tr>';
+}
+async function approveReview(id){
+  const { error } = await sb.from('reviews').update({ approved: true }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  toast('Review approved'); loadReviews();
+}
+async function unapproveReview(id){
+  const { error } = await sb.from('reviews').update({ approved: false }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  toast('Review hidden'); loadReviews();
 }
 
 /* ---- LEADS ---- */

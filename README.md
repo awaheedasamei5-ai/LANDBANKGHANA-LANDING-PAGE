@@ -2,7 +2,7 @@
 
 Public marketing site for **landbankghana.com**, plus an admin dashboard for
 managing homepage content (banners, photos, stats, clients, social links,
-news, contact details, staff accounts) and viewing contact-form submissions.
+news, contact details, staff accounts, plot listings, sellers, reviews).
 
 This is a standalone project — separate from the internal PEP Landbank sales
 portal repo, with its own Supabase backend.
@@ -11,23 +11,16 @@ portal repo, with its own Supabase backend.
 
 - `index.html` — the public landing page (single file, no build step).
 - `admin/index.html` — password-protected content admin dashboard.
-- `assets/logo.svg` — the LandBank Ghana logo (recreated as a vector from the
-  image shared in chat — see "Logos" below).
-- `assets/trulander-logo.svg` — Trulander Jsf Limited's logo, same situation.
+- `assets/logo.png` — the real LandBank Ghana logo, extracted from the files
+  you sent.
+- `assets/trulander-logo.png` — Trulander Jsf Limited's real logo, same.
+- `assets/photos/` — real photos you provided (hero photo, About/Process
+  section photos, the 3 promo/ad banners, and gallery photos).
 - `assets/supabase-config.js` — the Supabase project URL + public anon key
   shared by both `index.html` and `admin/index.html`.
 - `supabase/schema.sql` — a record of the database schema (tables + security
   policies) already applied to the Supabase project. You don't need to run
   this yourself; it's there for reference/history.
-
-## Logos
-
-Both logos are **recreations**, not your original files. Images pasted or
-dropped directly into a chat message can be *seen* but not saved as an actual
-file — there's no way to extract the real pixels from that. To use your exact
-original artwork, upload the logo files somewhere I can fetch them from (e.g.
-a Google Drive/Dropbox share link, or directly into the admin dashboard once
-the site is live), and I'll swap them in exactly as-is.
 
 ## Backend
 
@@ -36,43 +29,78 @@ A **new, separate Supabase project** was created for this site (name:
 It holds:
 
 - `banners` — `kind='hero'` controls the homepage headline/subtext/badge;
-  `kind='promo'` banners are slides in the animated advertisement carousel.
+  `kind='promo'` banners are slides in the animated advertisement carousel
+  (seeded with your 3 ad creatives).
 - `content_blocks` — photo placements: three fixed "named spots" (hero, about,
-  process section) plus an open-ended gallery — see below.
+  process section — seeded with your real photos) plus an open-ended gallery.
 - `stats` — the number tiles (e.g. "7+ Years Experience").
-- `clients` — the "Trusted by" logo strip (seeded with Trulander Jsf Limited),
-  each with optional Facebook/Instagram/TikTok links — clicking a client with
-  socials set pops open icon links to their pages.
+- `clients` — the "Trusted by" logo strip (seeded with Trulander Jsf Limited
+  and their real logo), each with optional Facebook/Instagram/TikTok links —
+  clicking a client with socials set pops open icon links to their pages.
 - `social_links` — your own social icons shown in the contact section +
   footer (seeded with real Instagram, Facebook, TikTok, WhatsApp).
 - `news` — announcements shown in the site's notification-bell panel.
 - `site_settings` — phone/WhatsApp/email/office address/urgent call number
   (seeded with WhatsApp +233 54 641 6566 and email
   digitalopsofficer@landbankghana.com; office address is still a placeholder).
+- `sellers` — seller profiles for the Hot Plots marketplace: name, company,
+  registration no., tags (free text — "Verified", "Premium", etc.), document
+  types held (free text — "Title", "Certified Site Plan & Indenture", etc.),
+  contact info.
+- `plots` — the plot listings themselves: title, size, price, location,
+  nearest landmark, description, up to 3 photos, linked seller, status
+  (available/reserved/sold), and a "Hot" featured flag.
+- `reviews` — public star-rating submissions (1–5 stars + comment), held for
+  moderation until an admin approves them, at which point they appear
+  automatically in the "Client Stories" section.
 - `leads` — every contact-form submission from the homepage.
 - `admins` — staff accounts: invite list, claimed status, display name, avatar.
 
-Anyone can **read** public content (banners/photos/stats/clients/social/news/
-settings — that's what makes the homepage work) and anyone can **submit** the
-contact form. Only signed-in admins can add/edit/delete content or view leads
-— enforced by Postgres Row Level Security, not just the frontend.
+Anyone can **read** public content and anyone can **submit** the contact
+form or a review. Only signed-in admins can add/edit/delete content, approve
+reviews, or view leads — enforced by Postgres Row Level Security, not just
+the frontend.
 
 ## What's on the homepage now
 
-- Sticky nav (Home/About/Services/Contact), hero, "Trusted by" clients strip
-  with clickable social popovers, an animated promo banner carousel (hidden
-  until you add a promo banner), "How We Help" cards, the buyer/seller
-  qualifier questions, a 5-step process timeline, stats, About Us, an
-  open-ended photo gallery (hidden until you add a photo), an honest
-  "stories coming soon" placeholder instead of fake testimonials, and a
-  contact form.
+- Sticky nav (Home/About/Services/Contact), a hero with a real photo of a
+  team member, "Trusted by" clients strip with clickable social popovers, an
+  animated promo banner carousel with your 3 ad creatives, "How We Help"
+  cards, the buyer/seller qualifier questions.
+- **Hot Plots** — a marketplace grid of available plots (photo, size, price,
+  status badge, "Hot" tag for featured listings). Clicking one opens a detail
+  modal with a photo gallery, full facts (size/location/nearest landmark/
+  description), and a seller card showing their tags (Verified ✓, Premium ★,
+  or any custom tag you add), company info, document types held, and direct
+  call/WhatsApp/email buttons. Shows an honest "new plots coming soon" message
+  until you add your first one.
+- A 5-step process timeline (with a real photo of the team verifying a site),
+  stats, About Us (with a real photo), an open-ended photo gallery, a
+  **Client Stories** section that shows real approved reviews with star
+  ratings once you have any (otherwise an honest "coming soon" state) plus a
+  public star-rating review submission form, and a contact form.
 - Floating WhatsApp button (bottom-right).
 - Floating, **draggable** notification bell (bottom-left, drag it anywhere —
   position is remembered) that opens a slide-in panel of your **News** items,
   with a red dot when there's something new.
 - A "Need to talk to staff urgently?" button that dials your urgent-call
-  number directly on mobile (`tel:` link) — pill-shaped on desktop, icon-only
-  on mobile so it doesn't crowd the WhatsApp button.
+  number directly on mobile (`tel:` link).
+
+## Managing the Hot Plots marketplace
+
+In `/admin`:
+
+- **Sellers** — add a seller/company once (name, company, registration no.,
+  contact info, bio, avatar). **Tags** and **document types** are just
+  comma-separated free text — type "Verified, Premium, Recommended" or
+  invent your own; there's no fixed list to be limited by. Never fill in a
+  company registration number you can't actually verify.
+- **Hot Plots** — add a plot, optionally linking it to a seller from the
+  dropdown, with up to 3 photos, price, size, location, nearest landmark,
+  description, status, and a "Mark as Hot" checkbox for featured listings.
+- **Reviews** — every review submitted on the homepage lands here as
+  "Pending". Click **Approve** to make it public instantly (or **Unapprove**
+  to hide it again, or delete it outright).
 
 ## Adding photos yourself (no code needed)
 
@@ -117,9 +145,9 @@ it once you're ready to set that up.
 
 Opening `index.html` by double-clicking it only shows the static fallback
 text — browsers restrict a `file://` page's ability to fetch live data from
-Supabase, so banners/stats/clients/news/contact info won't populate until the
-site is served over http(s). Deploying takes about 2 minutes and is the real
-target anyway:
+Supabase, so banners/stats/clients/plots/news/contact info won't populate
+until the site is served over http(s). Deploying takes about 2 minutes and is
+the real target anyway:
 
 1. Push this repo to GitHub (already done if you're reading this from the repo).
 2. In Netlify: **Add new site → Import an existing project → GitHub** → pick
@@ -128,24 +156,22 @@ target anyway:
    Add custom domain, then update your domain's DNS as instructed).
 
 Once deployed, everything — contact info, social icons, WhatsApp button,
-urgent call button, news bell, client popovers — will populate from the
-database automatically.
+urgent call button, news bell, client popovers, Hot Plots, reviews — will
+populate from the database automatically.
 
 ## What still needs your input
 
-- **Your real logo files** (LandBank + Trulander) — see "Logos" above.
-- **The 4 advertisement banner images** you shared — once the site is
-  deployed, upload them yourself under **Hero & Banners** (set Kind = Promo)
-  and they'll appear in the animated carousel exactly as designed, or send me
-  a link to fetch them from and I'll add them for you.
-- **Hero / About / Process photos** — currently abstract geometric artwork;
-  add real ones anytime under **Photos & Gallery**.
-- **Stats numbers** — years of experience, acres secured, client count, etc.
-  are placeholder figures. Edit anytime under **Stats**.
+- **The seller "Verified"/"Premium" tags on Trulander Jsf Limited** are a
+  placeholder default — please confirm in **Sellers** that's accurate, or
+  change it.
 - **Office address** — phone, WhatsApp, and email are set; office address is
   still blank until filled in under **Contact Info**.
-- **Client logos** — only Trulander Jsf Limited is seeded in. Add more under
-  **Clients**, each with optional social links for the click-to-reveal popover.
-- **Client stories / testimonials** — deliberately left as an honest
-  "coming soon" empty state rather than invented quotes. Send real references
-  when you have them and I'll wire up a proper section.
+- **Stats numbers** — years of experience, acres secured, client count, etc.
+  are placeholder figures. Edit anytime under **Stats**.
+- **Actual plot listings** — the Hot Plots section is wired up and ready but
+  starts empty; add your first real listings under **Hot Plots** in the admin
+  dashboard.
+- **Client stories / testimonials** — starts empty by design rather than
+  invented quotes; real ones will appear automatically as you approve
+  submitted reviews, or you can add one yourself directly in Supabase if you
+  already have references collected elsewhere.

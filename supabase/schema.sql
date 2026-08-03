@@ -143,14 +143,25 @@ begin
 end;
 $$;
 
--- Read-only team listing for the admin "Team" panel. Views run as their
--- owner by default (bypassing admins' own "always false" RLS), so the
--- `where public.is_admin()` clause is the access gate: is_admin() is a
--- single boolean, so it acts as an all-or-nothing filter on the view.
-create or replace view public.team_directory as
-  select email, display_name, avatar_url, role, claimed, created_at
-  from public.admins
-  where public.is_admin();
+-- Read-only team listing for the admin "Team" panel. This was originally a
+-- view, but Postgres/Supabase's linter flags any non-security_invoker view
+-- as an error-level risk regardless of an internal access gate — so it's a
+-- SECURITY DEFINER function instead (the same accepted pattern used by
+-- invite_admin/remove_admin below), explicitly checking is_admin() itself.
+create or replace function public.get_team()
+returns table (email text, display_name text, avatar_url text, role text, claimed boolean, created_at timestamptz)
+  language plpgsql security definer set search_path = public as
+$$
+begin
+  if not public.is_admin() then
+    raise exception 'not authorized';
+  end if;
+  return query
+    select a.email, a.display_name, a.avatar_url, a.role, a.claimed, a.created_at
+    from public.admins a
+    order by a.created_at;
+end;
+$$;
 
 -- Invite/remove teammates — only an existing claimed admin can call these.
 create or replace function public.invite_admin(new_email text) returns void
@@ -215,6 +226,66 @@ alter table public.content_blocks enable row level security;
 create policy content_blocks_read on public.content_blocks for select using (true);
 create policy content_blocks_write on public.content_blocks for all using (public.is_admin()) with check (public.is_admin());
 
+-- ---- SELLERS (Hot Plots marketplace) ----
+create table public.sellers (
+  id              uuid primary key default gen_random_uuid(),
+  name            text not null,
+  company_name    text,
+  company_reg_no  text,
+  phone           text,
+  email           text,
+  bio             text,
+  avatar_url      text,
+  tags            text[] not null default '{}',
+  document_types  text[] not null default '{}',
+  sort_order      int not null default 0,
+  active          boolean not null default true,
+  created_at      timestamptz not null default now()
+);
+alter table public.sellers enable row level security;
+create policy sellers_read on public.sellers for select using (true);
+create policy sellers_write on public.sellers for all using (public.is_admin()) with check (public.is_admin());
+
+-- ---- PLOTS (the "Hot Plots" marketplace) ----
+create table public.plots (
+  id               uuid primary key default gen_random_uuid(),
+  title            text not null,
+  size             text not null,
+  price_amount     numeric,
+  currency         text not null default 'GHS',
+  location         text not null,
+  nearest_landmark text,
+  description      text,
+  image_url        text,
+  image_url_2      text,
+  image_url_3      text,
+  seller_id        uuid references public.sellers(id) on delete set null,
+  status           text not null default 'available' check (status in ('available','reserved','sold')),
+  featured         boolean not null default false,
+  sort_order       int not null default 0,
+  active           boolean not null default true,
+  created_at       timestamptz not null default now()
+);
+alter table public.plots enable row level security;
+create policy plots_read on public.plots for select using (true);
+create policy plots_write on public.plots for all using (public.is_admin()) with check (public.is_admin());
+
+-- ---- REVIEWS (feeds the testimonials section once approved) ----
+create table public.reviews (
+  id             uuid primary key default gen_random_uuid(),
+  reviewer_name  text not null,
+  rating         int not null check (rating between 1 and 5),
+  comment        text,
+  approved       boolean not null default false,
+  created_at     timestamptz not null default now()
+);
+alter table public.reviews enable row level security;
+create policy reviews_insert on public.reviews for insert with check (true);
+create policy reviews_read_approved on public.reviews for select using (approved = true);
+create policy reviews_read_admin on public.reviews for select using (public.is_admin());
+create policy reviews_write_admin on public.reviews for update using (public.is_admin()) with check (public.is_admin());
+create policy reviews_delete_admin on public.reviews for delete using (public.is_admin());
+
 -- ---- LEADS (contact form submissions) ----
 create table public.leads (
   id         uuid primary key default gen_random_uuid(),
@@ -262,8 +333,30 @@ on conflict do nothing;
 update public.site_settings set urgent_phone = '233546416566' where id = 1;
 
 update public.clients set
-  logo_url = '/assets/trulander-logo.svg',
+  logo_url = '/assets/trulander-logo.png',
   facebook_url = 'https://www.facebook.com/trulanderjsf?mibextid=wwXIfr&mibextid=wwXIfr',
   instagram_url = 'https://www.instagram.com/trulanderjsf?igsh=ZTVyN3ZramdwYmpx&utm_source=qr',
   tiktok_url = 'https://www.tiktok.com/@trulander?_r=1&_t=ZS-98a3MdYO9pN'
 where lower(name) = lower('Trulander Jsf Limited');
+
+-- ---- SEED: real photos from the client, and the Hot Plots marketplace ----
+insert into public.content_blocks (key, slot, label, image_url, alt_text, sort_order, active) values
+  ('hero', 'hero', 'Hero photo (homepage top)', '/assets/photos/hero-person.png', 'LandBank Ghana helps you own land safely', 0, true),
+  ('about', 'about', 'About section photo', '/assets/photos/about.jpg', 'Handing over the keys to a new landowner', 0, true),
+  ('process', 'process', 'Process section photo', '/assets/photos/process.jpg', 'Our team verifying a plot on site', 0, true),
+  ('gallery_1', 'gallery', 'Site verification', '/assets/photos/gallery-1.jpg', 'LandBank Ghana team member on a site visit', 1, true),
+  ('gallery_2', 'gallery', 'Handover moment', '/assets/photos/gallery-2.png', 'Handing over the keys to a new home', 2, true),
+  ('gallery_3', 'gallery', 'On-site support', '/assets/photos/gallery-3.png', 'LandBank Ghana team member ready to help', 3, true),
+  ('gallery_4', 'gallery', 'Happy client', '/assets/photos/gallery-4.jpg', 'A happy LandBank Ghana client', 4, true)
+on conflict (key) do update set image_url = excluded.image_url, alt_text = excluded.alt_text, active = true;
+
+insert into public.banners (kind, headline, subheadline, image_url, cta_href, sort_order, active) values
+  ('promo', 'Own Land The Smart Way', 'Explore our curated list of risk-free lands, each thoroughly vetted through comprehensive due diligence.', '/assets/photos/promo-1.jpg', '#contact', 1, true),
+  ('promo', 'Land Acquisition Made Simple', 'A seamless platform for buying and selling risk-free lands across Ghana.', '/assets/photos/promo-2.jpg', '#contact', 2, true),
+  ('promo', 'Son of the Land Wey No Get Land', 'What a plot twist! Start your land ownership journey today.', '/assets/photos/promo-3.jpg', '#contact', 3, true);
+
+-- Note: no company registration number is seeded — never fabricate a real
+-- company's legal registration details; leave that field for the admin to
+-- fill in once they can verify it.
+insert into public.sellers (name, company_name, tags, document_types, phone, sort_order) values
+  ('Trulander Jsf Limited', 'Trulander Jsf Limited', ARRAY['Verified','Premium'], ARRAY['Title','Certified Site Plan & Indenture'], '233546416566', 1);
