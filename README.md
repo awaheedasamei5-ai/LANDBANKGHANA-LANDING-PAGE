@@ -1,8 +1,8 @@
 # LandBank Ghana — Landing Page
 
 Public marketing site for **landbankghana.com**, plus a small admin dashboard for
-managing homepage content (hero banner, stats, client logos, social links,
-contact details) and viewing contact-form submissions.
+managing homepage content (hero banner, photos, stats, client logos, social
+links, contact details) and viewing contact-form submissions.
 
 This is a standalone project — separate from the internal PEP Landbank sales
 portal repo, with its own Supabase backend.
@@ -11,9 +11,10 @@ portal repo, with its own Supabase backend.
 
 - `index.html` — the public landing page (single file, no build step).
 - `admin/index.html` — password-protected content admin dashboard.
-- `assets/logo.svg` — the LandBank Ghana logo (recreated as SVG from the logo
-  image you shared, so it's crisp at any size — swap this file directly if
-  you'd rather use your original artwork).
+- `assets/logo.svg` — the LandBank Ghana logo. This is currently a **recreation**
+  from the logo image pasted in chat, not your original file — pasted images
+  can't be saved from chat as real files, so send the actual logo file as an
+  attachment and I'll swap it in directly.
 - `assets/supabase-config.js` — the Supabase project URL + public anon key
   shared by both `index.html` and `admin/index.html`.
 - `supabase/schema.sql` — a record of the database schema (tables + security
@@ -27,17 +28,38 @@ A **new, separate Supabase project** was created for this site (name:
 It holds:
 
 - `banners` — hero headline/subheadline/badge text shown on the homepage.
+- `content_blocks` — photo placements: three fixed "named spots" (hero, about,
+  process section) plus an open-ended gallery — see below.
 - `stats` — the number tiles (e.g. "7+ Years Experience").
 - `clients` — the "Trusted by" logo strip (seeded with Trulander Jsf Limited).
-- `social_links` — social icons shown in the contact section + footer.
-- `site_settings` — phone/WhatsApp/email/office address.
+- `social_links` — social icons shown in the contact section + footer
+  (seeded with your real Instagram, Facebook, TikTok, and WhatsApp).
+- `site_settings` — phone/WhatsApp/email/office address (seeded with your
+  WhatsApp +233 54 641 6566 and email digitalopsofficer@landbankghana.com;
+  office address is still a placeholder).
 - `leads` — every contact-form submission from the homepage.
 - `admins` — the invite list of who's allowed to log into `/admin`.
 
-Anyone can **read** banners/stats/clients/social links/settings (that's what
-makes the public homepage work) and anyone can **submit** the contact form.
-Only signed-in admins can add/edit/delete content or view leads — enforced by
-Postgres Row Level Security, not just the frontend.
+Anyone can **read** banners/content/stats/clients/social links/settings
+(that's what makes the public homepage work) and anyone can **submit** the
+contact form. Only signed-in admins can add/edit/delete content or view
+leads — enforced by Postgres Row Level Security, not just the frontend.
+
+## Adding photos yourself (no code needed)
+
+In `/admin` → **Photos & Gallery**:
+
+- **Named spots** — Hero photo, About section photo, Process section photo.
+  Each replaces a specific piece of built-in artwork on the homepage. Leave
+  one empty (or hit "Remove photo") and that spot keeps its default look.
+- **Gallery** — add as many photos as you want, with an optional caption.
+  They show up automatically in a "More from LandBank Ghana" section on the
+  homepage — this section stays hidden until you add at least one photo.
+  This is the easiest way to drop in new images (site visits, team photos,
+  handovers, etc.) without touching any other setting.
+
+Every image field accepts either a pasted URL or a direct file upload
+(resized client-side before saving).
 
 ## Using the admin dashboard
 
@@ -62,22 +84,18 @@ Same flow as any static site:
 
 ## What still needs your input
 
-This page was built with your logo and starting copy, but a few things are
-intentionally left as placeholders for you to swap in via the admin dashboard
-or by sending me the assets:
-
-- **Hero art** — the homepage currently uses an abstract geometric graphic
-  (land-parcel outlines + a map pin) since we don't have real photography yet.
-  Send me photos (site visits, handovers, team photos) and I can swap it in.
+- **Your real logo file** — sent as an attachment, not pasted inline (see above).
+- **Hero / About / Process photos** — the homepage currently uses abstract
+  geometric artwork in these three spots since we don't have real photography
+  yet. Add them anytime under **Photos & Gallery** in the admin dashboard, or
+  send me the images and I'll add them for you.
 - **Stats numbers** — years of experience, acres secured, client count, etc.
   are placeholder figures. Edit them anytime under **Stats** in the admin
   dashboard.
-- **Contact details** — phone, WhatsApp, email, and office address are blank
-  until you fill them in under **Contact Info** in the admin dashboard.
+- **Office address** — phone, WhatsApp, and email are set; the office address
+  is still blank until you fill it in under **Contact Info**.
 - **Client logos** — only Trulander Jsf Limited is seeded in. Add more any
   time under **Clients**, with an optional logo upload.
 - **Client stories / testimonials** — deliberately left as an honest
   "coming soon" empty state rather than invented quotes. Send me real
   references when you have them and I'll wire up a proper section.
-- **Social links** — none are set yet; add your Facebook/Instagram/LinkedIn/
-  TikTok/WhatsApp links under **Social Links** and they'll appear automatically.

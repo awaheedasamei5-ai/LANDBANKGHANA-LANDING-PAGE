@@ -66,6 +66,7 @@ section{position:relative;}
 .mobile-panel{position:fixed;inset:0;z-index:99;background:var(--ink);color:#fff;display:none;flex-direction:column;padding:100px 28px 40px;gap:4px;}
 .mobile-panel.open{display:flex;}
 .mobile-panel a{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:600;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:14px;}
+.mobile-panel a svg{width:24px;height:24px;flex:none;color:var(--brand);}
 .mobile-panel .btn{margin-top:20px;}
 
 @media (max-width:900px){
@@ -91,7 +92,7 @@ section{position:relative;}
   linear-gradient(160deg,#0B2417,#081910 60%);
   box-shadow:var(--shadow);overflow:hidden;}
 .hero-visual svg{position:absolute;inset:0;width:100%;height:100%;}
-.hero-badge{position:absolute;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 16px 34px -14px rgba(8,25,16,.35);display:flex;flex-direction:column;gap:2px;min-width:120px;}
+.hero-badge{position:absolute;z-index:2;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 16px 34px -14px rgba(8,25,16,.35);display:flex;flex-direction:column;gap:2px;min-width:120px;}
 .hero-badge .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--ink);}
 .hero-badge .lbl{font-size:11px;color:var(--muted);font-weight:600;}
 .hero-badge.b1{top:8%;left:8%;}
@@ -161,6 +162,8 @@ section{position:relative;}
 .tstep::before{counter-increment:step;content:counter(step);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
 .tstep h4{font-size:15.5px;margin-bottom:8px;}
 .tstep p{font-size:13.5px;color:rgba(255,255,255,.62);}
+.process-photo{display:none;margin-top:28px;border-radius:20px;overflow:hidden;max-height:340px;}
+.process-photo img{width:100%;height:100%;max-height:340px;object-fit:cover;display:block;}
 .seller-note{margin-top:28px;background:rgba(34,165,76,.12);border:1px solid rgba(34,165,76,.3);border-radius:16px;padding:18px 22px;font-size:14.5px;color:rgba(255,255,255,.85);}
 .seller-note b{color:var(--brand);}
 @media (max-width:1000px){.timeline{grid-template-columns:repeat(2,1fr);}}
@@ -185,6 +188,15 @@ section{position:relative;}
 .value h4{font-size:15px;margin-bottom:6px;}
 .value p{font-size:13px;color:var(--muted);}
 @media (max-width:900px){.about-grid{grid-template-columns:1fr;}.about-card{aspect-ratio:auto;}}
+
+/* ---------- GALLERY ---------- */
+#gallery{padding:80px 0 20px;}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.gallery-grid figure{margin:0;border-radius:18px;overflow:hidden;background:var(--card);border:1px solid var(--line);}
+.gallery-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;}
+.gallery-grid figcaption{padding:12px 14px;font-size:13px;color:var(--muted);font-weight:600;}
+@media (max-width:900px){.gallery-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:560px){.gallery-grid{grid-template-columns:1fr;}}
 
 /* ---------- TESTIMONIALS (empty state) ---------- */
 #stories{padding:80px 0;}
@@ -274,10 +286,22 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 </header>
 
 <div class="mobile-panel" id="mobilePanel">
-  <a href="#home" data-nav-mobile>🏠 Home</a>
-  <a href="#about" data-nav-mobile>ℹ️ About Us</a>
-  <a href="#help" data-nav-mobile>🛡️ Services</a>
-  <a href="#contact" data-nav-mobile>✉️ Contact</a>
+  <a href="#home" data-nav-mobile>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    Home
+  </a>
+  <a href="#about" data-nav-mobile>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
+    About Us
+  </a>
+  <a href="#help" data-nav-mobile>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
+    Services
+  </a>
+  <a href="#contact" data-nav-mobile>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+    Contact
+  </a>
   <a href="#contact" class="btn btn-accent btn-block" data-nav-mobile>Get Started</a>
 </div>
 
@@ -285,7 +309,10 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 <section id="home">
   <div class="wrap hero-grid">
     <div class="hero-copy reveal">
-      <span class="eyebrow" id="heroBadgeText">🛡️ Verified &amp; Litigation-Free</span>
+      <span class="eyebrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span id="heroBadgeText">Verified &amp; Litigation-Free</span>
+      </span>
       <h1 id="heroHeadline">Own Land You <span class="accent">Can Trust.</span></h1>
       <p class="lead" id="heroSub">We help you find, verify, and secure litigation-free land in Ghana — from due diligence to documentation, every step of the way.</p>
       <div class="hero-ctas">
@@ -298,7 +325,8 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
       </div>
     </div>
     <div class="hero-visual reveal">
-      <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+      <img id="heroPhotoImg" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;"/>
+      <svg id="heroArtSvg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
         <defs>
           <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
             <path d="M40 0H0V40" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
@@ -413,6 +441,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
       <div class="tstep reveal"><h4>Documentation &amp; Registration</h4><p>We support the indenture, site plan, and registration paperwork so everything is on record.</p></div>
       <div class="tstep reveal"><h4>Safe Handover</h4><p>Final handover with every document filed and copies in your hands.</p></div>
     </div>
+    <div class="process-photo reveal" id="processPhoto"><img id="processPhotoImg" alt="LandBank Ghana team on site"/></div>
     <div class="seller-note reveal"><b>Selling instead?</b> The same team verifies your title, prepares your documents, and matches your land with buyers who are ready to move — safely and on your terms.</div>
   </div>
 </section>
@@ -432,7 +461,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 <!-- ============ ABOUT ============ -->
 <section id="about">
   <div class="wrap about-grid">
-    <div class="about-card reveal">
+    <div class="about-card reveal" id="aboutCard">
       <div class="quote">"Too many people lose money to land guarders and double sales. We exist to put <span class="accent">help</span> first."</div>
       <div style="font-size:13px;color:rgba(255,255,255,.55)">— The LandBank Ghana team</div>
     </div>
@@ -447,6 +476,17 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
         <div class="value"><h4>People-First</h4><p>Real people guide your transaction — not a listing you're left to figure out alone.</p></div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY (auto-populated, hidden until admin adds photos) ============ -->
+<section id="gallery" style="display:none">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Gallery</span>
+      <h2>More from LandBank Ghana</h2>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
   </div>
 </section>
 
@@ -603,19 +643,20 @@ try {
 async function loadContent(){
   if (!sb) return;
   try{
-    const [{data:banners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}] = await Promise.all([
+    const [{data:banners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}] = await Promise.all([
       sb.from('banners').select('*').eq('kind','hero').eq('active',true).order('sort_order').limit(1),
       sb.from('stats').select('*').eq('active',true).order('sort_order'),
       sb.from('clients').select('*').eq('active',true).order('sort_order'),
       sb.from('social_links').select('*').eq('active',true).order('sort_order'),
-      sb.from('site_settings').select('*').eq('id',1).maybeSingle()
+      sb.from('site_settings').select('*').eq('id',1).maybeSingle(),
+      sb.from('content_blocks').select('*').eq('active',true).order('sort_order')
     ]);
 
     if (banners && banners[0]) {
       const b = banners[0];
       if (b.headline) document.getElementById('heroHeadline').textContent = b.headline;
       if (b.subheadline) document.getElementById('heroSub').textContent = b.subheadline;
-      if (b.badge_text) document.getElementById('heroBadgeText').textContent = '🛡️ ' + b.badge_text;
+      if (b.badge_text) document.getElementById('heroBadgeText').textContent = b.badge_text;
     }
 
     if (stats && stats.length) {
@@ -648,6 +689,43 @@ async function loadContent(){
         wa.classList.add('show');
       }
     }
+
+    if (images && images.length) {
+      const bySlot = (slot) => images.find(i => i.slot === slot && i.image_url);
+
+      const hero = bySlot('hero');
+      if (hero) {
+        document.getElementById('heroPhotoImg').src = hero.image_url;
+        document.getElementById('heroPhotoImg').alt = hero.alt_text || 'LandBank Ghana';
+        document.getElementById('heroPhotoImg').style.display = 'block';
+        document.getElementById('heroArtSvg').style.display = 'none';
+      }
+
+      const about = bySlot('about');
+      if (about) {
+        const card = document.getElementById('aboutCard');
+        card.style.backgroundImage = `linear-gradient(160deg, rgba(11,36,23,.88), rgba(8,25,16,.94)), url('${about.image_url.replace(/'/g,"%27")}')`;
+        card.style.backgroundSize = 'cover';
+        card.style.backgroundPosition = 'center';
+      }
+
+      const process = bySlot('process');
+      if (process) {
+        document.getElementById('processPhotoImg').src = process.image_url;
+        document.getElementById('processPhotoImg').alt = process.alt_text || 'LandBank Ghana on site';
+        document.getElementById('processPhoto').style.display = 'block';
+      }
+
+      const galleryItems = images.filter(i => i.slot === 'gallery' && i.image_url);
+      if (galleryItems.length) {
+        document.getElementById('galleryGrid').innerHTML = galleryItems.map(g => `
+          <figure>
+            <img src="${esc(g.image_url)}" alt="${esc(g.alt_text || g.label || '')}"/>
+            ${g.label ? `<figcaption>${esc(g.label)}</figcaption>` : ''}
+          </figure>`).join('');
+        document.getElementById('gallery').style.display = 'block';
+      }
+    }
   } catch(e){ console.warn('Content load skipped:', e); }
 }
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -658,7 +736,7 @@ function socialIcon(platform){
     instagram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>',
     twitter:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.4-1.3 1.7-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7 3.7A11.6 11.6 0 0 1 3.4 4.6a4.1 4.1 0 0 0 1.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 0 1-1.9.1 4.1 4.1 0 0 0 3.8 2.9A8.3 8.3 0 0 1 2 18.6a11.6 11.6 0 0 0 6.3 1.8c7.5 0 11.6-6.2 11.6-11.6v-.5c.8-.6 1.5-1.3 2.1-2.4z"/></svg>',
     linkedin:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.9 8.7H3.6V21h3.3V8.7zM5.3 3a1.9 1.9 0 1 0 0 3.9 1.9 1.9 0 0 0 0-3.9zM21 21v-6.8c0-3.6-1.9-5.3-4.5-5.3a3.9 3.9 0 0 0-3.5 1.9V8.7H9.6c0 .1 0 12 0 12.3h3.3v-6.9c0-.4 0-.7.1-1 .3-.7 1-1.5 2.1-1.5 1.5 0 2.1 1.1 2.1 2.8V21H21z"/></svg>',
-    whatsapp:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2z"/></svg>',
+    whatsapp:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.7 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.2-3.5-.7-2.9-1.1-4.8-4-5-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.3.6-.6.9-.9 1.3-.1.2-.3.3-.1.6.6 1 1.3 1.8 2.1 2.4.9.7 1.4.9 1.7 1 .2.1.4.1.6-.1.2-.3.8-1 1-1.3.2-.3.4-.3.7-.2.3.1 1.6.8 1.9.9.3.2.5.2.6.3.1.2.1.9-.1 1.6z"/></svg>',
     tiktok:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3c.5 2.5 2 4 4.5 4.2v3c-1.6 0-3-.5-4.2-1.4v6.7A5.5 5.5 0 1 1 11 9.9v3.2a2.5 2.5 0 1 0 2 2.5V3h3z"/></svg>'
   };
   return icons[p] || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>';

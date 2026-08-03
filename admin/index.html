@@ -113,6 +113,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
   <div class="shell">
     <div class="side">
       <button class="nav-item active" data-panel="banners">Hero &amp; Banners</button>
+      <button class="nav-item" data-panel="photos">Photos &amp; Gallery</button>
       <button class="nav-item" data-panel="stats">Stats</button>
       <button class="nav-item" data-panel="clients">Clients</button>
       <button class="nav-item" data-panel="social">Social Links</button>
@@ -153,6 +154,42 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
         <div class="panel-card">
           <h3>All banners</h3>
           <table><thead><tr><th>Headline</th><th>Kind</th><th>Status</th><th></th></tr></thead><tbody id="bannersTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- PHOTOS & GALLERY -->
+      <div class="panel" id="panel-photos">
+        <div class="panel-card">
+          <h3>Named photo spots</h3>
+          <p class="desc">These photos replace the built-in artwork in specific spots on the homepage. Leave one empty and that spot keeps its default look.</p>
+          <div id="namedSlots"></div>
+        </div>
+        <div class="panel-card">
+          <h3>Add a gallery photo</h3>
+          <p class="desc">These appear automatically in the "More from LandBank Ghana" section on the homepage — add as many as you like, in any order. This is the easiest way to drop in new photos without touching any other setting.</p>
+          <form id="galleryForm">
+            <input type="hidden" name="key"/>
+            <div class="form-grid">
+              <div class="field"><label>Caption (optional)</label><input name="label" placeholder="Site visit, Kumasi"/></div>
+              <div class="field"><label>Alt text (for accessibility)</label><input name="alt_text" placeholder="Describe the photo"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Image URL</label><input name="image_url" placeholder="https://..."/></div>
+              <div class="field"><label>Or upload image</label><input type="file" accept="image/*" id="galleryImgFile"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="1"/></div>
+              <label style="font-size:13px;display:flex;gap:8px;align-items:center;margin-top:28px"><input type="checkbox" name="active" checked/> Active</label>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-accent" type="submit">Save photo</button>
+              <button class="btn" type="button" id="galleryCancelEdit" style="display:none">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>Gallery photos</h3>
+          <table><thead><tr><th>Photo</th><th>Caption</th><th>Status</th><th></th></tr></thead><tbody id="galleryTable"></tbody></table>
         </div>
       </div>
 
@@ -392,7 +429,7 @@ document.querySelectorAll('.side .nav-item').forEach(btn => {
 
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
-  loadBanners(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadLeads();
+  loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadLeads();
 }
 
 /* ---- BANNERS ---- */
@@ -431,6 +468,104 @@ function editBanner(b){
   bannerForm.subheadline.value = b.subheadline||''; bannerForm.image_url.value = b.image_url||'';
   bannerForm.kind.value = b.kind; bannerForm.sort_order.value = b.sort_order; bannerForm.active.checked = b.active;
   document.getElementById('bannerCancelEdit').style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---- PHOTOS (named slots + gallery) ---- */
+const NAMED_SLOTS = [
+  { key: 'hero', label: 'Hero photo (homepage top)', hint: 'Replaces the abstract artwork behind the headline.' },
+  { key: 'about', label: 'About section photo', hint: 'Shown behind the quote card in the About Us section.' },
+  { key: 'process', label: 'Process section photo', hint: 'Shown under the "How we take you from inquiry to handover" steps.' }
+];
+let contentBlocksCache = [];
+
+async function loadPhotos(){
+  const { data, error } = await sb.from('content_blocks').select('*');
+  if (error) return;
+  contentBlocksCache = data || [];
+  renderNamedSlots();
+  renderGalleryTable();
+}
+
+function renderNamedSlots(){
+  const wrap = document.getElementById('namedSlots');
+  wrap.innerHTML = NAMED_SLOTS.map(slot => {
+    const row = contentBlocksCache.find(c => c.key === slot.key);
+    const thumb = row && row.image_url ? `<img class="thumb" style="width:64px;height:64px" src="${esc(row.image_url)}"/>` : '<span class="hint">No photo set</span>';
+    return `
+      <div style="display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--line)">
+        <div style="width:64px;flex:none">${thumb}</div>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:14px">${esc(slot.label)}</div>
+          <div class="hint" style="margin-bottom:10px">${esc(slot.hint)}</div>
+          <div class="form-grid">
+            <div class="field"><label>Image URL</label><input type="text" id="slotUrl_${slot.key}" value="${row?esc(row.image_url||''):''}" placeholder="https://..."/></div>
+            <div class="field"><label>Or upload image</label><input type="file" accept="image/*" id="slotFile_${slot.key}"/></div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-accent" type="button" onclick="saveNamedSlot('${slot.key}','${esc(slot.label)}')">Save</button>
+            <button class="btn btn-danger" type="button" onclick="clearNamedSlot('${slot.key}')">Remove photo</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  NAMED_SLOTS.forEach(slot => {
+    const fileInput = document.getElementById('slotFile_'+slot.key);
+    fileInput.addEventListener('change', async (e) => {
+      if (e.target.files[0]) document.getElementById('slotUrl_'+slot.key).value = await resizeImage(e.target.files[0], 1600);
+    });
+  });
+}
+async function saveNamedSlot(key, label){
+  const url = document.getElementById('slotUrl_'+key).value.trim();
+  if (!url) return toast('Add an image URL or upload a photo first');
+  const { error } = await sb.from('content_blocks').upsert({ key, slot: key, label, image_url: url, active: true });
+  if (error) return toast('Error: ' + error.message);
+  toast('Photo saved'); loadPhotos();
+}
+async function clearNamedSlot(key){
+  if (!confirm('Remove this photo and go back to the default artwork?')) return;
+  const { error } = await sb.from('content_blocks').delete().eq('key', key);
+  if (error) return toast('Error: ' + error.message);
+  toast('Photo removed'); loadPhotos();
+}
+
+const galleryForm = document.getElementById('galleryForm');
+document.getElementById('galleryImgFile').addEventListener('change', async (e) => {
+  if (e.target.files[0]) galleryForm.image_url.value = await resizeImage(e.target.files[0], 1400);
+});
+galleryForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(galleryForm).entries());
+  if (!d.image_url) return toast('Add an image URL or upload a photo first');
+  d.active = !!galleryForm.active.checked;
+  d.sort_order = parseInt(d.sort_order||'1',10);
+  d.slot = 'gallery';
+  const key = d.key || ('gallery_' + Date.now() + '_' + Math.random().toString(36).slice(2,8));
+  d.key = key;
+  const { error } = await sb.from('content_blocks').upsert(d);
+  if (error) return toast('Error: ' + error.message);
+  toast('Gallery photo saved'); galleryForm.reset(); document.getElementById('galleryCancelEdit').style.display='none';
+  loadPhotos();
+});
+document.getElementById('galleryCancelEdit').addEventListener('click', () => { galleryForm.reset(); document.getElementById('galleryCancelEdit').style.display='none'; });
+function renderGalleryTable(){
+  const items = contentBlocksCache.filter(c => c.slot === 'gallery');
+  document.getElementById('galleryTable').innerHTML = items.map(g => `
+    <tr>
+      <td>${g.image_url?`<img class="thumb" src="${esc(g.image_url)}"/>`:'—'}</td>
+      <td>${esc(g.label||'')}</td>
+      <td><span class="pill ${g.active?'on':'off'}">${g.active?'Active':'Hidden'}</span></td>
+      <td class="row-actions">
+        <button class="btn" onclick='editGalleryItem(${JSON.stringify(g)})'>Edit</button>
+        <button class="btn btn-danger" onclick="deleteRow('content_blocks','${g.key}',loadPhotos,'key')">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="4">No gallery photos yet.</td></tr>';
+}
+function editGalleryItem(g){
+  galleryForm.key.value = g.key; galleryForm.label.value = g.label||''; galleryForm.alt_text.value = g.alt_text||'';
+  galleryForm.image_url.value = g.image_url||''; galleryForm.sort_order.value = g.sort_order; galleryForm.active.checked = g.active;
+  document.getElementById('galleryCancelEdit').style.display='inline-flex';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -580,9 +715,9 @@ async function updateLeadStatus(id, status){
 }
 
 /* ---- shared delete ---- */
-async function deleteRow(table, id, reload){
+async function deleteRow(table, id, reload, col){
   if (!confirm('Delete this item? This cannot be undone.')) return;
-  const { error } = await sb.from(table).delete().eq('id', id);
+  const { error } = await sb.from(table).delete().eq(col || 'id', id);
   if (error) return toast('Error: ' + error.message);
   toast('Deleted'); reload();
 }

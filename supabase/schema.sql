@@ -117,6 +117,25 @@ create policy settings_read on public.site_settings for select using (true);
 create policy settings_write on public.site_settings for all using (public.is_admin()) with check (public.is_admin());
 insert into public.site_settings (id) values (1) on conflict do nothing;
 
+-- ---- CONTENT BLOCKS (flexible photo placements) ----
+-- "slot" = a named, fixed spot the frontend already knows how to render
+-- (hero / about / process), or 'gallery' for free-form extra images that
+-- automatically show up in the homepage's open-ended gallery section —
+-- this is how new photos can be added without any code changes.
+create table public.content_blocks (
+  key         text primary key,
+  slot        text not null check (slot in ('hero','about','help_diligence','help_litigation','help_buyer','help_seller','process','gallery')),
+  label       text not null,
+  image_url   text,
+  alt_text    text,
+  sort_order  int not null default 0,
+  active      boolean not null default true,
+  created_at  timestamptz not null default now()
+);
+alter table public.content_blocks enable row level security;
+create policy content_blocks_read on public.content_blocks for select using (true);
+create policy content_blocks_write on public.content_blocks for all using (public.is_admin()) with check (public.is_admin());
+
 -- ---- LEADS (contact form submissions) ----
 create table public.leads (
   id         uuid primary key default gen_random_uuid(),
@@ -145,4 +164,18 @@ insert into public.stats(label, value, sort_order) values
 on conflict do nothing;
 insert into public.banners(kind, headline, subheadline, badge_text, cta_label, cta_href, sort_order) values
   ('hero','Own Land You Can Trust.','We help you find, verify, and secure litigation-free land in Ghana — from due diligence to documentation, every step of the way.','Verified & Litigation-Free','Start Your Land Search','#contact',1)
+on conflict do nothing;
+
+-- ---- SEED: real contact info + social links ----
+update public.site_settings
+   set whatsapp = '233546416566',
+       phone = '+233 54 641 6566',
+       email = 'digitalopsofficer@landbankghana.com'
+ where id = 1;
+
+insert into public.social_links (platform, url, sort_order) values
+  ('whatsapp', 'https://wa.me/233546416566', 1),
+  ('instagram', 'https://www.instagram.com/landbankghana_?igsh=MWd2em5vcWs1OG84Mw%3D%3D&utm_source=qr', 2),
+  ('facebook', 'https://www.facebook.com/share/18qnRVH4W9/?mibextid=wwXIfr', 3),
+  ('tiktok', 'https://www.tiktok.com/@landbankghana.com?_r=1&_t=ZS-98a1seDetRU', 4)
 on conflict do nothing;
