@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>LandBank Ghana — Litigation-Free Land, Made Simple</title>
+<meta name="description" content="LandBank Ghana helps you acquire litigation-free land with full due diligence, and helps sellers connect safely with verified buyers."/>
+<meta name="theme-color" content="#0B1F13"/>
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg"/>
+<meta property="og:title" content="LandBank Ghana — Litigation-Free Land, Made Simple"/>
+<meta property="og:description" content="Due diligence, litigation-free acquisition, and safe land sales — LandBank Ghana helps you every step of the way."/>
+<meta property="og:type" content="website"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#22A54C;
+  --brand-dark:#168038;
+  --brand-light:#DCF5E4;
+  --ink:#081910;
+  --ink-soft:#0E2417;
+  --bg:#F6FBF8;
+  --card:#ffffff;
+  --line:#E1EEE6;
+  --muted:#5C6E64;
+  --radius:22px;
+  --shadow:0 20px 50px -20px rgba(8,25,16,.18);
+  --maxw:1240px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;margin:0;line-height:1.1;letter-spacing:-.02em;}
+p{margin:0;}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-dark);background:var(--brand-light);border-radius:999px;padding:7px 16px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:15px;padding:14px 26px;border-radius:999px;border:1px solid transparent;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease;white-space:nowrap;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-primary:hover{background:var(--brand-dark);box-shadow:0 12px 28px -10px rgba(22,128,56,.55);}
+.btn-accent{background:var(--brand);color:#fff;}
+.btn-accent:hover{box-shadow:0 12px 28px -10px rgba(34,165,76,.55);transform:translateY(-1px);}
+.btn-ghost{background:#fff;color:var(--ink);border-color:var(--line);}
+.btn-ghost:hover{border-color:var(--brand);color:var(--brand-dark);}
+.btn-block{width:100%;}
+section{position:relative;}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.in{opacity:1;transform:none;}
+
+/* ---------- NAV ---------- */
+#nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 0;transition:background .3s ease,box-shadow .3s ease,padding .3s ease;}
+#nav .navbar{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.6);border-radius:999px;padding:8px 10px 8px 18px;box-shadow:0 10px 30px -14px rgba(8,25,16,.2);}
+#nav.scrolled .navbar{background:rgba(255,255,255,.92);}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;}
+.brand img{width:34px;height:34px;}
+.nav-links{display:flex;align-items:center;gap:4px;}
+.nav-links a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--muted);padding:8px 16px;border-radius:999px;transition:background .18s,color .18s;}
+.nav-links a svg{width:18px;height:18px;}
+.nav-links a:hover,.nav-links a.active{color:var(--brand-dark);background:var(--brand-light);}
+.nav-cta{display:flex;align-items:center;gap:10px;}
+.nav-cta .btn{padding:11px 20px;font-size:14px;}
+.burger{display:none;width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;align-items:center;justify-content:center;cursor:pointer;}
+.mobile-panel{position:fixed;inset:0;z-index:99;background:var(--ink);color:#fff;display:none;flex-direction:column;padding:100px 28px 40px;gap:4px;}
+.mobile-panel.open{display:flex;}
+.mobile-panel a{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:600;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:14px;}
+.mobile-panel .btn{margin-top:20px;}
+
+@media (max-width:900px){
+  .nav-links,.nav-cta .btn{display:none;}
+  .burger{display:flex;}
+}
+@media (max-width:420px){
+  .brand{font-size:15px;}
+}
+
+/* ---------- HERO ---------- */
+#home{padding:150px 0 90px;overflow:hidden;}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;}
+.hero-copy h1{font-size:clamp(34px,5vw,58px);}
+.hero-copy h1 .accent{color:var(--brand);}
+.hero-copy p.lead{margin-top:20px;font-size:18px;color:var(--muted);max-width:520px;}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px;}
+.hero-trust{display:flex;align-items:center;gap:10px;margin-top:26px;font-size:13px;color:var(--muted);}
+.hero-trust svg{width:18px;height:18px;color:var(--brand);flex:none;}
+.hero-visual{position:relative;aspect-ratio:1/1;border-radius:32px;background:
+  radial-gradient(120% 120% at 20% 15%,rgba(34,165,76,.55),transparent 60%),
+  radial-gradient(120% 120% at 85% 80%,rgba(8,25,16,.9),transparent 55%),
+  linear-gradient(160deg,#0B2417,#081910 60%);
+  box-shadow:var(--shadow);overflow:hidden;}
+.hero-visual svg{position:absolute;inset:0;width:100%;height:100%;}
+.hero-badge{position:absolute;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 16px 34px -14px rgba(8,25,16,.35);display:flex;flex-direction:column;gap:2px;min-width:120px;}
+.hero-badge .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--ink);}
+.hero-badge .lbl{font-size:11px;color:var(--muted);font-weight:600;}
+.hero-badge.b1{top:8%;left:8%;}
+.hero-badge.b2{bottom:10%;right:8%;}
+.hero-badge.b3{top:44%;right:-4%;background:var(--ink);color:#fff;}
+.hero-badge.b3 .num{color:#fff;}
+.hero-badge.b3 .lbl{color:rgba(255,255,255,.7);}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero-badge{animation:floaty 5s ease-in-out infinite;}
+.hero-badge.b2{animation-delay:.8s;}
+.hero-badge.b3{animation-delay:1.6s;}
+
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr;}
+  .hero-visual{max-width:420px;margin:0 auto;}
+}
+
+/* ---------- CLIENTS STRIP ---------- */
+#clients{padding:50px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fff;}
+.clients-head{text-align:center;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:26px;}
+.clients-row{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;}
+.client-tile{display:flex;align-items:center;gap:10px;padding:14px 24px;border:1px solid var(--line);border-radius:16px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;color:var(--ink-soft);background:var(--bg);}
+.client-tile img{width:28px;height:28px;object-fit:contain;border-radius:6px;}
+.client-tile .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);}
+
+/* ---------- SECTION HEAD ---------- */
+.sec-head{max-width:640px;margin:0 0 48px;}
+.sec-head.center{margin:0 auto 48px;text-align:center;}
+.sec-head h2{font-size:clamp(28px,4vw,42px);margin-top:14px;}
+.sec-head p{margin-top:14px;color:var(--muted);font-size:16px;}
+
+/* ---------- HELP CARDS ---------- */
+#help{padding:100px 0;}
+.help-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.help-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:30px 24px;transition:transform .25s ease,box-shadow .25s ease,background .25s ease;}
+.help-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);}
+.help-card.hi{background:var(--ink);border-color:var(--ink);color:#fff;}
+.help-card .ic{width:52px;height:52px;border-radius:14px;background:var(--brand-light);color:var(--brand-dark);display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.help-card.hi .ic{background:rgba(255,255,255,.12);color:var(--brand);}
+.help-card .ic svg{width:26px;height:26px;}
+.help-card h3{font-size:19px;margin-bottom:10px;}
+.help-card p{font-size:14.5px;color:var(--muted);}
+.help-card.hi p{color:rgba(255,255,255,.72);}
+@media (max-width:1000px){.help-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:600px){.help-grid{grid-template-columns:1fr;}}
+
+/* ---------- QUALIFIER ---------- */
+#qualify{padding:20px 0 100px;}
+.qual-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+.qual-card{border-radius:var(--radius);padding:40px 34px;position:relative;overflow:hidden;}
+.qual-card.buy{background:linear-gradient(150deg,#0B2417,#081910);color:#fff;}
+.qual-card.sell{background:var(--brand-light);color:var(--ink);}
+.qual-card h3{font-size:24px;max-width:360px;}
+.qual-card p{margin-top:12px;color:currentColor;opacity:.72;max-width:360px;font-size:15px;}
+.qual-card .qbtns{display:flex;gap:12px;margin-top:26px;}
+.qual-card .tag{position:absolute;top:26px;right:28px;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.14);}
+.qual-card.sell .tag{background:rgba(8,25,16,.08);}
+.qual-card .tag svg{width:22px;height:22px;color:var(--brand);}
+@media (max-width:860px){.qual-grid{grid-template-columns:1fr;}}
+
+/* ---------- PROCESS ---------- */
+#process{padding:100px 0;background:var(--ink);color:#fff;}
+#process .sec-head p{color:rgba(255,255,255,.65);}
+#process .eyebrow{background:rgba(255,255,255,.1);color:var(--brand);}
+.timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;counter-reset:step;}
+.tstep{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:26px 20px;position:relative;}
+.tstep::before{counter-increment:step;content:counter(step);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.tstep h4{font-size:15.5px;margin-bottom:8px;}
+.tstep p{font-size:13.5px;color:rgba(255,255,255,.62);}
+.seller-note{margin-top:28px;background:rgba(34,165,76,.12);border:1px solid rgba(34,165,76,.3);border-radius:16px;padding:18px 22px;font-size:14.5px;color:rgba(255,255,255,.85);}
+.seller-note b{color:var(--brand);}
+@media (max-width:1000px){.timeline{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:560px){.timeline{grid-template-columns:1fr;}}
+
+/* ---------- STATS ---------- */
+#stats{padding:80px 0;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center;}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px 16px;}
+.stat .val{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(26px,4vw,36px);color:var(--brand-dark);}
+.stat .lbl{margin-top:6px;font-size:13.5px;color:var(--muted);font-weight:600;}
+@media (max-width:800px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+
+/* ---------- ABOUT ---------- */
+#about{padding:100px 0;}
+.about-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:56px;align-items:center;}
+.about-card{background:linear-gradient(160deg,#0B2417,#081910);border-radius:32px;padding:44px;color:#fff;aspect-ratio:4/3.4;display:flex;flex-direction:column;justify-content:space-between;}
+.about-card .quote{font-family:'Space Grotesk',sans-serif;font-size:22px;line-height:1.4;}
+.about-card .quote .accent{color:var(--brand);}
+.values-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px;}
+.value{border:1px solid var(--line);border-radius:16px;padding:18px 20px;background:#fff;}
+.value h4{font-size:15px;margin-bottom:6px;}
+.value p{font-size:13px;color:var(--muted);}
+@media (max-width:900px){.about-grid{grid-template-columns:1fr;}.about-card{aspect-ratio:auto;}}
+
+/* ---------- TESTIMONIALS (empty state) ---------- */
+#stories{padding:80px 0;}
+.stories-empty{border:1.5px dashed var(--line);border-radius:var(--radius);padding:54px 30px;text-align:center;color:var(--muted);}
+.stories-empty svg{width:36px;height:36px;color:var(--brand);margin:0 auto 14px;}
+.stories-empty h4{font-size:18px;color:var(--ink);margin-bottom:8px;}
+
+/* ---------- CONTACT ---------- */
+#contact{padding:100px 0;}
+.contact-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;}
+.contact-info{background:var(--ink);color:#fff;border-radius:var(--radius);padding:40px 34px;}
+.contact-info h3{font-size:24px;margin-bottom:10px;}
+.contact-info p.sub{color:rgba(255,255,255,.65);font-size:14.5px;margin-bottom:28px;}
+.cinfo-row{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-top:1px solid rgba(255,255,255,.1);}
+.cinfo-row:first-of-type{border-top:none;}
+.cinfo-row .ic{width:38px;height:38px;border-radius:10px;background:rgba(34,165,76,.16);color:var(--brand);display:flex;align-items:center;justify-content:center;flex:none;}
+.cinfo-row .ic svg{width:18px;height:18px;}
+.cinfo-row .t{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5);font-weight:600;}
+.cinfo-row .v{font-size:15px;margin-top:3px;}
+.social-row{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap;}
+.social-row a{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.social-row a:hover{background:var(--brand);}
+.social-row svg{width:17px;height:17px;}
+
+.contact-form{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:36px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:7px;}
+.field input,.field select,.field textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-family:inherit;font-size:14.5px;color:var(--ink);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--brand);outline-offset:1px;}
+.field textarea{resize:vertical;min-height:100px;}
+.form-msg{margin-top:14px;font-size:14px;font-weight:600;display:none;}
+.form-msg.ok{color:var(--brand-dark);display:block;}
+.form-msg.err{color:#B3261E;display:block;}
+@media (max-width:900px){.contact-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}}
+
+/* ---------- FOOTER ---------- */
+footer{background:var(--ink);color:rgba(255,255,255,.6);padding:60px 0 26px;}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.1);}
+.footer-brand .brand{color:#fff;}
+.footer-brand p{margin-top:14px;font-size:14px;max-width:300px;}
+footer h5{color:#fff;font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;}
+footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px;font-size:14.5px;}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:24px;font-size:13px;flex-wrap:wrap;gap:10px;}
+.footer-bottom a{opacity:.8;}
+.footer-bottom a:hover{color:var(--brand);}
+@media (max-width:800px){.footer-grid{grid-template-columns:1fr 1fr;}}
+
+/* ---------- WHATSAPP FLOAT ---------- */
+#wa-float{position:fixed;right:22px;bottom:22px;z-index:80;width:58px;height:58px;border-radius:50%;background:var(--brand);display:none;align-items:center;justify-content:center;box-shadow:0 14px 30px -10px rgba(34,165,76,.6);}
+#wa-float svg{width:28px;height:28px;color:#fff;}
+#wa-float.show{display:flex;}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header id="nav">
+  <div class="wrap navbar">
+    <a href="#home" class="brand"><img src="assets/logo.svg" alt="LandBank Ghana logo"/> LandBank <span style="color:var(--brand)">Ghana</span></a>
+    <nav class="nav-links">
+      <a href="#home" class="active" data-nav>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        Home
+      </a>
+      <a href="#about" data-nav>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
+        About
+      </a>
+      <a href="#help" data-nav>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-9a2 2 0 0 0-2 2v9"/><path d="M4 17h9a2 2 0 0 0 2-2V6"/></svg>
+        Services
+      </a>
+      <a href="#contact" data-nav>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Contact
+      </a>
+    </nav>
+    <div class="nav-cta">
+      <a href="#qualify" class="btn btn-ghost">Free Land Check</a>
+      <a href="#contact" class="btn btn-primary">Get Started</a>
+      <button class="burger" id="burgerBtn" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-panel" id="mobilePanel">
+  <a href="#home" data-nav-mobile>🏠 Home</a>
+  <a href="#about" data-nav-mobile>ℹ️ About Us</a>
+  <a href="#help" data-nav-mobile>🛡️ Services</a>
+  <a href="#contact" data-nav-mobile>✉️ Contact</a>
+  <a href="#contact" class="btn btn-accent btn-block" data-nav-mobile>Get Started</a>
+</div>
+
+<!-- ============ HERO ============ -->
+<section id="home">
+  <div class="wrap hero-grid">
+    <div class="hero-copy reveal">
+      <span class="eyebrow" id="heroBadgeText">🛡️ Verified &amp; Litigation-Free</span>
+      <h1 id="heroHeadline">Own Land You <span class="accent">Can Trust.</span></h1>
+      <p class="lead" id="heroSub">We help you find, verify, and secure litigation-free land in Ghana — from due diligence to documentation, every step of the way.</p>
+      <div class="hero-ctas">
+        <a href="#qualify" class="btn btn-accent">I Want to Buy Land</a>
+        <a href="#qualify" class="btn btn-ghost">I Want to Sell Land</a>
+      </div>
+      <div class="hero-trust">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+        Every plot we recommend is put through independent title &amp; litigation checks first.
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M40 0H0V40" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="400" height="400" fill="url(#grid)"/>
+        <g opacity=".9">
+          <rect x="70" y="230" width="80" height="80" rx="10" fill="none" stroke="rgba(34,165,76,.8)" stroke-width="2"/>
+          <rect x="160" y="200" width="90" height="110" rx="10" fill="rgba(34,165,76,.16)" stroke="rgba(34,165,76,.9)" stroke-width="2"/>
+          <rect x="260" y="250" width="70" height="60" rx="10" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
+        </g>
+        <g stroke="rgba(255,255,255,.25)" stroke-width="2" fill="none">
+          <path d="M40 340 C 140 300, 260 300, 360 340"/>
+          <path d="M40 360 C 140 325, 260 325, 360 360"/>
+        </g>
+        <circle cx="205" cy="150" r="14" fill="#22A54C"/>
+        <path d="M205 108 v28 M191 122 h28" stroke="#081910" stroke-width="4" stroke-linecap="round"/>
+        <path d="M205 164 q0 30 -18 40" stroke="rgba(34,165,76,.6)" stroke-width="2" fill="none"/>
+      </svg>
+      <div class="hero-badge b1"><span class="num" id="statYears">7+</span><span class="lbl">Years Experience</span></div>
+      <div class="hero-badge b2"><span class="num" id="statAcres">1,200+</span><span class="lbl">Acres Secured</span></div>
+      <div class="hero-badge b3"><span class="num" id="statClients">500+</span><span class="lbl">Happy Clients</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CLIENTS ============ -->
+<section id="clients">
+  <div class="wrap">
+    <p class="clients-head">Trusted by</p>
+    <div class="clients-row" id="clientsRow">
+      <div class="client-tile"><span class="dot"></span> Trulander Jsf Limited</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW WE HELP ============ -->
+<section id="help">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">How We Help</span>
+      <h2>Help is the whole point.</h2>
+      <p>Land in Ghana can be confusing and risky to navigate alone. LandBank Ghana exists to stand between you and every bad deal — with real verification, real people, and real follow-through.</p>
+    </div>
+    <div class="help-grid">
+      <div class="help-card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <h3>Due Diligence &amp; Title Search</h3>
+        <p>We investigate every title at the Lands Commission, search court &amp; family records for disputes, and confirm boundaries before you spend a cedi.</p>
+      </div>
+      <div class="help-card hi reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></div>
+        <h3>Litigation-Free Acquisition</h3>
+        <p>We only guide you toward land we've verified is free of family disputes, double sales, or court litigation — so what you buy stays yours.</p>
+      </div>
+      <div class="help-card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4-4 4"/><path d="M3 12h18"/></svg></div>
+        <h3>Support for Buyers</h3>
+        <p>From shortlisting the right plot to registration and documentation, we walk with you to a safe, stress-free handover.</p>
+      </div>
+      <div class="help-card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
+        <h3>Support for Sellers</h3>
+        <p>Selling land safely takes more than a signboard. We help you package, verify, and connect your land with serious, ready buyers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUALIFIER QUESTIONS ============ -->
+<section id="qualify">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Let's Get Specific</span>
+      <h2>What are you trying to do?</h2>
+    </div>
+    <div class="qual-grid">
+      <div class="qual-card buy reveal">
+        <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <h3>Are you interested in acquiring litigation-free land?</h3>
+        <p>Tell us your budget and preferred area — we'll shortlist verified, dispute-free plots and handle the due diligence.</p>
+        <div class="qbtns">
+          <a href="#contact" class="btn btn-accent" data-interest="buyer">Yes, help me buy</a>
+          <a href="#help" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Not sure yet</a>
+        </div>
+      </div>
+      <div class="qual-card sell reveal">
+        <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
+        <h3>Do you have land you want to sell, safely and properly?</h3>
+        <p>We verify your documents, help you value it fairly, and connect you with serious, vetted buyers — no middlemen wahala.</p>
+        <div class="qbtns">
+          <a href="#contact" class="btn btn-primary" data-interest="seller">Yes, help me sell</a>
+          <a href="#help" class="btn btn-ghost">Learn how</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESS ============ -->
+<section id="process">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Our Process</span>
+      <h2>How we take you from inquiry to handover.</h2>
+      <p>A clear, five-step process built around one goal: no surprises after you've paid.</p>
+    </div>
+    <div class="timeline">
+      <div class="tstep reveal"><h4>Tell Us What You Need</h4><p>Share your budget, purpose, and preferred location — residential, commercial, or investment.</p></div>
+      <div class="tstep reveal"><h4>We Search &amp; Verify</h4><p>Lands Commission search, family/court records check, and boundary confirmation on every shortlisted plot.</p></div>
+      <div class="tstep reveal"><h4>You Visit, We Confirm</h4><p>An accompanied site visit where we walk the actual boundaries with you, in person.</p></div>
+      <div class="tstep reveal"><h4>Documentation &amp; Registration</h4><p>We support the indenture, site plan, and registration paperwork so everything is on record.</p></div>
+      <div class="tstep reveal"><h4>Safe Handover</h4><p>Final handover with every document filed and copies in your hands.</p></div>
+    </div>
+    <div class="seller-note reveal"><b>Selling instead?</b> The same team verifies your title, prepares your documents, and matches your land with buyers who are ready to move — safely and on your terms.</div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section id="stats">
+  <div class="wrap">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat"><div class="val">7+</div><div class="lbl">Years of Experience</div></div>
+      <div class="stat"><div class="val">100%</div><div class="lbl">Litigation-Free Transfers</div></div>
+      <div class="stat"><div class="val">1,200+</div><div class="lbl">Acres Secured</div></div>
+      <div class="stat"><div class="val">500+</div><div class="lbl">Happy Clients</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section id="about">
+  <div class="wrap about-grid">
+    <div class="about-card reveal">
+      <div class="quote">"Too many people lose money to land guarders and double sales. We exist to put <span class="accent">help</span> first."</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.55)">— The LandBank Ghana team</div>
+    </div>
+    <div class="reveal">
+      <span class="eyebrow">About Us</span>
+      <h2 style="margin-top:14px;font-size:clamp(26px,4vw,38px)">Built to help Ghanaians own land safely.</h2>
+      <p style="margin-top:16px;color:var(--muted);font-size:16px;">LandBank Ghana was founded to close the trust gap in land transactions — where verification is thorough, sellers are vetted, and buyers are protected from disputes before they ever sign. Whether you're securing your first plot or selling family land the right way, we stay with you from first inquiry to final handover.</p>
+      <div class="values-grid">
+        <div class="value"><h4>Integrity</h4><p>We tell you what we find — even when it means walking away from a deal.</p></div>
+        <div class="value"><h4>Transparency</h4><p>Every search, fee, and step is explained before you commit to anything.</p></div>
+        <div class="value"><h4>Diligence</h4><p>No shortcuts on title checks, boundary verification, or documentation.</p></div>
+        <div class="value"><h4>People-First</h4><p>Real people guide your transaction — not a listing you're left to figure out alone.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STORIES (empty state) ============ -->
+<section id="stories">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Client Stories</span>
+      <h2>What our clients say</h2>
+    </div>
+    <div class="stories-empty reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.8 7.8L3 21l1.7-6.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
+      <h4>Client stories are coming soon</h4>
+      <p>We're gathering references from recent buyers and sellers. Ask us directly and we'll happily connect you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact">
+  <div class="wrap contact-grid">
+    <div class="contact-info reveal">
+      <h3>Let's talk about your land.</h3>
+      <p class="sub">Reach out directly, or send the form and we'll respond within one business day.</p>
+      <div class="cinfo-row">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg></div>
+        <div><div class="t">Phone / WhatsApp</div><div class="v" id="cPhone">Add in admin dashboard</div></div>
+      </div>
+      <div class="cinfo-row">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+        <div><div class="t">Email</div><div class="v" id="cEmail">Add in admin dashboard</div></div>
+      </div>
+      <div class="cinfo-row">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div><div class="t">Office</div><div class="v" id="cAddress">Add in admin dashboard</div></div>
+      </div>
+      <div class="social-row" id="socialRow"></div>
+    </div>
+
+    <form class="contact-form reveal" id="leadForm">
+      <div class="form-row">
+        <div class="field"><label>Full name</label><input type="text" name="name" required placeholder="e.g. Ama Owusu"/></div>
+        <div class="field"><label>Phone number</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+        <div class="field"><label>I'm interested in</label>
+          <select name="interest" id="interestSelect">
+            <option value="buyer">Buying land</option>
+            <option value="seller">Selling land</option>
+            <option value="due_diligence">Due diligence on land I've found</option>
+            <option value="other">Something else</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Tell us more</label><textarea name="message" placeholder="Location, budget, or land details..."></textarea></div>
+      <button type="submit" class="btn btn-accent btn-block">Send Message</button>
+      <p class="form-msg" id="formMsg"></p>
+    </form>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#home" class="brand"><img src="assets/logo.svg" alt="LandBank Ghana logo"/> LandBank Ghana</a>
+        <p>Helping buyers acquire litigation-free land and helping sellers connect safely with verified buyers, across Ghana.</p>
+      </div>
+      <div>
+        <h5>Explore</h5>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#help">Services</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#qualify">Free Land Check</a></li>
+          <li><a href="#process">Our Process</a></li>
+          <li><a href="admin/">Staff Login</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> LandBank Ghana. All rights reserved.</span>
+      <span>Built for landbankghana.com</span>
+    </div>
+  </div>
+</footer>
+
+<a id="wa-float" target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.7 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.2-3.5-.7-2.9-1.1-4.8-4-5-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.3.6-.6.9-.9 1.3-.1.2-.3.3-.1.6.6 1 1.3 1.8 2.1 2.4.9.7 1.4.9 1.7 1 .2.1.4.1.6-.1.2-.3.8-1 1-1.3.2-.3.4-.3.7-.2.3.1 1.6.8 1.9.9.3.2.5.2.6.3.1.2.1.9-.1 1.6z"/></svg>
+</a>
+
+<script src="assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* Core page UI (nav, menu, scroll-reveal, form) must keep working even if the
+   Supabase CDN script above fails to load (slow network, ad-blocker, firewall) —
+   so it does not depend on `supabase` existing, and every block below is
+   isolated with try/catch so one failure can't take down the rest of the page. */
+
+/* --- nav scroll state --- */
+const navEl = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  navEl.classList.toggle('scrolled', window.scrollY > 20);
+  const secs = ['home','about','help','contact'];
+  let current = secs[0];
+  for (const id of secs) {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top < 140) current = id;
+  }
+  document.querySelectorAll('[data-nav]').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+
+/* --- mobile menu --- */
+const burger = document.getElementById('burgerBtn');
+const mobilePanel = document.getElementById('mobilePanel');
+burger.addEventListener('click', () => mobilePanel.classList.add('open'));
+mobilePanel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobilePanel.classList.remove('open')));
+
+/* --- scroll reveal --- */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: .12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* --- interest preselect from qualifier buttons --- */
+document.querySelectorAll('[data-interest]').forEach(a => {
+  a.addEventListener('click', () => {
+    const sel = document.getElementById('interestSelect');
+    if (sel) sel.value = a.getAttribute('data-interest');
+  });
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* --- Supabase client (isolated: a CDN/network failure here must not break the UI above) --- */
+let sb = null;
+try {
+  sb = supabase.createClient(window.LANDBANK_SUPABASE_URL, window.LANDBANK_SUPABASE_ANON_KEY);
+} catch (e) {
+  console.warn('Supabase unavailable — homepage will show default static content.', e);
+}
+
+/* --- load dynamic content from Supabase --- */
+async function loadContent(){
+  if (!sb) return;
+  try{
+    const [{data:banners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}] = await Promise.all([
+      sb.from('banners').select('*').eq('kind','hero').eq('active',true).order('sort_order').limit(1),
+      sb.from('stats').select('*').eq('active',true).order('sort_order'),
+      sb.from('clients').select('*').eq('active',true).order('sort_order'),
+      sb.from('social_links').select('*').eq('active',true).order('sort_order'),
+      sb.from('site_settings').select('*').eq('id',1).maybeSingle()
+    ]);
+
+    if (banners && banners[0]) {
+      const b = banners[0];
+      if (b.headline) document.getElementById('heroHeadline').textContent = b.headline;
+      if (b.subheadline) document.getElementById('heroSub').textContent = b.subheadline;
+      if (b.badge_text) document.getElementById('heroBadgeText').textContent = '🛡️ ' + b.badge_text;
+    }
+
+    if (stats && stats.length) {
+      const grid = document.getElementById('statsGrid');
+      grid.innerHTML = stats.map(s => `<div class="stat"><div class="val">${esc(s.value)}</div><div class="lbl">${esc(s.label)}</div></div>`).join('');
+      const find = (kw) => stats.find(s => s.label.toLowerCase().includes(kw));
+      const y = find('year'), a = find('acre'), c = find('client');
+      if (y) document.getElementById('statYears').textContent = y.value;
+      if (a) document.getElementById('statAcres').textContent = a.value;
+      if (c) document.getElementById('statClients').textContent = c.value;
+    }
+
+    if (clientsData && clientsData.length) {
+      document.getElementById('clientsRow').innerHTML = clientsData.map(c => `
+        <div class="client-tile">${c.logo_url ? `<img src="${esc(c.logo_url)}" alt="${esc(c.name)}"/>` : '<span class="dot"></span>'} ${esc(c.name)}</div>
+      `).join('');
+    }
+
+    if (social && social.length) {
+      document.getElementById('socialRow').innerHTML = social.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener" aria-label="${esc(s.platform)}">${socialIcon(s.platform)}</a>`).join('');
+    }
+
+    if (settings) {
+      if (settings.phone) document.getElementById('cPhone').textContent = settings.phone;
+      if (settings.email) document.getElementById('cEmail').textContent = settings.email;
+      if (settings.address) document.getElementById('cAddress').textContent = settings.address;
+      if (settings.whatsapp) {
+        const wa = document.getElementById('wa-float');
+        wa.href = 'https://wa.me/' + settings.whatsapp.replace(/[^0-9]/g,'');
+        wa.classList.add('show');
+      }
+    }
+  } catch(e){ console.warn('Content load skipped:', e); }
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function socialIcon(platform){
+  const p = (platform||'').toLowerCase();
+  const icons = {
+    facebook:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>',
+    instagram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>',
+    twitter:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.4-1.3 1.7-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7 3.7A11.6 11.6 0 0 1 3.4 4.6a4.1 4.1 0 0 0 1.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 0 1-1.9.1 4.1 4.1 0 0 0 3.8 2.9A8.3 8.3 0 0 1 2 18.6a11.6 11.6 0 0 0 6.3 1.8c7.5 0 11.6-6.2 11.6-11.6v-.5c.8-.6 1.5-1.3 2.1-2.4z"/></svg>',
+    linkedin:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.9 8.7H3.6V21h3.3V8.7zM5.3 3a1.9 1.9 0 1 0 0 3.9 1.9 1.9 0 0 0 0-3.9zM21 21v-6.8c0-3.6-1.9-5.3-4.5-5.3a3.9 3.9 0 0 0-3.5 1.9V8.7H9.6c0 .1 0 12 0 12.3h3.3v-6.9c0-.4 0-.7.1-1 .3-.7 1-1.5 2.1-1.5 1.5 0 2.1 1.1 2.1 2.8V21H21z"/></svg>',
+    whatsapp:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2z"/></svg>',
+    tiktok:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3c.5 2.5 2 4 4.5 4.2v3c-1.6 0-3-.5-4.2-1.4v6.7A5.5 5.5 0 1 1 11 9.9v3.2a2.5 2.5 0 1 0 2 2.5V3h3z"/></svg>'
+  };
+  return icons[p] || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>';
+}
+loadContent();
+
+/* --- contact form submit --- */
+document.getElementById('leadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const msg = document.getElementById('formMsg');
+  const data = Object.fromEntries(new FormData(form).entries());
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try{
+    if (!sb) throw new Error('offline');
+    const { error } = await sb.from('leads').insert({
+      name: data.name, phone: data.phone, email: data.email || null,
+      interest: data.interest, message: data.message || null
+    });
+    if (error) throw error;
+    msg.textContent = "Thanks — we've received your message and will reach out within one business day.";
+    msg.className = 'form-msg ok';
+    form.reset();
+  } catch(err){
+    msg.textContent = "Something went wrong sending your message. Please try again or contact us directly.";
+    msg.className = 'form-msg err';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send Message';
+  }
+});
+</script>
+</body>
+</html>

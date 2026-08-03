@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="LandBank Ghana">
+  <circle cx="100" cy="100" r="96" fill="#22A54C"/>
+  <g fill="#ffffff">
+    <path d="M46 96 L100 54 L154 96 L154 104 L138 104 L138 92 L100 66 L62 92 L62 104 L46 104 Z"/>
+    <rect x="62" y="92" width="14" height="46" />
+    <rect x="124" y="92" width="14" height="46" />
+    <path d="M93 100 a10 10 0 1 1 8 16 l4 14 h-16 l4-14 a10 10 0 0 1 0-16 Z" fill="#22A54C"/>
+    <circle cx="100" cy="108" r="9"/>
+    <path d="M94 116 h12 l4 16 h-20 Z"/>
+  </g>
+  <g fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round">
+    <path d="M42 118 C 80 130, 110 130, 150 108"/>
+    <path d="M52 134 C 86 144, 112 144, 146 126"/>
+  </g>
+</svg>

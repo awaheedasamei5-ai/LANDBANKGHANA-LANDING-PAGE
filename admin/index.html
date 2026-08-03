@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>LandBank Ghana — Admin</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#22A54C;--brand-dark:#168038;--brand-light:#DCF5E4;
+  --ink:#081910;--bg:#F6FBF8;--card:#ffffff;--line:#E1EEE6;--muted:#5C6E64;--radius:16px;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;}
+a{color:inherit;}
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:11px 20px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;}
+.btn-accent{background:var(--brand);color:#fff;border-color:var(--brand);}
+.btn-danger{color:#B3261E;border-color:#f3d0cd;}
+.btn:disabled{opacity:.6;cursor:default;}
+
+/* ---- auth screen ---- */
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-card{width:100%;max-width:400px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:36px;box-shadow:0 20px 50px -25px rgba(8,25,16,.25);}
+.auth-card img{width:44px;margin-bottom:14px;}
+.auth-tabs{display:flex;gap:6px;background:var(--bg);border-radius:999px;padding:4px;margin:20px 0;}
+.auth-tabs button{flex:1;border:none;background:none;padding:9px;border-radius:999px;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);}
+.auth-tabs button.active{background:#fff;color:var(--ink);box-shadow:0 4px 10px -4px rgba(8,25,16,.2);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;padding:12px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-family:inherit;font-size:14px;}
+.auth-msg{font-size:13.5px;margin-top:10px;color:#B3261E;display:none;}
+.auth-msg.show{display:block;}
+.auth-msg.ok{color:var(--brand-dark);}
+
+/* ---- dashboard ---- */
+#dash{display:none;}
+#dash.show{display:block;}
+header.topbar{background:#fff;border-bottom:1px solid var(--line);padding:16px 0;position:sticky;top:0;z-index:5;}
+.topbar .row{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;}
+.brand img{width:28px;}
+.shell{max-width:1100px;margin:0 auto;padding:28px 20px 80px;display:grid;grid-template-columns:220px 1fr;gap:26px;}
+.side{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;height:fit-content;position:sticky;top:80px;}
+.side button{display:flex;width:100%;text-align:left;padding:11px 14px;border:none;background:none;border-radius:10px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;margin-bottom:2px;}
+.side button.active{background:var(--brand-light);color:var(--brand-dark);}
+.panel{display:none;}
+.panel.active{display:block;}
+.panel-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:20px;}
+.panel-card h3{font-size:17px;margin-bottom:4px;}
+.panel-card .desc{font-size:13px;color:var(--muted);margin-bottom:18px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top;}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;}
+.row-actions{display:flex;gap:6px;}
+.row-actions button{font-size:12px;padding:6px 10px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.pill.on{background:var(--brand-light);color:var(--brand-dark);}
+.pill.off{background:#f1f1f1;color:#888;}
+.hint{font-size:12px;color:var(--muted);margin-top:4px;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:14px 20px;border-radius:12px;font-size:14px;display:none;box-shadow:0 14px 30px -10px rgba(0,0,0,.3);}
+.toast.show{display:block;}
+img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
+@media(max-width:800px){.shell{grid-template-columns:1fr;}.side{position:static;display:flex;overflow-x:auto;gap:4px;}.form-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ===================== AUTH SCREEN ===================== -->
+<div id="authScreen">
+  <div class="auth-card">
+    <img src="../assets/logo.svg" alt="LandBank Ghana"/>
+    <h2>Admin Dashboard</h2>
+    <p style="font-size:13.5px;color:var(--muted);margin-top:6px;">Manage banners, stats, clients, and contact details for landbankghana.com.</p>
+    <div class="auth-tabs">
+      <button id="tabSignin" class="active">Sign in</button>
+      <button id="tabActivate">Activate account</button>
+    </div>
+
+    <form id="signinForm">
+      <div class="field"><label>Email</label><input type="email" name="email" required/></div>
+      <div class="field"><label>Password</label><input type="password" name="password" required/></div>
+      <button class="btn btn-accent" style="width:100%;justify-content:center" type="submit">Sign in</button>
+    </form>
+
+    <form id="activateForm" style="display:none">
+      <div class="field"><label>Invited email</label><input type="email" name="email" required/></div>
+      <div class="field"><label>Choose a password</label><input type="password" name="password" minlength="8" required/></div>
+      <div class="hint" style="margin-bottom:14px">Only emails already invited by an existing admin can activate an account.</div>
+      <button class="btn btn-accent" style="width:100%;justify-content:center" type="submit">Activate &amp; sign in</button>
+    </form>
+
+    <p class="auth-msg" id="authMsg"></p>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<div id="dash">
+  <header class="topbar">
+    <div class="row">
+      <div class="brand"><img src="../assets/logo.svg" alt=""/> LandBank Ghana Admin</div>
+      <div style="display:flex;gap:10px">
+        <a class="btn" href="../index.html" target="_blank">View site ↗</a>
+        <button class="btn" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <div class="side">
+      <button class="nav-item active" data-panel="banners">Hero &amp; Banners</button>
+      <button class="nav-item" data-panel="stats">Stats</button>
+      <button class="nav-item" data-panel="clients">Clients</button>
+      <button class="nav-item" data-panel="social">Social Links</button>
+      <button class="nav-item" data-panel="settings">Contact Info</button>
+      <button class="nav-item" data-panel="leads">Leads</button>
+    </div>
+
+    <div class="content">
+      <!-- BANNERS -->
+      <div class="panel active" id="panel-banners">
+        <div class="panel-card">
+          <h3>Add / edit hero banner</h3>
+          <p class="desc">This controls the big headline, subtext, and floating badge on the homepage hero.</p>
+          <form id="bannerForm">
+            <input type="hidden" name="id"/>
+            <div class="form-grid">
+              <div class="field"><label>Headline</label><input name="headline" placeholder="Own Land You Can Trust."/></div>
+              <div class="field"><label>Badge text (small pill above headline)</label><input name="badge_text" placeholder="Verified & Litigation-Free"/></div>
+            </div>
+            <div class="field"><label>Subheadline</label><textarea name="subheadline" rows="2" placeholder="We help you find, verify, and secure litigation-free land..."></textarea></div>
+            <div class="form-grid">
+              <div class="field"><label>Image URL (optional)</label><input name="image_url" placeholder="https://..."/></div>
+              <div class="field"><label>Or upload image</label><input type="file" accept="image/*" id="bannerImgFile"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Kind</label>
+                <select name="kind"><option value="hero">Hero (homepage top)</option><option value="promo">Promo (secondary)</option></select>
+              </div>
+              <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="1"/></div>
+            </div>
+            <label style="font-size:13px;display:flex;gap:8px;align-items:center;margin-bottom:14px"><input type="checkbox" name="active" checked/> Active (visible on site)</label>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-accent" type="submit">Save banner</button>
+              <button class="btn" type="button" id="bannerCancelEdit" style="display:none">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>All banners</h3>
+          <table><thead><tr><th>Headline</th><th>Kind</th><th>Status</th><th></th></tr></thead><tbody id="bannersTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="panel" id="panel-stats">
+        <div class="panel-card">
+          <h3>Add / edit stat</h3>
+          <p class="desc">These are the number tiles (e.g. "7+ Years Experience") shown on the homepage.</p>
+          <form id="statForm">
+            <input type="hidden" name="id"/>
+            <div class="form-grid">
+              <div class="field"><label>Value</label><input name="value" placeholder="7+" required/></div>
+              <div class="field"><label>Label</label><input name="label" placeholder="Years of Experience" required/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="1"/></div>
+              <label style="font-size:13px;display:flex;gap:8px;align-items:center;margin-top:28px"><input type="checkbox" name="active" checked/> Active</label>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-accent" type="submit">Save stat</button>
+              <button class="btn" type="button" id="statCancelEdit" style="display:none">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>All stats</h3>
+          <table><thead><tr><th>Value</th><th>Label</th><th>Status</th><th></th></tr></thead><tbody id="statsTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- CLIENTS -->
+      <div class="panel" id="panel-clients">
+        <div class="panel-card">
+          <h3>Add / edit client</h3>
+          <p class="desc">Shown in the "Trusted by" strip on the homepage.</p>
+          <form id="clientForm">
+            <input type="hidden" name="id"/>
+            <div class="form-grid">
+              <div class="field"><label>Client name</label><input name="name" placeholder="Trulander Jsf Limited" required/></div>
+              <div class="field"><label>Website (optional)</label><input name="website_url" placeholder="https://..."/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Logo URL (optional)</label><input name="logo_url" placeholder="https://..."/></div>
+              <div class="field"><label>Or upload logo</label><input type="file" accept="image/*" id="clientLogoFile"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="1"/></div>
+              <label style="font-size:13px;display:flex;gap:8px;align-items:center;margin-top:28px"><input type="checkbox" name="active" checked/> Active</label>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-accent" type="submit">Save client</button>
+              <button class="btn" type="button" id="clientCancelEdit" style="display:none">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>All clients</h3>
+          <table><thead><tr><th>Logo</th><th>Name</th><th>Status</th><th></th></tr></thead><tbody id="clientsTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- SOCIAL -->
+      <div class="panel" id="panel-social">
+        <div class="panel-card">
+          <h3>Add / edit social link</h3>
+          <p class="desc">Shown as icons in the contact section and footer.</p>
+          <form id="socialForm">
+            <input type="hidden" name="id"/>
+            <div class="form-grid">
+              <div class="field"><label>Platform</label>
+                <select name="platform">
+                  <option value="facebook">Facebook</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="twitter">X / Twitter</option>
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="tiktok">TikTok</option>
+                  <option value="whatsapp">WhatsApp</option>
+                </select>
+              </div>
+              <div class="field"><label>URL</label><input name="url" placeholder="https://..." required/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="1"/></div>
+              <label style="font-size:13px;display:flex;gap:8px;align-items:center;margin-top:28px"><input type="checkbox" name="active" checked/> Active</label>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-accent" type="submit">Save link</button>
+              <button class="btn" type="button" id="socialCancelEdit" style="display:none">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>All social links</h3>
+          <table><thead><tr><th>Platform</th><th>URL</th><th>Status</th><th></th></tr></thead><tbody id="socialTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="panel" id="panel-settings">
+        <div class="panel-card">
+          <h3>Contact info</h3>
+          <p class="desc">Shown in the contact section on the homepage. Leave blank to show a placeholder.</p>
+          <form id="settingsForm">
+            <div class="form-grid">
+              <div class="field"><label>Phone (display)</label><input name="phone" placeholder="+233 ..."/></div>
+              <div class="field"><label>WhatsApp number (digits only, with country code)</label><input name="whatsapp" placeholder="233241234567"/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Email</label><input name="email" placeholder="hello@landbankghana.com"/></div>
+              <div class="field"><label>Office address</label><input name="address" placeholder="Accra, Ghana"/></div>
+            </div>
+            <button class="btn btn-accent" type="submit">Save contact info</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- LEADS -->
+      <div class="panel" id="panel-leads">
+        <div class="panel-card">
+          <h3>Contact form submissions</h3>
+          <p class="desc">Everyone who has submitted the homepage contact form.</p>
+          <table><thead><tr><th>Name</th><th>Contact</th><th>Interest</th><th>Message</th><th>Status</th><th></th></tr></thead><tbody id="leadsTable"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* Isolated so a Supabase CDN/network failure can't take down the tab-switching
+   and other UI wiring defined below it in this same script block. */
+let sb = null;
+try {
+  sb = supabase.createClient(window.LANDBANK_SUPABASE_URL, window.LANDBANK_SUPABASE_ANON_KEY);
+} catch (e) {
+  console.warn('Supabase unavailable:', e);
+}
+let editing = {};
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function resizeImage(file, maxDim){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let {width,height} = img;
+        if (width > height && width > maxDim){ height*=maxDim/width; width=maxDim; }
+        else if (height > maxDim){ width*=maxDim/height; height=maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img,0,0,width,height);
+        resolve(canvas.toDataURL('image/jpeg', .82));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ============ AUTH ============ */
+const tabSignin = document.getElementById('tabSignin');
+const tabActivate = document.getElementById('tabActivate');
+const signinForm = document.getElementById('signinForm');
+const activateForm = document.getElementById('activateForm');
+const authMsg = document.getElementById('authMsg');
+
+tabSignin.addEventListener('click', () => { tabSignin.classList.add('active'); tabActivate.classList.remove('active'); signinForm.style.display='block'; activateForm.style.display='none'; authMsg.classList.remove('show'); });
+tabActivate.addEventListener('click', () => { tabActivate.classList.add('active'); tabSignin.classList.remove('active'); activateForm.style.display='block'; signinForm.style.display='none'; authMsg.classList.remove('show'); });
+
+function showAuthMsg(text, ok){ authMsg.textContent = text; authMsg.className = 'auth-msg show' + (ok?' ok':''); }
+function requireSb(){
+  if (!sb) { showAuthMsg('Could not connect to the server. Check your internet connection and reload the page.'); return false; }
+  return true;
+}
+
+signinForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!requireSb()) return;
+  const d = Object.fromEntries(new FormData(signinForm).entries());
+  const { error } = await sb.auth.signInWithPassword({ email: d.email, password: d.password });
+  if (error) return showAuthMsg(error.message);
+  // Idempotent: only actually claims the row if this email was invited and unclaimed.
+  await sb.rpc('claim_admin', { check_email: d.email }).catch(() => {});
+  checkSession();
+});
+
+activateForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!requireSb()) return;
+  const d = Object.fromEntries(new FormData(activateForm).entries());
+  const { data: invited, error: checkErr } = await sb.rpc('email_is_invited_admin', { check_email: d.email });
+  if (checkErr) return showAuthMsg(checkErr.message);
+  if (!invited) return showAuthMsg('That email has not been invited as an admin, or has already been activated.');
+  const { data: signUpData, error: signUpErr } = await sb.auth.signUp({ email: d.email, password: d.password });
+  if (signUpErr) return showAuthMsg(signUpErr.message);
+  if (!signUpData.session) {
+    showAuthMsg('Account created! If your project requires email confirmation, check your inbox, confirm, then use "Sign in" — your admin access activates automatically on first sign-in.', true);
+    return;
+  }
+  const { error: claimErr } = await sb.rpc('claim_admin', { check_email: d.email });
+  if (claimErr) return showAuthMsg(claimErr.message);
+  showAuthMsg('Account activated — signing you in...', true);
+  checkSession();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+
+async function checkSession(){
+  if (!sb) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (session){
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('dash').classList.add('show');
+    loadAll();
+  }
+}
+checkSession();
+
+/* ============ NAV PANELS ============ */
+document.querySelectorAll('.side .nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.side .nav-item').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.panel).classList.add('active');
+  });
+});
+
+/* ============ GENERIC CRUD HELPERS ============ */
+async function loadAll(){
+  loadBanners(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadLeads();
+}
+
+/* ---- BANNERS ---- */
+const bannerForm = document.getElementById('bannerForm');
+document.getElementById('bannerImgFile').addEventListener('change', async (e) => {
+  if (e.target.files[0]) bannerForm.image_url.value = await resizeImage(e.target.files[0], 1200);
+});
+bannerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(bannerForm).entries());
+  d.active = !!bannerForm.active.checked;
+  d.sort_order = parseInt(d.sort_order||'1',10);
+  const id = d.id; delete d.id;
+  const { error } = id ? await sb.from('banners').update(d).eq('id', id) : await sb.from('banners').insert(d);
+  if (error) return toast('Error: ' + error.message);
+  toast('Banner saved'); bannerForm.reset(); document.getElementById('bannerCancelEdit').style.display='none';
+  loadBanners();
+});
+document.getElementById('bannerCancelEdit').addEventListener('click', () => { bannerForm.reset(); document.getElementById('bannerCancelEdit').style.display='none'; });
+async function loadBanners(){
+  const { data, error } = await sb.from('banners').select('*').order('sort_order');
+  if (error) return;
+  document.getElementById('bannersTable').innerHTML = (data||[]).map(b => `
+    <tr>
+      <td>${esc(b.headline||'(no headline)')}</td>
+      <td>${esc(b.kind)}</td>
+      <td><span class="pill ${b.active?'on':'off'}">${b.active?'Active':'Hidden'}</span></td>
+      <td class="row-actions">
+        <button class="btn" onclick='editBanner(${JSON.stringify(b)})'>Edit</button>
+        <button class="btn btn-danger" onclick="deleteRow('banners','${b.id}',loadBanners)">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="4">No banners yet.</td></tr>';
+}
+function editBanner(b){
+  bannerForm.id.value = b.id; bannerForm.headline.value = b.headline||''; bannerForm.badge_text.value = b.badge_text||'';
+  bannerForm.subheadline.value = b.subheadline||''; bannerForm.image_url.value = b.image_url||'';
+  bannerForm.kind.value = b.kind; bannerForm.sort_order.value = b.sort_order; bannerForm.active.checked = b.active;
+  document.getElementById('bannerCancelEdit').style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---- STATS ---- */
+const statForm = document.getElementById('statForm');
+statForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(statForm).entries());
+  d.active = !!statForm.active.checked; d.sort_order = parseInt(d.sort_order||'1',10);
+  const id = d.id; delete d.id;
+  const { error } = id ? await sb.from('stats').update(d).eq('id', id) : await sb.from('stats').insert(d);
+  if (error) return toast('Error: ' + error.message);
+  toast('Stat saved'); statForm.reset(); document.getElementById('statCancelEdit').style.display='none';
+  loadStats();
+});
+document.getElementById('statCancelEdit').addEventListener('click', () => { statForm.reset(); document.getElementById('statCancelEdit').style.display='none'; });
+async function loadStats(){
+  const { data, error } = await sb.from('stats').select('*').order('sort_order');
+  if (error) return;
+  document.getElementById('statsTable').innerHTML = (data||[]).map(s => `
+    <tr>
+      <td>${esc(s.value)}</td><td>${esc(s.label)}</td>
+      <td><span class="pill ${s.active?'on':'off'}">${s.active?'Active':'Hidden'}</span></td>
+      <td class="row-actions">
+        <button class="btn" onclick='editStat(${JSON.stringify(s)})'>Edit</button>
+        <button class="btn btn-danger" onclick="deleteRow('stats','${s.id}',loadStats)">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="4">No stats yet.</td></tr>';
+}
+function editStat(s){
+  statForm.id.value = s.id; statForm.value.value = s.value; statForm.label.value = s.label;
+  statForm.sort_order.value = s.sort_order; statForm.active.checked = s.active;
+  document.getElementById('statCancelEdit').style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---- CLIENTS ---- */
+const clientForm = document.getElementById('clientForm');
+document.getElementById('clientLogoFile').addEventListener('change', async (e) => {
+  if (e.target.files[0]) clientForm.logo_url.value = await resizeImage(e.target.files[0], 300);
+});
+clientForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(clientForm).entries());
+  d.active = !!clientForm.active.checked; d.sort_order = parseInt(d.sort_order||'1',10);
+  const id = d.id; delete d.id;
+  const { error } = id ? await sb.from('clients').update(d).eq('id', id) : await sb.from('clients').insert(d);
+  if (error) return toast('Error: ' + error.message);
+  toast('Client saved'); clientForm.reset(); document.getElementById('clientCancelEdit').style.display='none';
+  loadClients();
+});
+document.getElementById('clientCancelEdit').addEventListener('click', () => { clientForm.reset(); document.getElementById('clientCancelEdit').style.display='none'; });
+async function loadClients(){
+  const { data, error } = await sb.from('clients').select('*').order('sort_order');
+  if (error) return;
+  document.getElementById('clientsTable').innerHTML = (data||[]).map(c => `
+    <tr>
+      <td>${c.logo_url?`<img class="thumb" src="${esc(c.logo_url)}"/>`:'—'}</td>
+      <td>${esc(c.name)}</td>
+      <td><span class="pill ${c.active?'on':'off'}">${c.active?'Active':'Hidden'}</span></td>
+      <td class="row-actions">
+        <button class="btn" onclick='editClient(${JSON.stringify(c)})'>Edit</button>
+        <button class="btn btn-danger" onclick="deleteRow('clients','${c.id}',loadClients)">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="4">No clients yet.</td></tr>';
+}
+function editClient(c){
+  clientForm.id.value = c.id; clientForm.name.value = c.name; clientForm.website_url.value = c.website_url||'';
+  clientForm.logo_url.value = c.logo_url||''; clientForm.sort_order.value = c.sort_order; clientForm.active.checked = c.active;
+  document.getElementById('clientCancelEdit').style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---- SOCIAL ---- */
+const socialForm = document.getElementById('socialForm');
+socialForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(socialForm).entries());
+  d.active = !!socialForm.active.checked; d.sort_order = parseInt(d.sort_order||'1',10);
+  const id = d.id; delete d.id;
+  const { error } = id ? await sb.from('social_links').update(d).eq('id', id) : await sb.from('social_links').insert(d);
+  if (error) return toast('Error: ' + error.message);
+  toast('Link saved'); socialForm.reset(); document.getElementById('socialCancelEdit').style.display='none';
+  loadSocial();
+});
+document.getElementById('socialCancelEdit').addEventListener('click', () => { socialForm.reset(); document.getElementById('socialCancelEdit').style.display='none'; });
+async function loadSocial(){
+  const { data, error } = await sb.from('social_links').select('*').order('sort_order');
+  if (error) return;
+  document.getElementById('socialTable').innerHTML = (data||[]).map(s => `
+    <tr>
+      <td>${esc(s.platform)}</td><td>${esc(s.url)}</td>
+      <td><span class="pill ${s.active?'on':'off'}">${s.active?'Active':'Hidden'}</span></td>
+      <td class="row-actions">
+        <button class="btn" onclick='editSocial(${JSON.stringify(s)})'>Edit</button>
+        <button class="btn btn-danger" onclick="deleteRow('social_links','${s.id}',loadSocial)">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="4">No social links yet.</td></tr>';
+}
+function editSocial(s){
+  socialForm.id.value = s.id; socialForm.platform.value = s.platform; socialForm.url.value = s.url;
+  socialForm.sort_order.value = s.sort_order; socialForm.active.checked = s.active;
+  document.getElementById('socialCancelEdit').style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---- SETTINGS ---- */
+const settingsForm = document.getElementById('settingsForm');
+settingsForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(settingsForm).entries());
+  d.id = 1;
+  const { error } = await sb.from('site_settings').upsert(d);
+  if (error) return toast('Error: ' + error.message);
+  toast('Contact info saved');
+});
+async function loadSettings(){
+  const { data } = await sb.from('site_settings').select('*').eq('id',1).maybeSingle();
+  if (!data) return;
+  settingsForm.phone.value = data.phone||''; settingsForm.whatsapp.value = data.whatsapp||'';
+  settingsForm.email.value = data.email||''; settingsForm.address.value = data.address||'';
+}
+
+/* ---- LEADS ---- */
+async function loadLeads(){
+  const { data, error } = await sb.from('leads').select('*').order('created_at',{ascending:false});
+  if (error) return;
+  document.getElementById('leadsTable').innerHTML = (data||[]).map(l => `
+    <tr>
+      <td>${esc(l.name)}</td>
+      <td>${esc(l.phone||'')}${l.email?'<br>'+esc(l.email):''}</td>
+      <td>${esc(l.interest||'')}</td>
+      <td style="max-width:220px">${esc(l.message||'')}</td>
+      <td>
+        <select onchange="updateLeadStatus('${l.id}',this.value)">
+          <option value="new" ${l.status==='new'?'selected':''}>New</option>
+          <option value="contacted" ${l.status==='contacted'?'selected':''}>Contacted</option>
+          <option value="closed" ${l.status==='closed'?'selected':''}>Closed</option>
+        </select>
+      </td>
+      <td class="row-actions"><button class="btn btn-danger" onclick="deleteRow('leads','${l.id}',loadLeads)">Delete</button></td>
+    </tr>`).join('') || '<tr><td colspan="6">No submissions yet.</td></tr>';
+}
+async function updateLeadStatus(id, status){
+  const { error } = await sb.from('leads').update({ status }).eq('id', id);
+  toast(error ? 'Error updating status' : 'Status updated');
+}
+
+/* ---- shared delete ---- */
+async function deleteRow(table, id, reload){
+  if (!confirm('Delete this item? This cannot be undone.')) return;
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  toast('Deleted'); reload();
+}
+</script>
+</body>
+</html>
