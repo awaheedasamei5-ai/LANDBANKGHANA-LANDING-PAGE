@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Trulander Jsf Limited">
+  <defs>
+    <linearGradient id="tGrad" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#F5872B"/>
+      <stop offset="1" stop-color="#EF1E56"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="96" fill="url(#tGrad)"/>
+  <g fill="#ffffff">
+    <path d="M100 96 C88 80 68 66 46 62 C62 78 74 92 90 100 C70 96 50 98 32 108 C54 106 74 112 90 122 C88 138 82 152 70 164 C88 158 100 146 104 128 C108 146 120 158 138 164 C126 152 120 138 118 122 C134 112 154 106 176 108 C158 98 138 96 118 100 C134 92 146 78 162 62 C140 66 120 80 108 96 Z"/>
+    <path d="M92 118 L108 118 L112 168 L100 176 L88 168 Z"/>
+  </g>
+</svg>

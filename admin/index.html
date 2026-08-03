@@ -118,6 +118,8 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="clients">Clients</button>
       <button class="nav-item" data-panel="social">Social Links</button>
       <button class="nav-item" data-panel="settings">Contact Info</button>
+      <button class="nav-item" data-panel="news">News</button>
+      <button class="nav-item" data-panel="team">Team</button>
       <button class="nav-item" data-panel="leads">Leads</button>
     </div>
 
@@ -125,8 +127,8 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <!-- BANNERS -->
       <div class="panel active" id="panel-banners">
         <div class="panel-card">
-          <h3>Add / edit hero banner</h3>
-          <p class="desc">This controls the big headline, subtext, and floating badge on the homepage hero.</p>
+          <h3>Add / edit banner</h3>
+          <p class="desc">"Hero" controls the big headline, subtext, and floating badge at the top of the homepage. "Promo" banners appear as slides in the animated advertisement carousel further down the page — add one per creative/ad image, each with its own optional click-through link.</p>
           <form id="bannerForm">
             <input type="hidden" name="id"/>
             <div class="form-grid">
@@ -301,8 +303,67 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
               <div class="field"><label>Email</label><input name="email" placeholder="hello@landbankghana.com"/></div>
               <div class="field"><label>Office address</label><input name="address" placeholder="Accra, Ghana"/></div>
             </div>
+            <div class="form-grid">
+              <div class="field"><label>Urgent call number (digits only, with country code)</label><input name="urgent_phone" placeholder="233241234567"/>
+                <div class="hint">Used by the "Need to talk to a staff urgently?" button on the site — tapping it dials this number directly on mobile. Can be the same as your WhatsApp number or different.</div>
+              </div>
+            </div>
             <button class="btn btn-accent" type="submit">Save contact info</button>
           </form>
+        </div>
+      </div>
+
+      <!-- NEWS -->
+      <div class="panel" id="panel-news">
+        <div class="panel-card">
+          <h3>Add / edit news item</h3>
+          <p class="desc">Shows up in the notification bell's news panel on the homepage, newest first.</p>
+          <form id="newsForm">
+            <input type="hidden" name="id"/>
+            <div class="field"><label>Title</label><input name="title" required placeholder="New plots available in Kumasi"/></div>
+            <div class="field"><label>Details</label><textarea name="body" rows="3" placeholder="Short description..."></textarea></div>
+            <div class="form-grid">
+              <div class="field"><label>Image URL (optional)</label><input name="image_url" placeholder="https://..."/></div>
+              <div class="field"><label>Or upload image</label><input type="file" accept="image/*" id="newsImgFile"/></div>
+            </div>
+            <label style="font-size:13px;display:flex;gap:8px;align-items:center;margin-bottom:14px"><input type="checkbox" name="active" checked/> Active (visible on site)</label>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-accent" type="submit">Save news item</button>
+              <button class="btn" type="button" id="newsCancelEdit" style="display:none">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>All news items</h3>
+          <table><thead><tr><th>Title</th><th>Published</th><th>Status</th><th></th></tr></thead><tbody id="newsTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- TEAM -->
+      <div class="panel" id="panel-team">
+        <div class="panel-card">
+          <h3>My profile</h3>
+          <p class="desc">This name and photo show wherever your account is credited in the dashboard.</p>
+          <form id="myProfileForm">
+            <div class="form-grid">
+              <div class="field"><label>Display name</label><input name="display_name" placeholder="e.g. Ama"/></div>
+              <div class="field"><label>Profile photo</label><input type="file" accept="image/*" id="myAvatarFile"/></div>
+            </div>
+            <input type="hidden" name="avatar_url"/>
+            <button class="btn btn-accent" type="submit">Save my profile</button>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>Invite a teammate</h3>
+          <p class="desc">They'll be able to activate their own account at /admin with this email.</p>
+          <form id="inviteForm" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <div class="field" style="flex:1;min-width:220px;margin-bottom:0"><label>Email</label><input type="email" name="email" required placeholder="teammate@landbankghana.com"/></div>
+            <button class="btn btn-accent" type="submit">Send invite</button>
+          </form>
+        </div>
+        <div class="panel-card">
+          <h3>Team</h3>
+          <table><thead><tr><th>Photo</th><th>Name</th><th>Email</th><th>Status</th><th></th></tr></thead><tbody id="teamTable"></tbody></table>
         </div>
       </div>
 
@@ -429,7 +490,7 @@ document.querySelectorAll('.side .nav-item').forEach(btn => {
 
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
-  loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadLeads();
+  loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam(); loadLeads();
 }
 
 /* ---- BANNERS ---- */
@@ -687,6 +748,99 @@ async function loadSettings(){
   if (!data) return;
   settingsForm.phone.value = data.phone||''; settingsForm.whatsapp.value = data.whatsapp||'';
   settingsForm.email.value = data.email||''; settingsForm.address.value = data.address||'';
+  settingsForm.urgent_phone.value = data.urgent_phone||'';
+}
+
+/* ---- NEWS ---- */
+const newsForm = document.getElementById('newsForm');
+document.getElementById('newsImgFile').addEventListener('change', async (e) => {
+  if (e.target.files[0]) newsForm.image_url.value = await resizeImage(e.target.files[0], 1200);
+});
+newsForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(newsForm).entries());
+  d.active = !!newsForm.active.checked;
+  const id = d.id; delete d.id;
+  const { error } = id ? await sb.from('news').update(d).eq('id', id) : await sb.from('news').insert(d);
+  if (error) return toast('Error: ' + error.message);
+  toast('News item saved'); newsForm.reset(); document.getElementById('newsCancelEdit').style.display='none';
+  loadNews();
+});
+document.getElementById('newsCancelEdit').addEventListener('click', () => { newsForm.reset(); document.getElementById('newsCancelEdit').style.display='none'; });
+async function loadNews(){
+  const { data, error } = await sb.from('news').select('*').order('published_at',{ascending:false});
+  if (error) return;
+  document.getElementById('newsTable').innerHTML = (data||[]).map(n => `
+    <tr>
+      <td>${esc(n.title)}</td>
+      <td>${new Date(n.published_at).toLocaleDateString()}</td>
+      <td><span class="pill ${n.active?'on':'off'}">${n.active?'Active':'Hidden'}</span></td>
+      <td class="row-actions">
+        <button class="btn" onclick='editNews(${JSON.stringify(n)})'>Edit</button>
+        <button class="btn btn-danger" onclick="deleteRow('news','${n.id}',loadNews)">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="4">No news items yet.</td></tr>';
+}
+function editNews(n){
+  newsForm.id.value = n.id; newsForm.title.value = n.title||''; newsForm.body.value = n.body||'';
+  newsForm.image_url.value = n.image_url||''; newsForm.active.checked = n.active;
+  document.getElementById('newsCancelEdit').style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---- TEAM ---- */
+let myEmail = null;
+const myProfileForm = document.getElementById('myProfileForm');
+document.getElementById('myAvatarFile').addEventListener('change', async (e) => {
+  if (e.target.files[0]) myProfileForm.avatar_url.value = await resizeImage(e.target.files[0], 400);
+});
+myProfileForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(myProfileForm).entries());
+  const { error } = await sb.rpc('update_my_profile', { new_display_name: d.display_name || null, new_avatar_url: d.avatar_url || null });
+  if (error) return toast('Error: ' + error.message);
+  toast('Profile saved'); loadTeam();
+});
+
+const inviteForm = document.getElementById('inviteForm');
+inviteForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(inviteForm).entries());
+  const { error } = await sb.rpc('invite_admin', { new_email: d.email });
+  if (error) return toast('Error: ' + error.message);
+  toast('Invite sent — they can activate at /admin with that email'); inviteForm.reset();
+  loadTeam();
+});
+
+async function loadTeam(){
+  const { data: userData } = await sb.auth.getUser();
+  myEmail = userData && userData.user ? userData.user.email : null;
+
+  const { data, error } = await sb.from('team_directory').select('*').order('created_at');
+  if (error) return;
+
+  const me = (data||[]).find(t => myEmail && t.email.toLowerCase() === myEmail.toLowerCase());
+  if (me) {
+    myProfileForm.display_name.value = me.display_name || '';
+    myProfileForm.avatar_url.value = me.avatar_url || '';
+  }
+
+  document.getElementById('teamTable').innerHTML = (data||[]).map(t => `
+    <tr>
+      <td>${t.avatar_url?`<img class="thumb" src="${esc(t.avatar_url)}"/>`:'—'}</td>
+      <td>${esc(t.display_name || '(no name set)')}${myEmail && t.email.toLowerCase()===myEmail.toLowerCase()?' <span class="pill on">You</span>':''}</td>
+      <td>${esc(t.email)}</td>
+      <td><span class="pill ${t.claimed?'on':'off'}">${t.claimed?'Active':'Invited — not yet activated'}</span></td>
+      <td class="row-actions">
+        ${(!myEmail || t.email.toLowerCase()!==myEmail.toLowerCase()) ? `<button class="btn btn-danger" onclick="removeTeamMember('${esc(t.email)}')">Remove</button>` : ''}
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5">No team members yet.</td></tr>';
+}
+async function removeTeamMember(email){
+  if (!confirm(`Remove ${email}'s access? This cannot be undone.`)) return;
+  const { error } = await sb.rpc('remove_admin', { target_email: email });
+  if (error) return toast('Error: ' + error.message);
+  toast('Removed'); loadTeam();
 }
 
 /* ---- LEADS ---- */

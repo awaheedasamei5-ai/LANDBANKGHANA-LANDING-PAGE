@@ -117,6 +117,85 @@ create policy settings_read on public.site_settings for select using (true);
 create policy settings_write on public.site_settings for all using (public.is_admin()) with check (public.is_admin());
 insert into public.site_settings (id) values (1) on conflict do nothing;
 
+-- ---- CLIENT SOCIAL HANDLES (popover on click, e.g. Trulander) ----
+alter table public.clients add column if not exists facebook_url text;
+alter table public.clients add column if not exists instagram_url text;
+alter table public.clients add column if not exists tiktok_url text;
+
+-- ---- STAFF PROFILE FIELDS + TEAM MANAGEMENT ----
+alter table public.admins add column if not exists display_name text;
+alter table public.admins add column if not exists avatar_url text;
+alter table public.admins add column if not exists role text not null default 'staff';
+alter table public.admins add column if not exists invited_by text;
+
+-- A signed-in admin can update their own display_name/avatar (not email/claim state).
+create or replace function public.update_my_profile(new_display_name text, new_avatar_url text) returns void
+  language plpgsql security definer set search_path = public as
+$$
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+  update public.admins
+     set display_name = new_display_name,
+         avatar_url = new_avatar_url
+   where user_id = auth.uid() and claimed = true;
+end;
+$$;
+
+-- Read-only team listing for the admin "Team" panel. Views run as their
+-- owner by default (bypassing admins' own "always false" RLS), so the
+-- `where public.is_admin()` clause is the access gate: is_admin() is a
+-- single boolean, so it acts as an all-or-nothing filter on the view.
+create or replace view public.team_directory as
+  select email, display_name, avatar_url, role, claimed, created_at
+  from public.admins
+  where public.is_admin();
+
+-- Invite/remove teammates — only an existing claimed admin can call these.
+create or replace function public.invite_admin(new_email text) returns void
+  language plpgsql security definer set search_path = public as
+$$
+begin
+  if not public.is_admin() then
+    raise exception 'not authorized';
+  end if;
+  insert into public.admins(email) values (lower(new_email))
+  on conflict (email) do nothing;
+end;
+$$;
+
+create or replace function public.remove_admin(target_email text) returns void
+  language plpgsql security definer set search_path = public as
+$$
+begin
+  if not public.is_admin() then
+    raise exception 'not authorized';
+  end if;
+  if lower(target_email) = lower(coalesce((select email from auth.users where id = auth.uid()), '')) then
+    raise exception 'cannot remove your own access';
+  end if;
+  delete from public.admins where lower(email) = lower(target_email);
+end;
+$$;
+
+-- ---- NEWS / ANNOUNCEMENTS (site notification bell) ----
+create table public.news (
+  id           uuid primary key default gen_random_uuid(),
+  title        text not null,
+  body         text,
+  image_url    text,
+  published_at timestamptz not null default now(),
+  active       boolean not null default true,
+  created_at   timestamptz not null default now()
+);
+alter table public.news enable row level security;
+create policy news_read on public.news for select using (true);
+create policy news_write on public.news for all using (public.is_admin()) with check (public.is_admin());
+
+-- ---- URGENT/EMERGENCY CALL NUMBER (separate from the general display phone) ----
+alter table public.site_settings add column if not exists urgent_phone text;
+
 -- ---- CONTENT BLOCKS (flexible photo placements) ----
 -- "slot" = a named, fixed spot the frontend already knows how to render
 -- (hero / about / process), or 'gallery' for free-form extra images that
@@ -179,3 +258,12 @@ insert into public.social_links (platform, url, sort_order) values
   ('facebook', 'https://www.facebook.com/share/18qnRVH4W9/?mibextid=wwXIfr', 3),
   ('tiktok', 'https://www.tiktok.com/@landbankghana.com?_r=1&_t=ZS-98a1seDetRU', 4)
 on conflict do nothing;
+
+update public.site_settings set urgent_phone = '233546416566' where id = 1;
+
+update public.clients set
+  logo_url = '/assets/trulander-logo.svg',
+  facebook_url = 'https://www.facebook.com/trulanderjsf?mibextid=wwXIfr&mibextid=wwXIfr',
+  instagram_url = 'https://www.instagram.com/trulanderjsf?igsh=ZTVyN3ZramdwYmpx&utm_source=qr',
+  tiktok_url = 'https://www.tiktok.com/@trulander?_r=1&_t=ZS-98a3MdYO9pN'
+where lower(name) = lower('Trulander Jsf Limited');

@@ -114,15 +114,43 @@ section{position:relative;}
 #clients{padding:50px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fff;}
 .clients-head{text-align:center;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:26px;}
 .clients-row{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;}
+.client-tile-wrap{position:relative;}
 .client-tile{display:flex;align-items:center;gap:10px;padding:14px 24px;border:1px solid var(--line);border-radius:16px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;color:var(--ink-soft);background:var(--bg);}
+.client-tile.clickable{cursor:pointer;transition:border-color .18s,box-shadow .18s;}
+.client-tile.clickable:hover{border-color:var(--brand);box-shadow:0 8px 20px -12px rgba(34,165,76,.4);}
 .client-tile img{width:28px;height:28px;object-fit:contain;border-radius:6px;}
 .client-tile .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);}
+.client-popover{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--line);border-radius:14px;padding:9px;display:none;gap:8px;box-shadow:var(--shadow);z-index:20;}
+.client-popover.open{display:flex;}
+.client-popover a{width:36px;height:36px;border-radius:10px;background:var(--bg);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;transition:background .18s,color .18s;}
+.client-popover a:hover{background:var(--brand);color:#fff;}
+.client-popover svg{width:17px;height:17px;}
 
 /* ---------- SECTION HEAD ---------- */
 .sec-head{max-width:640px;margin:0 0 48px;}
 .sec-head.center{margin:0 auto 48px;text-align:center;}
 .sec-head h2{font-size:clamp(28px,4vw,42px);margin-top:14px;}
 .sec-head p{margin-top:14px;color:var(--muted);font-size:16px;}
+
+/* ---------- PROMO CAROUSEL ---------- */
+#promo{padding:60px 0 10px;}
+.promo-carousel{position:relative;border-radius:26px;overflow:hidden;box-shadow:var(--shadow);background:var(--ink);}
+.promo-carousel::before{content:'';position:absolute;inset:-2px;z-index:0;border-radius:28px;padding:2px;
+  background:linear-gradient(120deg,var(--brand),transparent 30%,transparent 70%,var(--brand));
+  opacity:.7;pointer-events:none;}
+.promo-track{display:flex;position:relative;z-index:1;transition:transform .65s cubic-bezier(.65,0,.35,1);}
+.promo-slide{flex:0 0 100%;position:relative;aspect-ratio:2/1;overflow:hidden;}
+.promo-slide img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.02);transition:transform 8s ease-out;}
+.promo-slide.active img{transform:scale(1.1);}
+.promo-slide a{position:absolute;inset:0;display:block;}
+.promo-arrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.92);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px -8px rgba(0,0,0,.4);z-index:5;color:var(--ink);}
+.promo-arrow svg{width:20px;height:20px;}
+.promo-arrow.prev{left:16px;}
+.promo-arrow.next{right:16px;}
+.promo-dots{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5;}
+.promo-dots button{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.5);border:none;cursor:pointer;padding:0;transition:width .2s,background .2s;}
+.promo-dots button.active{background:#fff;width:24px;border-radius:6px;}
+@media (max-width:700px){.promo-slide{aspect-ratio:4/3;}.promo-arrow{width:36px;height:36px;}}
 
 /* ---------- HELP CARDS ---------- */
 #help{padding:100px 0;}
@@ -249,6 +277,40 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 #wa-float{position:fixed;right:22px;bottom:22px;z-index:80;width:58px;height:58px;border-radius:50%;background:var(--brand);display:none;align-items:center;justify-content:center;box-shadow:0 14px 30px -10px rgba(34,165,76,.6);}
 #wa-float svg{width:28px;height:28px;color:#fff;}
 #wa-float.show{display:flex;}
+
+/* ---------- URGENT CALL BUTTON ---------- */
+.urgent-call{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:80;display:none;align-items:center;gap:10px;background:var(--ink);color:#fff;padding:13px 22px;border-radius:999px;font-weight:600;font-size:14px;box-shadow:0 14px 30px -10px rgba(8,25,16,.5);white-space:nowrap;}
+.urgent-call.show{display:flex;}
+.urgent-call svg{width:18px;height:18px;color:var(--brand);flex:none;}
+.urgent-call:hover{background:var(--brand-dark);}
+@media (max-width:760px){
+  .urgent-call span{display:none;}
+  .urgent-call{padding:14px;bottom:90px;left:auto;right:22px;transform:none;}
+  .urgent-call svg{width:22px;height:22px;}
+}
+
+/* ---------- NEWS BELL ---------- */
+.news-bell{position:fixed;left:22px;bottom:22px;z-index:85;width:56px;height:56px;border-radius:50%;background:var(--ink);color:#fff;border:none;display:none;align-items:center;justify-content:center;box-shadow:0 14px 30px -10px rgba(8,25,16,.5);cursor:grab;touch-action:none;}
+.news-bell.show{display:flex;}
+.news-bell:active{cursor:grabbing;}
+.news-bell svg{width:24px;height:24px;pointer-events:none;}
+.news-dot{position:absolute;top:10px;right:10px;width:11px;height:11px;border-radius:50%;background:#ef4444;border:2px solid var(--ink);display:none;pointer-events:none;}
+.news-dot.show{display:block;}
+.news-overlay{position:fixed;inset:0;background:rgba(8,25,16,.4);z-index:104;display:none;}
+.news-overlay.open{display:block;}
+.news-panel{position:fixed;top:0;left:0;height:100vh;width:380px;max-width:88vw;background:#fff;z-index:105;box-shadow:20px 0 50px -20px rgba(0,0,0,.35);transform:translateX(-105%);transition:transform .32s cubic-bezier(.65,0,.35,1);display:flex;flex-direction:column;}
+.news-panel.open{transform:translateX(0);}
+.news-panel-head{display:flex;align-items:center;justify-content:space-between;padding:22px;border-bottom:1px solid var(--line);flex:none;}
+.news-panel-head h4{font-family:'Space Grotesk',sans-serif;font-size:19px;}
+.news-panel-head button{width:34px;height:34px;border-radius:50%;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);}
+.news-panel-head button svg{width:16px;height:16px;}
+.news-list{flex:1;overflow-y:auto;padding:8px 22px 22px;}
+.news-item{padding:18px 0;border-bottom:1px solid var(--line);}
+.news-item img{width:100%;border-radius:12px;margin-bottom:10px;aspect-ratio:16/9;object-fit:cover;}
+.news-item h5{font-size:15px;margin-bottom:6px;font-family:'Space Grotesk',sans-serif;}
+.news-item p{font-size:13.5px;color:var(--muted);}
+.news-item .date{font-size:11px;color:var(--brand-dark);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.news-empty{padding:50px 0;text-align:center;color:var(--muted);font-size:14px;}
 </style>
 </head>
 <body>
@@ -358,7 +420,25 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   <div class="wrap">
     <p class="clients-head">Trusted by</p>
     <div class="clients-row" id="clientsRow">
-      <div class="client-tile"><span class="dot"></span> Trulander Jsf Limited</div>
+      <div class="client-tile-wrap">
+        <div class="client-tile"><span class="dot"></span> Trulander Jsf Limited</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROMO CAROUSEL (auto-populated, hidden until admin adds promo banners) ============ -->
+<section id="promo" style="display:none">
+  <div class="wrap">
+    <div class="promo-carousel" id="promoCarousel">
+      <div class="promo-track" id="promoTrack"></div>
+      <button class="promo-arrow prev" id="promoPrev" aria-label="Previous slide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <button class="promo-arrow next" id="promoNext" aria-label="Next slide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <div class="promo-dots" id="promoDots"></div>
     </div>
   </div>
 </section>
@@ -571,7 +651,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
         <ul>
           <li><a href="#qualify">Free Land Check</a></li>
           <li><a href="#process">Our Process</a></li>
-          <li><a href="admin/">Staff Login</a></li>
+          <li><a href="admin/index.html">Staff Login</a></li>
         </ul>
       </div>
     </div>
@@ -585,6 +665,28 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 <a id="wa-float" target="_blank" rel="noopener">
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.7 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.2-3.5-.7-2.9-1.1-4.8-4-5-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.3.6-.6.9-.9 1.3-.1.2-.3.3-.1.6.6 1 1.3 1.8 2.1 2.4.9.7 1.4.9 1.7 1 .2.1.4.1.6-.1.2-.3.8-1 1-1.3.2-.3.4-.3.7-.2.3.1 1.6.8 1.9.9.3.2.5.2.6.3.1.2.1.9-.1 1.6z"/></svg>
 </a>
+
+<!-- ============ URGENT CALL BUTTON ============ -->
+<a id="urgent-call" class="urgent-call">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg>
+  <span>Need to talk to staff urgently?</span>
+</a>
+
+<!-- ============ NEWS BELL (draggable) ============ -->
+<button id="newsBell" class="news-bell" aria-label="News and updates" type="button">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+  <span class="news-dot" id="newsDot"></span>
+</button>
+<div class="news-overlay" id="newsOverlay"></div>
+<div class="news-panel" id="newsPanel">
+  <div class="news-panel-head">
+    <h4>News &amp; Updates</h4>
+    <button id="newsPanelClose" aria-label="Close" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="news-list" id="newsList"><div class="news-empty">No news yet.</div></div>
+</div>
 
 <script src="assets/supabase-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -631,6 +733,80 @@ document.querySelectorAll('[data-interest]').forEach(a => {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
+/* --- news bell: draggable floating button + slide-in panel (independent of Supabase) --- */
+(function setupNewsBell(){
+  const bell = document.getElementById('newsBell');
+  const panel = document.getElementById('newsPanel');
+  const overlay = document.getElementById('newsOverlay');
+  const dot = document.getElementById('newsDot');
+  const closeBtn = document.getElementById('newsPanelClose');
+
+  try {
+    const pos = JSON.parse(localStorage.getItem('lb_bell_pos') || 'null');
+    if (pos && typeof pos.left === 'number' && typeof pos.top === 'number') {
+      bell.style.left = pos.left + 'px'; bell.style.top = pos.top + 'px';
+      bell.style.right = 'auto'; bell.style.bottom = 'auto';
+    }
+  } catch(e){}
+
+  let dragging = false, moved = false, startX = 0, startY = 0, origLeft = 0, origTop = 0;
+  function pointerDown(e){
+    dragging = true; moved = false;
+    const rect = bell.getBoundingClientRect();
+    origLeft = rect.left; origTop = rect.top;
+    startX = e.clientX; startY = e.clientY;
+    bell.setPointerCapture && e.pointerId != null && bell.setPointerCapture(e.pointerId);
+  }
+  function pointerMove(e){
+    if (!dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+    if (!moved) return;
+    const newLeft = Math.max(6, Math.min(window.innerWidth - 62, origLeft + dx));
+    const newTop = Math.max(6, Math.min(window.innerHeight - 62, origTop + dy));
+    bell.style.left = newLeft + 'px'; bell.style.top = newTop + 'px';
+    bell.style.right = 'auto'; bell.style.bottom = 'auto';
+  }
+  function pointerUp(){
+    if (!dragging) return;
+    dragging = false;
+    if (moved) {
+      const rect = bell.getBoundingClientRect();
+      try { localStorage.setItem('lb_bell_pos', JSON.stringify({ left: rect.left, top: rect.top })); } catch(e){}
+    } else {
+      openPanel();
+    }
+  }
+  bell.addEventListener('pointerdown', pointerDown);
+  window.addEventListener('pointermove', pointerMove);
+  window.addEventListener('pointerup', pointerUp);
+
+  function openPanel(){
+    panel.classList.add('open'); overlay.classList.add('open');
+    try { localStorage.setItem('lb_news_last_seen', new Date().toISOString()); } catch(e){}
+    dot.classList.remove('show');
+  }
+  function closePanel(){ panel.classList.remove('open'); overlay.classList.remove('open'); }
+  closeBtn.addEventListener('click', closePanel);
+  overlay.addEventListener('click', closePanel);
+
+  window.__renderNews = function(items){
+    if (!items || !items.length) return;
+    bell.classList.add('show');
+    document.getElementById('newsList').innerHTML = items.map(n => `
+      <div class="news-item">
+        ${n.image_url ? `<img src="${esc(n.image_url)}" alt=""/>` : ''}
+        <div class="date">${new Date(n.published_at).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}</div>
+        <h5>${esc(n.title)}</h5>
+        ${n.body ? `<p>${esc(n.body)}</p>` : ''}
+      </div>`).join('');
+    let lastSeen = null;
+    try { lastSeen = localStorage.getItem('lb_news_last_seen'); } catch(e){}
+    const hasNew = items.some(n => !lastSeen || new Date(n.published_at) > new Date(lastSeen));
+    dot.classList.toggle('show', hasNew);
+  };
+})();
+
 /* --- Supabase client (isolated: a CDN/network failure here must not break the UI above) --- */
 let sb = null;
 try {
@@ -643,13 +819,15 @@ try {
 async function loadContent(){
   if (!sb) return;
   try{
-    const [{data:banners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}] = await Promise.all([
+    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}] = await Promise.all([
       sb.from('banners').select('*').eq('kind','hero').eq('active',true).order('sort_order').limit(1),
+      sb.from('banners').select('*').eq('kind','promo').eq('active',true).order('sort_order'),
       sb.from('stats').select('*').eq('active',true).order('sort_order'),
       sb.from('clients').select('*').eq('active',true).order('sort_order'),
       sb.from('social_links').select('*').eq('active',true).order('sort_order'),
       sb.from('site_settings').select('*').eq('id',1).maybeSingle(),
-      sb.from('content_blocks').select('*').eq('active',true).order('sort_order')
+      sb.from('content_blocks').select('*').eq('active',true).order('sort_order'),
+      sb.from('news').select('*').eq('active',true).order('published_at',{ascending:false})
     ]);
 
     if (banners && banners[0]) {
@@ -670,9 +848,21 @@ async function loadContent(){
     }
 
     if (clientsData && clientsData.length) {
-      document.getElementById('clientsRow').innerHTML = clientsData.map(c => `
-        <div class="client-tile">${c.logo_url ? `<img src="${esc(c.logo_url)}" alt="${esc(c.name)}"/>` : '<span class="dot"></span>'} ${esc(c.name)}</div>
-      `).join('');
+      document.getElementById('clientsRow').innerHTML = clientsData.map((c,i) => {
+        const socials = [
+          c.facebook_url ? { p:'facebook', url:c.facebook_url } : null,
+          c.instagram_url ? { p:'instagram', url:c.instagram_url } : null,
+          c.tiktok_url ? { p:'tiktok', url:c.tiktok_url } : null
+        ].filter(Boolean);
+        const clickable = socials.length > 0;
+        return `
+        <div class="client-tile-wrap">
+          <div class="client-tile${clickable?' clickable':''}"${clickable?` onclick="toggleClientPopover(${i})"`:''}>
+            ${c.logo_url ? `<img src="${esc(c.logo_url)}" alt="${esc(c.name)}"/>` : '<span class="dot"></span>'} ${esc(c.name)}
+          </div>
+          ${clickable ? `<div class="client-popover" id="clientPopover${i}">${socials.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener" aria-label="${esc(s.p)}">${socialIcon(s.p)}</a>`).join('')}</div>` : ''}
+        </div>`;
+      }).join('');
     }
 
     if (social && social.length) {
@@ -688,7 +878,15 @@ async function loadContent(){
         wa.href = 'https://wa.me/' + settings.whatsapp.replace(/[^0-9]/g,'');
         wa.classList.add('show');
       }
+      const urgentNumber = settings.urgent_phone || settings.whatsapp;
+      if (urgentNumber) {
+        const call = document.getElementById('urgent-call');
+        call.href = 'tel:+' + urgentNumber.replace(/[^0-9]/g,'');
+        call.classList.add('show');
+      }
     }
+
+    if (newsItems && newsItems.length && window.__renderNews) window.__renderNews(newsItems);
 
     if (images && images.length) {
       const bySlot = (slot) => images.find(i => i.slot === slot && i.image_url);
@@ -726,9 +924,58 @@ async function loadContent(){
         document.getElementById('gallery').style.display = 'block';
       }
     }
+
+    if (promoBanners && promoBanners.length) initPromoCarousel(promoBanners);
   } catch(e){ console.warn('Content load skipped:', e); }
 }
+
+/* --- promo banner carousel --- */
+function initPromoCarousel(slides){
+  const track = document.getElementById('promoTrack');
+  const dotsWrap = document.getElementById('promoDots');
+  track.innerHTML = slides.map((s, i) => {
+    const img = `<img src="${esc(s.image_url)}" alt="${esc(s.headline || 'LandBank Ghana')}"/>`;
+    return `<div class="promo-slide${i===0?' active':''}">${s.cta_href ? `<a href="${esc(s.cta_href)}" aria-label="${esc(s.headline||'Learn more')}">${img}</a>` : img}</div>`;
+  }).join('');
+  dotsWrap.innerHTML = slides.map((_, i) => `<button aria-label="Go to slide ${i+1}" class="${i===0?'active':''}"></button>`).join('');
+
+  let current = 0;
+  const slideEls = track.querySelectorAll('.promo-slide');
+  const dotEls = dotsWrap.querySelectorAll('button');
+  function show(i){
+    current = (i + slides.length) % slides.length;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    slideEls.forEach((el, idx) => el.classList.toggle('active', idx === current));
+    dotEls.forEach((el, idx) => el.classList.toggle('active', idx === current));
+  }
+  document.getElementById('promoPrev').addEventListener('click', () => { show(current - 1); resetAutoplay(); });
+  document.getElementById('promoNext').addEventListener('click', () => { show(current + 1); resetAutoplay(); });
+  dotEls.forEach((el, idx) => el.addEventListener('click', () => { show(idx); resetAutoplay(); }));
+
+  let timer = null;
+  function resetAutoplay(){
+    if (timer) clearInterval(timer);
+    if (slides.length > 1) timer = setInterval(() => show(current + 1), 5500);
+  }
+  const carousel = document.getElementById('promoCarousel');
+  carousel.addEventListener('mouseenter', () => { if (timer) clearInterval(timer); });
+  carousel.addEventListener('mouseleave', resetAutoplay);
+  resetAutoplay();
+
+  document.getElementById('promo').style.display = 'block';
+}
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function toggleClientPopover(i){
+  const target = document.getElementById('clientPopover'+i);
+  const wasOpen = target.classList.contains('open');
+  document.querySelectorAll('.client-popover.open').forEach(p => p.classList.remove('open'));
+  if (!wasOpen) target.classList.add('open');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.client-tile-wrap')) {
+    document.querySelectorAll('.client-popover.open').forEach(p => p.classList.remove('open'));
+  }
+});
 function socialIcon(platform){
   const p = (platform||'').toLowerCase();
   const icons = {
