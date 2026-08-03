@@ -6,7 +6,7 @@
 <title>LandBank Ghana — Litigation-Free Land, Made Simple</title>
 <meta name="description" content="LandBank Ghana helps you acquire litigation-free land with full due diligence, and helps sellers connect safely with verified buyers."/>
 <meta name="theme-color" content="#0B1F13"/>
-<link rel="icon" type="image/svg+xml" href="assets/logo.svg"/>
+<link rel="icon" type="image/png" href="assets/logo.png"/>
 <meta property="og:title" content="LandBank Ghana — Litigation-Free Land, Made Simple"/>
 <meta property="og:description" content="Due diligence, litigation-free acquisition, and safe land sales — LandBank Ghana helps you every step of the way."/>
 <meta property="og:type" content="website"/>
@@ -86,18 +86,17 @@ section{position:relative;}
 .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px;}
 .hero-trust{display:flex;align-items:center;gap:10px;margin-top:26px;font-size:13px;color:var(--muted);}
 .hero-trust svg{width:18px;height:18px;color:var(--brand);flex:none;}
-.hero-visual{position:relative;aspect-ratio:1/1;border-radius:32px;background:
-  radial-gradient(120% 120% at 20% 15%,rgba(34,165,76,.55),transparent 60%),
-  radial-gradient(120% 120% at 85% 80%,rgba(8,25,16,.9),transparent 55%),
-  linear-gradient(160deg,#0B2417,#081910 60%);
-  box-shadow:var(--shadow);overflow:hidden;}
-.hero-visual svg{position:absolute;inset:0;width:100%;height:100%;}
+.hero-visual{position:relative;min-height:440px;display:flex;align-items:flex-end;justify-content:center;}
+.hero-visual::before{content:'';position:absolute;width:82%;height:82%;left:9%;top:6%;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,165,76,.4),transparent 70%);filter:blur(48px);z-index:0;}
+.hero-photo{position:relative;z-index:1;max-height:480px;width:auto;max-width:100%;object-fit:contain;
+  filter:drop-shadow(0 26px 30px rgba(8,25,16,.22));}
 .hero-badge{position:absolute;z-index:2;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 16px 34px -14px rgba(8,25,16,.35);display:flex;flex-direction:column;gap:2px;min-width:120px;}
 .hero-badge .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--ink);}
 .hero-badge .lbl{font-size:11px;color:var(--muted);font-weight:600;}
-.hero-badge.b1{top:8%;left:8%;}
-.hero-badge.b2{bottom:10%;right:8%;}
-.hero-badge.b3{top:44%;right:-4%;background:var(--ink);color:#fff;}
+.hero-badge.b1{top:2%;left:0;}
+.hero-badge.b2{bottom:14%;right:0;}
+.hero-badge.b3{top:38%;left:-4%;background:var(--ink);color:#fff;}
 .hero-badge.b3 .num{color:#fff;}
 .hero-badge.b3 .lbl{color:rgba(255,255,255,.7);}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
@@ -107,7 +106,8 @@ section{position:relative;}
 
 @media (max-width:900px){
   .hero-grid{grid-template-columns:1fr;}
-  .hero-visual{max-width:420px;margin:0 auto;}
+  .hero-visual{max-width:420px;margin:0 auto;min-height:380px;}
+  .hero-photo{max-height:400px;}
 }
 
 /* ---------- CLIENTS STRIP ---------- */
@@ -318,7 +318,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 <!-- ============ NAV ============ -->
 <header id="nav">
   <div class="wrap navbar">
-    <a href="#home" class="brand"><img src="assets/logo.svg" alt="LandBank Ghana logo"/> LandBank <span style="color:var(--brand)">Ghana</span></a>
+    <a href="#home" class="brand"><img src="assets/logo.png" alt="LandBank Ghana logo"/> LandBank <span style="color:var(--brand)">Ghana</span></a>
     <nav class="nav-links">
       <a href="#home" class="active" data-nav>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
@@ -387,27 +387,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
       </div>
     </div>
     <div class="hero-visual reveal">
-      <img id="heroPhotoImg" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;"/>
-      <svg id="heroArtSvg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M40 0H0V40" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
-          </pattern>
-        </defs>
-        <rect width="400" height="400" fill="url(#grid)"/>
-        <g opacity=".9">
-          <rect x="70" y="230" width="80" height="80" rx="10" fill="none" stroke="rgba(34,165,76,.8)" stroke-width="2"/>
-          <rect x="160" y="200" width="90" height="110" rx="10" fill="rgba(34,165,76,.16)" stroke="rgba(34,165,76,.9)" stroke-width="2"/>
-          <rect x="260" y="250" width="70" height="60" rx="10" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
-        </g>
-        <g stroke="rgba(255,255,255,.25)" stroke-width="2" fill="none">
-          <path d="M40 340 C 140 300, 260 300, 360 340"/>
-          <path d="M40 360 C 140 325, 260 325, 360 360"/>
-        </g>
-        <circle cx="205" cy="150" r="14" fill="#22A54C"/>
-        <path d="M205 108 v28 M191 122 h28" stroke="#081910" stroke-width="4" stroke-linecap="round"/>
-        <path d="M205 164 q0 30 -18 40" stroke="rgba(34,165,76,.6)" stroke-width="2" fill="none"/>
-      </svg>
+      <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.png" alt="LandBank Ghana helps you own land safely"/>
       <div class="hero-badge b1"><span class="num" id="statYears">7+</span><span class="lbl">Years Experience</span></div>
       <div class="hero-badge b2"><span class="num" id="statAcres">1,200+</span><span class="lbl">Acres Secured</span></div>
       <div class="hero-badge b3"><span class="num" id="statClients">500+</span><span class="lbl">Happy Clients</span></div>
@@ -634,7 +614,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="#home" class="brand"><img src="assets/logo.svg" alt="LandBank Ghana logo"/> LandBank Ghana</a>
+        <a href="#home" class="brand"><img src="assets/logo.png" alt="LandBank Ghana logo"/> LandBank Ghana</a>
         <p>Helping buyers acquire litigation-free land and helping sellers connect safely with verified buyers, across Ghana.</p>
       </div>
       <div>
@@ -895,8 +875,6 @@ async function loadContent(){
       if (hero) {
         document.getElementById('heroPhotoImg').src = hero.image_url;
         document.getElementById('heroPhotoImg').alt = hero.alt_text || 'LandBank Ghana';
-        document.getElementById('heroPhotoImg').style.display = 'block';
-        document.getElementById('heroArtSvg').style.display = 'none';
       }
 
       const about = bySlot('about');
