@@ -55,6 +55,20 @@ It holds:
   automatically in the "Client Stories" section.
 - `leads` — every contact-form submission from the homepage.
 - `admins` — staff accounts: invite list, claimed status, display name, avatar.
+- `buyer_inquiries` — the "Yes, help me buy" form: existing land needing due
+  diligence, desired acquisition location, whether they want plot options
+  shown, budget, preferred contact. Reviewed in **Buyer Inquiries** in admin.
+- `seller_submissions` — the "Yes, help me sell" form: full land details,
+  documents held, whether a search result exists, description. Reviewed in
+  **Seller Submissions** in admin; approving one publishes it to Hot Plots.
+- `seller_submission_files` — the land photos and supporting documents
+  attached to a seller submission.
+
+Two Storage buckets back all file uploads: `media` (public — banners,
+gallery, plots, clients, avatars, news, seller-submitted land photos) and
+`documents` (private, admin-only — seller-submitted supporting documents
+like title deeds and search results, accessed via short-lived signed links).
+Files here persist permanently and don't expire.
 
 Anyone can **read** public content and anyone can **submit** the contact
 form or a review. Only signed-in admins can add/edit/delete content, approve
@@ -74,11 +88,19 @@ the frontend.
   or any custom tag you add), company info, document types held, and direct
   call/WhatsApp/email buttons. Shows an honest "new plots coming soon" message
   until you add your first one.
+- **"Yes, help me buy" / "Yes, help me sell"** on the qualifier cards open
+  detailed forms instead of just jumping to the contact section — see
+  "Buyer & seller forms" below.
 - A 5-step process timeline (with a real photo of the team verifying a site),
-  stats, About Us (with a real photo), an open-ended photo gallery, a
-  **Client Stories** section that shows real approved reviews with star
-  ratings once you have any (otherwise an honest "coming soon" state) plus a
-  public star-rating review submission form, and a contact form.
+  stats, About Us (with a real photo), an animated gallery carousel (one
+  large photo at a time with a slow Ken-Burns zoom, captions, and a
+  clickable filmstrip), a **Client Stories** section that shows real
+  approved reviews with star ratings once you have any (otherwise an honest
+  "coming soon" state) plus a public star-rating review submission form, and
+  a contact form.
+- A mobile/desktop view toggle in the nav — forces the real mobile layout on
+  an actual phone's "desktop site" mode, and opens a phone-frame preview of
+  the live mobile layout when clicked from a desktop browser.
 - Floating WhatsApp button (bottom-right).
 - Floating, **draggable** notification bell (bottom-left, drag it anywhere —
   position is remembered) that opens a slide-in panel of your **News** items,
@@ -110,14 +132,39 @@ In `/admin` → **Photos & Gallery**:
   Each replaces a specific piece of built-in artwork. Leave one empty (or hit
   "Remove photo") and that spot keeps its default look.
 - **Gallery** — add as many photos as you want, with an optional caption.
-  They show up automatically in a "More from LandBank Ghana" section — hidden
+  They show up automatically in the animated gallery carousel — hidden
   until you add at least one.
 
 In `/admin` → **Hero & Banners**, set "Kind" to **Promo** to add a slide to
 the advertisement carousel (image + optional click-through link).
 
-Every image field accepts either a pasted URL or a direct file upload
-(resized client-side before saving).
+Every image field accepts either a pasted URL or a direct file upload. A file
+upload opens a **crop tool** first — drag to reposition, use the slider to
+zoom, then Apply — before the image is uploaded to Storage and saved.
+
+## Buyer & seller forms
+
+Clicking **"Yes, help me buy"** or **"Yes, help me sell"** on the homepage
+opens a detailed form instead of just scrolling to the contact section:
+
+- **Buyer form** asks whether they already have land needing due diligence,
+  a location they're interested in acquiring land in, whether they'd like to
+  see available plot options, budget range, and preferred contact method.
+  Name and phone are required. Every submission lands in **Buyer Inquiries**
+  in admin — a Gmail-style inbox (list + detail) with a New/Read/Contacted/
+  Closed status you update as you follow up.
+- **Seller form** captures full land details (title, size, location, nearest
+  landmark), which documents they hold, whether they have a search result,
+  a free-text description, and lets them attach any number of land photos
+  and supporting documents (PDF, Word, or images). Every submission lands in
+  **Seller Submissions** in admin with everything visible for verification —
+  photos viewable inline, documents downloadable via a secure link. Hit
+  **Approve** once you've checked it out and it automatically creates (or
+  reuses) a seller record and publishes a linked Hot Plot; **Reject**
+  discards it without publishing anything.
+
+Uploaded files go to real Supabase Storage (not embedded in the database),
+so they persist permanently and don't slow down page loads.
 
 ## Staff accounts — how login works
 
