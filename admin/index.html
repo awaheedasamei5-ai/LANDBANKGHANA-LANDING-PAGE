@@ -28,11 +28,9 @@ a{color:inherit;}
 
 /* ---- auth screen ---- */
 #authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.auth-card{width:100%;max-width:400px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:36px;box-shadow:0 20px 50px -25px rgba(8,25,16,.25);}
-.auth-card img{width:60px;margin-bottom:14px;}
-.auth-tabs{display:flex;gap:6px;background:var(--bg);border-radius:999px;padding:4px;margin:20px 0;}
-.auth-tabs button{flex:1;border:none;background:none;padding:9px;border-radius:999px;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);}
-.auth-tabs button.active{background:#fff;color:var(--ink);box-shadow:0 4px 10px -4px rgba(8,25,16,.2);}
+.auth-card{width:100%;max-width:400px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:36px;box-shadow:0 20px 50px -25px rgba(8,25,16,.25);text-align:center;}
+.auth-card img{width:60px;margin:0 auto 14px;}
+.auth-card form{text-align:left;margin-top:22px;}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;}
 .field input,.field select,.field textarea{width:100%;padding:12px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-family:inherit;font-size:14px;}
@@ -145,30 +143,12 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
     <img src="../assets/trulander-logo.png" alt="Trulander JSF Limited"/>
     <h2>Admin Dashboard</h2>
     <p style="font-size:13.5px;color:var(--muted);margin-top:6px;">Manage Royal Palm Enclave listings, banners, stats, and contact details for Trulander JSF Limited.</p>
-    <div class="auth-tabs">
-      <button id="tabSignin" class="active">Sign in</button>
-      <button id="tabMagicLink">Email link</button>
-      <button id="tabActivate">Activate account</button>
-    </div>
-
     <form id="signinForm">
       <div class="field"><label>Email</label><input type="email" name="email" required/></div>
       <div class="field"><label>Password</label><input type="password" name="password" required/></div>
       <button class="btn btn-accent" style="width:100%;justify-content:center" type="submit">Sign in</button>
     </form>
-
-    <form id="magicLinkForm" style="display:none">
-      <div class="field"><label>Invited email</label><input type="email" name="email" required/></div>
-      <div class="hint" style="margin-bottom:14px">Only emails already invited by an existing admin can sign in this way. We'll email you a link — no password needed.</div>
-      <button class="btn btn-accent" style="width:100%;justify-content:center" type="submit">Send me a sign-in link</button>
-    </form>
-
-    <form id="activateForm" style="display:none">
-      <div class="field"><label>Invited email</label><input type="email" name="email" required/></div>
-      <div class="field"><label>Choose a password</label><input type="password" name="password" minlength="8" required/></div>
-      <div class="hint" style="margin-bottom:14px">Only emails already invited by an existing admin can activate an account.</div>
-      <button class="btn btn-accent" style="width:100%;justify-content:center" type="submit">Activate &amp; sign in</button>
-    </form>
+    <p class="hint" style="text-align:center;margin-top:16px">Need access? Ask an existing admin to create your account.</p>
 
     <p class="auth-msg" id="authMsg"></p>
   </div>
@@ -920,25 +900,8 @@ async function downloadDocument(path, name){
 }
 
 /* ============ AUTH ============ */
-const tabSignin = document.getElementById('tabSignin');
-const tabMagicLink = document.getElementById('tabMagicLink');
-const tabActivate = document.getElementById('tabActivate');
 const signinForm = document.getElementById('signinForm');
-const magicLinkForm = document.getElementById('magicLinkForm');
-const activateForm = document.getElementById('activateForm');
 const authMsg = document.getElementById('authMsg');
-
-const AUTH_TABS = [
-  { btn: tabSignin, form: signinForm },
-  { btn: tabMagicLink, form: magicLinkForm },
-  { btn: tabActivate, form: activateForm }
-];
-AUTH_TABS.forEach(({ btn, form }) => {
-  btn.addEventListener('click', () => {
-    AUTH_TABS.forEach(t => { t.btn.classList.toggle('active', t.btn === btn); t.form.style.display = t.form === form ? 'block' : 'none'; });
-    authMsg.classList.remove('show');
-  });
-});
 
 function showAuthMsg(text, ok){ authMsg.textContent = text; authMsg.className = 'auth-msg show' + (ok?' ok':''); }
 function requireSb(){
@@ -963,56 +926,6 @@ signinForm.addEventListener('submit', async (e) => {
     await checkSession();
   } catch (err) {
     showAuthMsg('Something went wrong signing in. Check your connection and try again.');
-  } finally {
-    btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = originalLabel;
-  }
-});
-
-magicLinkForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  if (!requireSb()) return;
-  const btn = magicLinkForm.querySelector('button[type=submit]');
-  const originalLabel = btn.textContent;
-  btn.disabled = true; btn.classList.add('btn-loading'); btn.textContent = 'Sending...';
-  authMsg.classList.remove('show');
-  try {
-    const d = Object.fromEntries(new FormData(magicLinkForm).entries());
-    const { error } = await sb.auth.signInWithOtp({ email: d.email, options: { emailRedirectTo: location.href.split('#')[0] } });
-    if (error) { showAuthMsg(error.message); return; }
-    showAuthMsg("Check your email — we've sent a sign-in link to " + d.email + '. Open it on this device to finish signing in.', true);
-    magicLinkForm.reset();
-  } catch (err) {
-    showAuthMsg('Something went wrong sending your link. Check your connection and try again.');
-  } finally {
-    btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = originalLabel;
-  }
-});
-
-activateForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  if (!requireSb()) return;
-  const btn = activateForm.querySelector('button[type=submit]');
-  const originalLabel = btn.textContent;
-  btn.disabled = true; btn.classList.add('btn-loading'); btn.textContent = 'Activating...';
-  authMsg.classList.remove('show');
-  try {
-    const d = Object.fromEntries(new FormData(activateForm).entries());
-    const { data: invited, error: checkErr } = await sb.rpc('email_is_invited_admin', { check_email: d.email });
-    if (checkErr) { showAuthMsg(checkErr.message); return; }
-    if (!invited) { showAuthMsg('That email has not been invited as an admin, or has already been activated.'); return; }
-    const { data: signUpData, error: signUpErr } = await sb.auth.signUp({ email: d.email, password: d.password, options: { emailRedirectTo: location.href.split('#')[0] } });
-    if (signUpErr) { showAuthMsg(signUpErr.message); return; }
-    if (!signUpData.session) {
-      showAuthMsg('Account created! If your project requires email confirmation, check your inbox, confirm, then use "Sign in" — your admin access activates automatically on first sign-in.', true);
-      return;
-    }
-    const { error: claimErr } = await sb.rpc('claim_admin', { check_email: d.email });
-    if (claimErr) { showAuthMsg(claimErr.message); return; }
-    showAuthMsg('Account activated — signing you in...', true);
-    btn.textContent = 'Loading your dashboard...';
-    await checkSession();
-  } catch (err) {
-    showAuthMsg('Something went wrong activating your account. Check your connection and try again.');
   } finally {
     btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = originalLabel;
   }
