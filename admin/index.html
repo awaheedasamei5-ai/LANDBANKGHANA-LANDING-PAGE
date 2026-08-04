@@ -656,7 +656,10 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <!-- REVIEWS -->
       <div class="panel" id="panel-reviews">
         <div class="panel-card">
-          <h3>Reviews</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h3 style="margin:0">Reviews</h3>
+            <button type="button" class="btn btn-ghost" id="reviewsExportBtn">Download All (CSV)</button>
+          </div>
           <p class="desc">Approve a review to show it publicly in the homepage's "Client Stories" section.</p>
           <table><thead><tr><th>Name</th><th>Rating</th><th>Comment</th><th>Status</th><th></th></tr></thead><tbody id="reviewsTable"></tbody></table>
         </div>
@@ -665,8 +668,11 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <!-- LEADS -->
       <div class="panel" id="panel-leads">
         <div class="panel-card">
-          <h3>Contact form submissions</h3>
-          <p class="desc">Everyone who has submitted the homepage contact form.</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h3 style="margin:0">Contact form submissions</h3>
+            <button type="button" class="btn btn-ghost" id="leadsExportBtn">Download All (CSV)</button>
+          </div>
+          <p class="desc">Everyone who has submitted the homepage contact form. Use the icons to call, WhatsApp, or email them directly.</p>
           <table><thead><tr><th>Name</th><th>Contact</th><th>Interest</th><th>Message</th><th>Status</th><th></th></tr></thead><tbody id="leadsTable"></tbody></table>
         </div>
       </div>
@@ -716,6 +722,17 @@ let editing = {};
 
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function exportCSV(rows, cols, filename){
+  if (!rows || !rows.length) return toast('Nothing to export yet');
+  const csvEsc = (v) => `"${String(v ?? '').replace(/"/g,'""')}"`;
+  const csv = [cols.join(',')].concat(rows.map(r => cols.map(c => csvEsc(r[c])).join(','))).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 /* ============ CROP TOOL + STORAGE UPLOAD ============
    Every admin image field goes through this: pick a file -> crop/reposition
@@ -1518,9 +1535,11 @@ function adminStars(rating){
   const star = (filled) => `<svg viewBox="0 0 24 24" width="13" height="13" style="vertical-align:-2px" fill="${filled?'#F5A623':'none'}" stroke="#F5A623" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg>`;
   return Array.from({length:5}, (_, i) => star(i < rating)).join('');
 }
+let reviewsCache = [];
 async function loadReviews(){
   const { data, error } = await sb.from('reviews').select('*').order('created_at',{ascending:false});
   if (error) return;
+  reviewsCache = data || [];
   document.getElementById('reviewsTable').innerHTML = (data||[]).map(r => `
     <tr>
       <td>${esc(r.reviewer_name)}</td>
@@ -1543,15 +1562,26 @@ async function unapproveReview(id){
   if (error) return toast('Error: ' + error.message);
   toast('Review hidden'); loadReviews();
 }
+document.getElementById('reviewsExportBtn').addEventListener('click', () => {
+  exportCSV(reviewsCache, ['reviewer_name','rating','comment','approved','created_at'], `reviews-${new Date().toISOString().slice(0,10)}.csv`);
+});
 
 /* ---- LEADS ---- */
+let leadsCache = [];
 async function loadLeads(){
   const { data, error } = await sb.from('leads').select('*').order('created_at',{ascending:false});
   if (error) return;
+  leadsCache = data || [];
   document.getElementById('leadsTable').innerHTML = (data||[]).map(l => `
     <tr>
       <td>${esc(l.name)}</td>
-      <td>${esc(l.phone||'')}${l.email?'<br>'+esc(l.email):''}</td>
+      <td>
+        <div class="row-actions" style="flex-wrap:wrap">
+          ${l.phone?`<a class="btn btn-ghost" style="padding:6px 10px" href="tel:+${esc(l.phone.replace(/[^0-9]/g,''))}" title="Call">Call</a><a class="btn btn-ghost" style="padding:6px 10px" href="https://wa.me/${esc(l.phone.replace(/[^0-9]/g,''))}" target="_blank" rel="noopener" title="WhatsApp">WhatsApp</a>`:''}
+          ${l.email?`<a class="btn btn-ghost" style="padding:6px 10px" href="mailto:${esc(l.email)}" title="Email">Email</a>`:''}
+        </div>
+        <div class="hint" style="margin-top:4px">${esc(l.phone||'')}${l.email?' · '+esc(l.email):''}</div>
+      </td>
       <td>${esc(l.interest||'')}</td>
       <td style="max-width:220px">${esc(l.message||'')}</td>
       <td>
@@ -1568,6 +1598,9 @@ async function updateLeadStatus(id, status){
   const { error } = await sb.from('leads').update({ status }).eq('id', id);
   toast(error ? 'Error updating status' : 'Status updated');
 }
+document.getElementById('leadsExportBtn').addEventListener('click', () => {
+  exportCSV(leadsCache, ['name','phone','email','interest','message','status','created_at'], `contact-leads-${new Date().toISOString().slice(0,10)}.csv`);
+});
 
 /* ---- SELLER SUBMISSIONS ---- */
 let submissionsCache = [];
@@ -1619,6 +1652,11 @@ async function openSubmission(id){
       <div><b>Asking price</b><span>${sub.asking_price_amount!=null?esc(sub.currency||'GHS')+' '+Number(sub.asking_price_amount).toLocaleString():'—'}</span></div>
       <div><b>Search result?</b><span>${sub.has_search_result==null?'—':(sub.has_search_result?'Yes':'No')}</span></div>
       <div><b>Documents held</b><span>${esc((sub.documents_held||[]).join(', ')||'—')}</span></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      <a class="btn btn-ghost" href="tel:+${esc((sub.phone||'').replace(/[^0-9]/g,''))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc((sub.phone||'').replace(/[^0-9]/g,''))}" target="_blank" rel="noopener">WhatsApp</a>
+      ${sub.email?`<a class="btn btn-ghost" href="mailto:${esc(sub.email)}">Email</a>`:''}
     </div>
     <b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Full details</b>
     <div class="detail-desc">${esc(sub.description)}</div>
@@ -1730,6 +1768,11 @@ function openBuyer(id){
     </div>
     ${b.existing_land_details?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Existing land details</b><div class="detail-desc">${esc(b.existing_land_details)}</div>`:''}
     ${b.message?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Message</b><div class="detail-desc">${esc(b.message)}</div>`:''}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <a class="btn btn-ghost" href="tel:+${esc((b.phone||'').replace(/[^0-9]/g,''))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc((b.phone||'').replace(/[^0-9]/g,''))}" target="_blank" rel="noopener">WhatsApp</a>
+      ${b.email?`<a class="btn btn-ghost" href="mailto:${esc(b.email)}">Email</a>`:''}
+    </div>
     <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
       <label class="hint" style="margin:0">Status</label>
       <select onchange="updateBuyerStatus('${b.id}',this.value)">
@@ -1784,6 +1827,11 @@ function openRemoteSales(id){
       <div><b>Sales experience</b><span>${esc(r.experience||'—')}</span></div>
     </div>
     ${r.message?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Message</b><div class="detail-desc">${esc(r.message)}</div>`:''}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <a class="btn btn-ghost" href="tel:+${esc((r.phone||'').replace(/[^0-9]/g,''))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc((r.phone||'').replace(/[^0-9]/g,''))}" target="_blank" rel="noopener">WhatsApp</a>
+      ${r.email?`<a class="btn btn-ghost" href="mailto:${esc(r.email)}">Email</a>`:''}
+    </div>
     <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
       <label class="hint" style="margin:0">Status</label>
       <select onchange="updateRemoteSalesStatus('${r.id}',this.value)">
@@ -1984,16 +2032,8 @@ function sendSiteVisitWhatsApp(id, kind){
   window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
 }
 document.getElementById('siteVisitExportBtn').addEventListener('click', () => {
-  if (!siteVisitsCache.length) return toast('No site visit requests to export');
   const cols = ['full_name','contact','nationality','visit_day','place_of_work','position','pickup_location','transport_mode','plot_interest','accompaniment_count','visit_purpose','status','created_at'];
-  const csvEsc = (v) => `"${String(v ?? '').replace(/"/g,'""')}"`;
-  const csv = [cols.join(',')].concat(siteVisitsCache.map(r => cols.map(c => csvEsc(r[c])).join(','))).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `site-visit-requests-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  exportCSV(siteVisitsCache, cols, `site-visit-requests-${new Date().toISOString().slice(0,10)}.csv`);
 });
 
 /* ---- shared delete ---- */
