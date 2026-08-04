@@ -536,6 +536,14 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 .rp-feature:hover{transform:translateY(-4px);border-color:var(--brand);box-shadow:var(--shadow);}
 .rp-feature .rp-feature-ic{width:44px;height:44px;border-radius:12px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;flex:none;}
 .rp-feature svg{width:22px;height:22px;color:var(--brand-dark);}
+.rp-band-green{position:relative;z-index:1;padding:52px 0;background:linear-gradient(135deg,var(--brand),var(--brand-dark));overflow:hidden;}
+.rp-band-green::before{content:'';position:absolute;right:-60px;top:-70px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%);}
+.rp-band-green::after{content:'';position:absolute;left:-50px;bottom:-70px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%);}
+.rp-band-green .wrap{position:relative;z-index:1;}
+.rp-label-onbrand{color:rgba(255,255,255,.85) !important;}
+.rp-band-heading{margin-bottom:20px;font-size:19px;font-family:'Space Grotesk',sans-serif;color:#fff;}
+.rp-band-green .rp-feature{background:#fff;border:1px solid rgba(255,255,255,.5);}
+.rp-band-green .rp-feature:hover{border-color:#fff;box-shadow:0 16px 34px -14px rgba(6,20,12,.4);}
 .rp-growth{display:flex;align-items:center;gap:28px;background:linear-gradient(120deg,var(--brand-light),#fff 75%);border:1px solid var(--brand);border-radius:22px;padding:34px 36px;position:relative;overflow:hidden;}
 .rp-growth::before{content:'';position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle, rgba(34,165,76,.22), transparent 70%);}
 .rp-growth-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(44px,7vw,64px);color:var(--brand-dark);flex:none;position:relative;}
@@ -690,13 +698,17 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
         Home
       </a>
+      <a href="#/about" data-nav data-route-link="about">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
+        About
+      </a>
       <a href="#/royal-palm" data-nav data-route-link="royal-palm">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12M12 12c-4-1-6-4-6-8 4 0 7 2 8 6"/><path d="M12 12c4-1 6-4 6-8-4 0-7 2-8 6"/></svg>
         Royal Palm
       </a>
-      <a href="#/about" data-nav data-route-link="about">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
-        About
+      <a href="#/plots" data-nav data-route-link="plots">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Plots
       </a>
       <a href="#/services" data-nav data-route-link="services">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-9a2 2 0 0 0-2 2v9"/><path d="M4 17h9a2 2 0 0 0 2-2V6"/></svg>
@@ -836,16 +848,24 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
           <b>Headlease Owner</b><span>Dorsi Animle Family, Shai Osudoku — fully certified headlease</span>
         </div>
       </div>
-      <div class="rp-section-gap reveal">
-        <span class="rp-label">Utilities &amp; Infrastructure</span>
-        <h4 style="margin-bottom:20px;font-size:19px;font-family:'Space Grotesk',sans-serif">Features of Royal Palm Enclave</h4>
+    </div>
+  </div>
+  <div class="rp-band-green">
+    <div class="wrap">
+      <div class="reveal">
+        <span class="rp-label rp-label-onbrand">Utilities &amp; Infrastructure</span>
+        <h4 class="rp-band-heading">Features of Royal Palm Enclave</h4>
         <div class="rp-features">
           <div class="rp-feature"><div class="rp-feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></div>Electricity</div>
           <div class="rp-feature"><div class="rp-feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18c3-2 6 2 9 0s6 2 9 0"/><path d="M3 12c3-2 6 2 9 0s6 2 9 0"/></svg></div>Planned Roads</div>
           <div class="rp-feature"><div class="rp-feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M9 5h6"/><path d="M12 8c3 3.5 5 6.5 5 9a5 5 0 0 1-10 0c0-2.5 2-5.5 5-9z"/></svg></div>Running Water</div>
         </div>
       </div>
-      <div class="rp-section-gap reveal">
+    </div>
+  </div>
+  <div class="rp-body">
+    <div class="wrap">
+      <div class="rp-section-gap reveal" style="margin-top:0">
         <span class="rp-label">Land Value Growth</span>
         <h4 style="margin-bottom:20px;font-size:19px;font-family:'Space Grotesk',sans-serif">Appreciation in Numbers</h4>
         <div class="rp-growth">
