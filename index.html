@@ -265,6 +265,17 @@ section{position:relative;}
 @media (max-width:640px){.plots-toolbar select,.plots-fav-toggle{flex:1 1 auto;}}
 @media (max-width:640px){.plots-grid{grid-template-columns:1fr;}}
 
+.plots-view-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.plots-view-tab{display:flex;align-items:center;gap:7px;padding:11px 20px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-weight:700;font-size:13.5px;color:var(--ink-soft);cursor:pointer;transition:.15s;}
+.plots-view-tab svg{width:15px;height:15px;}
+.plots-view-tab.active{background:var(--ink);border-color:var(--ink);color:var(--brand);}
+.plots-view-tab .count{font-size:11px;font-weight:700;background:rgba(0,0,0,.06);padding:2px 7px;border-radius:999px;}
+.plots-view-tab.active .count{background:rgba(255,255,255,.16);color:#fff;}
+.plots-tag-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.plots-tag-chip{display:inline-flex;align-items:center;gap:5px;padding:9px 15px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-family:inherit;font-weight:600;font-size:12.5px;color:var(--ink-soft);cursor:pointer;transition:.15s;}
+.plots-tag-chip svg{width:12px;height:12px;}
+.plots-tag-chip.active{background:var(--brand-light);border-color:var(--brand);color:var(--brand-dark);}
+
 /* ---- plot modal ---- */
 .modal-overlay{position:fixed;inset:0;background:rgba(8,25,16,.55);z-index:110;display:none;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.open{display:flex;}
@@ -293,6 +304,8 @@ section{position:relative;}
 .seller-tag svg{width:11px;height:11px;}
 .seller-tag.tag-verified{background:#DCF5E4;color:#168038;}
 .seller-tag.tag-premium{background:#FDF0CE;color:#9A6B00;}
+.seller-tag.tag-company{background:#DCEAFB;color:#155A9C;}
+.seller-tag.tag-newagent{background:#F3E8FD;color:#7B1FA2;}
 .seller-docs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
 .doc-pill{font-size:11.5px;background:var(--bg);border:1px solid var(--line);padding:4px 10px;border-radius:999px;color:var(--ink-soft);}
 .seller-contact{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
@@ -707,21 +720,21 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <span class="ic tone-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span>
       <span>Home</span>
     </a>
-    <a href="#/royal-palm" data-nav-mobile data-route-link="royal-palm" class="mobile-nav-item">
-      <span class="ic tone-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12M12 12c-4-1-6-4-6-8 4 0 7 2 8 6"/><path d="M12 12c4-1 6-4 6-8-4 0-7 2-8 6"/></svg></span>
-      <span>Royal Palm Enclave</span>
-    </a>
     <a href="#/about" data-nav-mobile data-route-link="about" class="mobile-nav-item">
       <span class="ic tone-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg></span>
       <span>About Us</span>
     </a>
-    <a href="#/services" data-nav-mobile data-route-link="services" class="mobile-nav-item">
-      <span class="ic tone-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></span>
-      <span>Services</span>
+    <a href="#/royal-palm" data-nav-mobile data-route-link="royal-palm" class="mobile-nav-item">
+      <span class="ic tone-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12M12 12c-4-1-6-4-6-8 4 0 7 2 8 6"/><path d="M12 12c4-1 6-4 6-8-4 0-7 2-8 6"/></svg></span>
+      <span>Royal Palm Enclave</span>
     </a>
     <a href="#/plots" data-nav-mobile data-route-link="plots" class="mobile-nav-item">
       <span class="ic tone-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-      <span>Hot Plots</span>
+      <span>Plots</span>
+    </a>
+    <a href="#/services" data-nav-mobile data-route-link="services" class="mobile-nav-item">
+      <span class="ic tone-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></span>
+      <span>Services</span>
     </a>
     <a href="#/site-visit" data-nav-mobile data-route-link="site-visit" class="mobile-nav-item">
       <span class="ic tone-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg></span>
@@ -929,16 +942,30 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </div>
 </section>
 
-<!-- ============ HOT PLOTS (marketplace, full page) ============ -->
+<!-- ============ PLOTS (marketplace hub, full page) ============ -->
 <section id="plots">
   <div class="wrap">
     <div class="page-breadcrumb reveal">
-      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Hot Plots
+      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Plots
     </div>
     <div class="sec-head center reveal">
-      <span class="eyebrow">Hot Plots</span>
-      <h2>Selling fast — available now.</h2>
-      <p>A live, limited selection of verified plots from trusted sellers. Once they're gone, they're gone.</p>
+      <span class="eyebrow">Plots</span>
+      <h2>Every verified plot, in one place.</h2>
+      <p>Browse all available land — filter by type, status, and seller, or jump straight to what's selling fast or newly listed.</p>
+    </div>
+    <div class="plots-view-tabs reveal" id="plotsViewTabs">
+      <button type="button" class="plots-view-tab active" data-view="all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        All Plots <span class="count" id="plotsCountAll"></span>
+      </button>
+      <button type="button" class="plots-view-tab" data-view="hot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c1.5 1.5 2 3.5 2 5a8 8 0 1 1-16 0c0-4 2-6 3-8 .5 2 1.5 2.5 2 2 .5-.5 0-3.5 3-6z"/></svg>
+        Hot Plots <span class="count" id="plotsCountHot"></span>
+      </button>
+      <button type="button" class="plots-view-tab" data-view="new">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg>
+        New Plots <span class="count" id="plotsCountNew"></span>
+      </button>
     </div>
     <div class="plots-toolbar reveal" id="plotsToolbar" style="display:none">
       <div class="plots-search">
@@ -972,6 +999,17 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <button type="button" class="plots-fav-toggle" id="plotsFavToggle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         Saved
+      </button>
+    </div>
+    <div class="plots-tag-filters reveal" id="plotsTagFilters">
+      <button type="button" class="plots-tag-chip" data-tag="verified">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Verified sellers
+      </button>
+      <button type="button" class="plots-tag-chip" data-tag="company">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M6 21V7l6-4 6 4v14M10 21v-6h4v6"/></svg> Company sellers
+      </button>
+      <button type="button" class="plots-tag-chip" data-tag="new agent">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg> New agents
       </button>
     </div>
     <div class="plots-grid" id="plotsGrid"></div>
@@ -2657,6 +2695,17 @@ function renderPlotsPreview(plots){
     </div>`).join('');
 }
 
+let plotsView = 'all';
+const plotsSellerTagFilter = new Set();
+function isNewPlot(p){
+  if (!p.created_at) return false;
+  return (Date.now() - new Date(p.created_at).getTime()) <= 21 * 24 * 60 * 60 * 1000;
+}
+function sellerHasTag(p, tag){
+  const seller = p.seller_id ? sellersCache[p.seller_id] : null;
+  if (!seller || !seller.tags) return false;
+  return seller.tags.some(t => (t||'').toLowerCase().trim() === tag);
+}
 function applyPlotsFilters(){
   const q = (document.getElementById('plotsSearchInput').value || '').trim().toLowerCase();
   const status = document.getElementById('plotsStatusFilter').value;
@@ -2666,12 +2715,28 @@ function applyPlotsFilters(){
   const favOnly = document.getElementById('plotsFavToggle').classList.contains('active');
   const favs = getFavoritePlots();
 
-  let list = plotsCache.filter(p => {
+  const base = plotsCache.filter(p => {
     if (q && !(`${p.title} ${p.location}`.toLowerCase().includes(q))) return false;
     if (status && p.status !== status) return false;
     if (type && (p.listing_type || 'third_party') !== type) return false;
     if (propertyType && (p.plot_type || 'residential') !== propertyType) return false;
     if (favOnly && !favs.includes(p.id)) return false;
+    if (plotsSellerTagFilter.size){
+      const matchesSelectedTag = [...plotsSellerTagFilter].some(t =>
+        t === 'company' ? (p.listing_type === 'company' || sellerHasTag(p, 'company')) : sellerHasTag(p, t)
+      );
+      if (!matchesSelectedTag) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('plotsCountAll').textContent = base.length;
+  document.getElementById('plotsCountHot').textContent = base.filter(p => p.featured === true).length;
+  document.getElementById('plotsCountNew').textContent = base.filter(isNewPlot).length;
+
+  let list = base.filter(p => {
+    if (plotsView === 'hot') return p.featured === true;
+    if (plotsView === 'new') return isNewPlot(p);
     return true;
   });
 
@@ -2683,6 +2748,21 @@ function applyPlotsFilters(){
   plotsFilteredCache = list;
   renderPlotsGrid(list);
 }
+document.querySelectorAll('.plots-view-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    plotsView = btn.dataset.view;
+    document.querySelectorAll('.plots-view-tab').forEach(b => b.classList.toggle('active', b === btn));
+    applyPlotsFilters();
+  });
+});
+document.querySelectorAll('.plots-tag-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tag = btn.dataset.tag;
+    if (plotsSellerTagFilter.has(tag)) { plotsSellerTagFilter.delete(tag); btn.classList.remove('active'); }
+    else { plotsSellerTagFilter.add(tag); btn.classList.add('active'); }
+    applyPlotsFilters();
+  });
+});
 
 function renderPlotsGrid(plots){
   const grid = document.getElementById('plotsGrid');
@@ -2719,15 +2799,19 @@ document.getElementById('plotsFavToggle').addEventListener('click', function(){
   applyPlotsFilters();
 });
 function tagIcon(tag){
-  const t = (tag||'').toLowerCase();
+  const t = (tag||'').toLowerCase().trim();
   if (t === 'verified') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
   if (t === 'premium') return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg>';
+  if (t === 'company') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 21h18M6 21V7l6-4 6 4v14M10 21v-6h4v6"/></svg>';
+  if (t === 'new agent') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>';
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
 }
 function tagClass(tag){
-  const t = (tag||'').toLowerCase();
+  const t = (tag||'').toLowerCase().trim();
   if (t === 'verified') return 'tag-verified';
   if (t === 'premium') return 'tag-premium';
+  if (t === 'company') return 'tag-company';
+  if (t === 'new agent') return 'tag-newagent';
   return '';
 }
 /* --- Company (Trulander) listings with no linked seller still need direct
