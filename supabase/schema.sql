@@ -468,4 +468,86 @@ create policy "seller_submission_files public insert" on public.seller_submissio
 create policy "seller_submission_files admin read" on public.seller_submission_files for select using (is_admin());
 create policy "seller_submission_files admin delete" on public.seller_submission_files for delete using (is_admin());
 
+-- =====================================================================
+--  MIGRATION: fix leading-slash image paths (broke on GitHub Pages,
+--  which serves this site from a /repo-name/ subpath, not domain root)
+-- =====================================================================
+update public.content_blocks set image_url = ltrim(image_url, '/') where image_url like '/%';
+update public.banners set image_url = ltrim(image_url, '/') where image_url like '/%';
+update public.clients set logo_url = ltrim(logo_url, '/') where logo_url like '/%';
+update public.sellers set avatar_url = ltrim(avatar_url, '/') where avatar_url like '/%';
+update public.plots set image_url = ltrim(image_url, '/') where image_url like '/%';
+update public.plots set image_url_2 = ltrim(image_url_2, '/') where image_url_2 like '/%';
+update public.plots set image_url_3 = ltrim(image_url_3, '/') where image_url_3 like '/%';
+update public.news set image_url = ltrim(image_url, '/') where image_url like '/%';
+update public.admins set avatar_url = ltrim(avatar_url, '/') where avatar_url like '/%';
+
+-- =====================================================================
+--  MIGRATION: trulander_rebrand_backend
+--  The site pivoted from a "LandBank Ghana" agency brand to being
+--  Trulander JSF Limited's own commerce site (a GREDA-registered real
+--  estate company), with landbankghana.com credited as the "marketed by"
+--  partner in the footer instead of being the primary brand. Content
+--  facts below (mission, vision, Royal Palm Enclave details, referral
+--  program terms) are taken directly from Trulander's own printed
+--  brochure — nothing here is invented.
+-- =====================================================================
+
+-- "Refer & Earn" remote sales force applications — GHS 1,500 per
+-- successful referral, per Trulander's real Tsopoli Referral Program.
+create table public.remote_sales_applications (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  phone text not null,
+  email text,
+  location text,
+  experience text,
+  message text,
+  status text not null default 'new' check (status in ('new','read','contacted','onboarded','closed')),
+  created_at timestamptz not null default now()
+);
+alter table public.remote_sales_applications enable row level security;
+create policy "remote_sales_applications public insert" on public.remote_sales_applications for insert with check (true);
+create policy "remote_sales_applications admin read" on public.remote_sales_applications for select using (is_admin());
+create policy "remote_sales_applications admin update" on public.remote_sales_applications for update using (is_admin());
+create policy "remote_sales_applications admin delete" on public.remote_sales_applications for delete using (is_admin());
+
+-- Distinguish Trulander's own Royal Palm Enclave listings from
+-- third-party seller submissions in the Hot Plots marketplace.
+alter table public.plots add column if not exists listing_type text not null default 'third_party' check (listing_type in ('company','third_party'));
+
+-- Real Trulander contact info, from their own printed brochure.
+update public.site_settings set
+  phone = '+233 302 956 795',
+  whatsapp = '233546416566',
+  email = 'info@trulander.com',
+  address = 'Nungua Nautical Last Stop, Alex Nerda Building, Accra'
+where id = 1;
+
+-- Hero copy: Trulander / Royal Palm Enclave focused.
+update public.banners set
+  headline = 'Own Royal Palm Enclave, Risk-Free.',
+  subheadline = 'Trulander JSF Limited makes genuine land accessible for all — GREDA-registered, fully documented, and backed by real due diligence on every plot we sell.',
+  badge_text = 'GREDA Registered · Verified Title',
+  cta_label = 'Explore Royal Palm Enclave',
+  cta_href = '#royal-palm'
+where kind = 'hero';
+
+-- social_links becomes the primary brand's own (Trulander) social icons.
+update public.social_links set url = 'https://www.facebook.com/trulanderjsf?mibextid=wwXIfr&mibextid=wwXIfr' where platform = 'facebook';
+update public.social_links set url = 'https://www.instagram.com/trulanderjsf?igsh=ZTVyN3ZramdwYmpx&utm_source=qr' where platform = 'instagram';
+update public.social_links set url = 'https://www.tiktok.com/@trulander?_r=1&_t=ZS-98a3MdYO9pN' where platform = 'tiktok';
+
+-- The former "Trulander" client-tile row becomes the "Marketed by
+-- LandBankGhana.com" footer credit, carrying LandBank's own real handles
+-- (previously in social_links, before Trulander became the primary brand).
+update public.clients set
+  name = 'LandBankGhana.com',
+  logo_url = 'assets/logo.png',
+  facebook_url = 'https://www.facebook.com/share/18qnRVH4W9/?mibextid=wwXIfr',
+  instagram_url = 'https://www.instagram.com/landbankghana_?igsh=MWd2em5vcWs1OG84Mw%3D%3D&utm_source=qr',
+  tiktok_url = 'https://www.tiktok.com/@landbankghana.com?_r=1&_t=ZS-98a1seDetRU',
+  website_url = null
+where name = 'Trulander Jsf Limited';
+
 insert into public.clients (name, sort_order) values ('Hollard Insurance', 2) on conflict do nothing;

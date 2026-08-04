@@ -1,19 +1,23 @@
-# LandBank Ghana — Landing Page
+# Trulander JSF Limited — Landing Page
 
-Public marketing site for **landbankghana.com**, plus an admin dashboard for
-managing homepage content (banners, photos, stats, clients, social links,
-news, contact details, staff accounts, plot listings, sellers, reviews).
+Public commerce site for Trulander JSF Limited — a GREDA-registered real
+estate company and home of **Royal Palm Enclave, Tsopoli** — plus an admin
+dashboard for managing every piece of content on it (banners, photos, stats,
+clients, social links, news, contact details, staff accounts, plot listings,
+sellers, reviews, and the buyer/seller/remote-sales inboxes below).
 
-This is a standalone project — separate from the internal PEP Landbank sales
-portal repo, with its own Supabase backend.
+landbankghana.com is credited as the site's marketing partner in the footer
+("Marketed by") — this project itself is standalone, separate from the
+internal PEP Landbank sales portal repo, with its own Supabase backend.
 
 ## Structure
 
 - `index.html` — the public landing page (single file, no build step).
 - `admin/index.html` — password-protected content admin dashboard.
-- `assets/logo.png` — the real LandBank Ghana logo, extracted from the files
-  you sent.
-- `assets/trulander-logo.png` — Trulander Jsf Limited's real logo, same.
+- `assets/trulander-logo.png` — Trulander JSF Limited's real logo — the
+  primary site logo (nav, footer, favicon).
+- `assets/logo.png` — the LandBank Ghana logo, used only for the "Marketed
+  by landbankghana.com" footer credit.
 - `assets/photos/` — real photos you provided (hero photo, About/Process
   section photos, the 3 promo/ad banners, and gallery photos).
 - `assets/supabase-config.js` — the Supabase project URL + public anon key
@@ -63,6 +67,12 @@ It holds:
   **Seller Submissions** in admin; approving one publishes it to Hot Plots.
 - `seller_submission_files` — the land photos and supporting documents
   attached to a seller submission.
+- `remote_sales_applications` — the "Refer & Earn" remote sales force
+  applications (GHS 1,500 per successful referral, Trulander's real Tsopoli
+  Referral Program terms). Reviewed in **Remote Sales Force** in admin.
+- `plots.listing_type` — `'company'` (Trulander's own Royal Palm Enclave
+  listings, shown with a "Trulander" badge) or `'third_party'` (verified
+  seller submissions — the default).
 
 Two Storage buckets back all file uploads: `media` (public — banners,
 gallery, plots, clients, avatars, news, seller-submitted land photos) and
@@ -77,21 +87,32 @@ the frontend.
 
 ## What's on the homepage now
 
-- Sticky nav (Home/About/Services/Contact), a hero with a real photo of a
-  team member, "Trusted by" clients strip with clickable social popovers, an
-  animated promo banner carousel with your 3 ad creatives, "How We Help"
-  cards, the buyer/seller qualifier questions.
-- **Hot Plots** — a marketplace grid of available plots (photo, size, price,
-  status badge, "Hot" tag for featured listings). Clicking one opens a detail
-  modal with a photo gallery, full facts (size/location/nearest landmark/
-  description), and a seller card showing their tags (Verified ✓, Premium ★,
-  or any custom tag you add), company info, document types held, and direct
-  call/WhatsApp/email buttons. Shows an honest "new plots coming soon" message
-  until you add your first one.
+- Sticky nav (Home/Royal Palm/About/Services/Contact), a hero with a real
+  photo of a team member, "Trusted by" clients strip with clickable social
+  popovers, an animated promo banner carousel with your ad creatives, and
+  the buyer/seller qualifier questions.
+- **Royal Palm Enclave, Tsopoli** — a dedicated flagship-project section with
+  land size/lease/GREDA facts, land features, the real investment growth
+  numbers from Trulander's brochure (~638% appreciation 2019–2026), what's
+  driving the growth (New Airport City, Tema-Aflao Road, Dawa Industrial
+  Zone, Saglemi Housing, etc.), and a "Book a Free Site Visit" CTA.
+- **Hot Plots** — a searchable, filterable marketplace grid of available
+  plots (search by title/location, filter by status/listing type, sort by
+  price or newest, save favorites). Each card shows a photo, size, price,
+  status badge, "Hot" tag for featured listings, and a "Trulander" badge for
+  the company's own listings vs. verified third-party ones. Clicking one
+  opens a detail modal with a photo gallery, full facts, a share button, a
+  save-to-favorites heart, and a seller card with tags, company info,
+  document types held, and direct call/WhatsApp/email buttons. Shows an
+  honest "new plots coming soon" message until you add your first one.
 - **"Yes, help me buy" / "Yes, help me sell"** on the qualifier cards open
   detailed forms instead of just jumping to the contact section — see
   "Buyer & seller forms" below.
-- A 5-step process timeline (with a real photo of the team verifying a site),
+- **Refer & Earn** — a remote sales force section built around Trulander's
+  real referral program (GHS 1,500 per successful referral). Anyone can
+  apply with their contact info; every application lands in **Remote Sales
+  Force** in admin for you to call and onboard.
+- A 6-step process section (with a real photo of the team verifying a site),
   stats, About Us (with a real photo), an animated gallery carousel (one
   large photo at a time with a slow Ken-Burns zoom, captions, and a
   clickable filmstrip), a **Client Stories** section that shows real

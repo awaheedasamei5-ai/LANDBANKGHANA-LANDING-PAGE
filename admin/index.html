@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>LandBank Ghana — Admin</title>
+<title>Trulander JSF Limited — Admin</title>
 <meta name="robots" content="noindex, nofollow"/>
-<link rel="icon" type="image/png" href="../assets/logo.png"/>
+<link rel="icon" type="image/png" href="../assets/trulander-logo.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -129,9 +129,9 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
 <!-- ===================== AUTH SCREEN ===================== -->
 <div id="authScreen">
   <div class="auth-card">
-    <img src="../assets/logo.png" alt="LandBank Ghana"/>
+    <img src="../assets/trulander-logo.png" alt="Trulander JSF Limited"/>
     <h2>Admin Dashboard</h2>
-    <p style="font-size:13.5px;color:var(--muted);margin-top:6px;">Manage banners, stats, clients, and contact details for landbankghana.com.</p>
+    <p style="font-size:13.5px;color:var(--muted);margin-top:6px;">Manage Royal Palm Enclave listings, banners, stats, and contact details for Trulander JSF Limited.</p>
     <div class="auth-tabs">
       <button id="tabSignin" class="active">Sign in</button>
       <button id="tabActivate">Activate account</button>
@@ -158,7 +158,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
 <div id="dash">
   <header class="topbar">
     <div class="row">
-      <div class="brand"><img src="../assets/logo.png" alt=""/> LandBank Ghana Admin</div>
+      <div class="brand"><img src="../assets/trulander-logo.png" alt=""/> Trulander JSF Admin</div>
       <div style="display:flex;gap:10px">
         <a class="btn" href="../index.html" target="_blank">View site ↗</a>
         <button class="btn" id="logoutBtn">Log out</button>
@@ -180,6 +180,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="sellers">Sellers</button>
       <button class="nav-item" data-panel="submissions">Seller Submissions</button>
       <button class="nav-item" data-panel="buyers">Buyer Inquiries</button>
+      <button class="nav-item" data-panel="remotesales">Remote Sales Force</button>
       <button class="nav-item" data-panel="reviews">Reviews</button>
       <button class="nav-item" data-panel="leads">Leads</button>
     </div>
@@ -229,7 +230,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
         </div>
         <div class="panel-card">
           <h3>Add a gallery photo</h3>
-          <p class="desc">These appear automatically in the "More from LandBank Ghana" section on the homepage — add as many as you like, in any order. This is the easiest way to drop in new photos without touching any other setting.</p>
+          <p class="desc">These appear automatically in the "More from Trulander JSF Limited" section on the homepage — add as many as you like, in any order. This is the easiest way to drop in new photos without touching any other setting.</p>
           <form id="galleryForm">
             <input type="hidden" name="key"/>
             <div class="form-grid">
@@ -431,8 +432,8 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <!-- SELLERS -->
       <div class="panel" id="panel-sellers">
         <div class="panel-card">
-          <h3>Add / edit seller</h3>
-          <p class="desc">Tags and document types are free text, comma separated — add as many custom ones as you like.</p>
+          <h3>Third-party sellers</h3>
+          <p class="desc">Independent sellers whose land Trulander verifies and lists on their behalf — separate from Trulander's own Royal Palm Enclave listings. Tags and document types are free text, comma separated — add as many custom ones as you like.</p>
           <form id="sellerForm">
             <input type="hidden" name="id"/>
             <div class="form-grid">
@@ -492,6 +493,18 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
         </div>
       </div>
 
+      <!-- REMOTE SALES FORCE -->
+      <div class="panel" id="panel-remotesales">
+        <div class="panel-card">
+          <h3>Remote sales force applications</h3>
+          <p class="desc">Everyone who applied through the "Refer &amp; Earn" section — call them to get them onboarded, then update their status.</p>
+          <div class="inbox">
+            <div class="inbox-list" id="remoteSalesList"></div>
+            <div class="inbox-detail" id="remoteSalesDetail"><div class="inbox-empty">Select an application to view its details.</div></div>
+          </div>
+        </div>
+      </div>
+
       <!-- PLOTS -->
       <div class="panel" id="panel-plots">
         <div class="panel-card">
@@ -499,7 +512,14 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
           <p class="desc">Shows up in the "Hot Plots" section on the homepage.</p>
           <form id="plotForm">
             <input type="hidden" name="id"/>
-            <div class="field"><label>Title</label><input name="title" required placeholder="e.g. 100ft x 100ft Plot — East Legon Hills"/></div>
+            <div class="field"><label>Listing type</label>
+              <select name="listing_type">
+                <option value="third_party">Third-party — from a seller submission</option>
+                <option value="company">Company — Trulander's own listing</option>
+              </select>
+              <div class="hint">"Company" shows a "Trulander" badge on the site.</div>
+            </div>
+            <div class="field"><label>Title</label><input name="title" required placeholder="e.g. Royal Palm Enclave — Plot 12"/></div>
             <div class="form-grid">
               <div class="field"><label>Size</label><input name="size" required placeholder="e.g. 100ft x 100ft"/></div>
               <div class="field"><label>Location</label><input name="location" required placeholder="e.g. East Legon Hills, Accra"/></div>
@@ -824,7 +844,7 @@ document.querySelectorAll('.side .nav-item').forEach(btn => {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales();
 }
 
 /* ---- BANNERS ---- */
@@ -1271,7 +1291,7 @@ async function loadPlots(){
   document.getElementById('plotsTable').innerHTML = (data||[]).map(p => `
     <tr>
       <td>${p.image_url?`<img class="thumb" src="${esc(p.image_url)}"/>`:'—'}</td>
-      <td>${esc(p.title)}</td>
+      <td>${esc(p.title)}<br><span class="pill ${p.listing_type==='company'?'on':'off'}" style="margin-top:4px">${p.listing_type==='company'?'Trulander':'Third-party'}</span></td>
       <td>${p.price_amount!=null?esc(p.currency||'GHS')+' '+Number(p.price_amount).toLocaleString():'—'}</td>
       <td><span class="pill ${p.status==='available'?'on':'off'}">${esc(p.status)}</span></td>
       <td class="row-actions">
@@ -1281,7 +1301,7 @@ async function loadPlots(){
     </tr>`).join('') || '<tr><td colspan="5">No plots yet.</td></tr>';
 }
 function editPlot(p){
-  plotForm.id.value = p.id; plotForm.title.value = p.title; plotForm.size.value = p.size; plotForm.location.value = p.location;
+  plotForm.id.value = p.id; plotForm.listing_type.value = p.listing_type || 'third_party'; plotForm.title.value = p.title; plotForm.size.value = p.size; plotForm.location.value = p.location;
   plotForm.price_amount.value = p.price_amount!=null?p.price_amount:''; plotForm.currency.value = p.currency||'GHS';
   plotForm.nearest_landmark.value = p.nearest_landmark||''; plotForm.description.value = p.description||'';
   plotForm.image_url.value = p.image_url||''; plotForm.image_url_2.value = p.image_url_2||''; plotForm.image_url_3.value = p.image_url_3||'';
@@ -1524,6 +1544,61 @@ async function updateBuyerStatus(id, status, silent){
   if (error) return toast('Error: ' + error.message);
   const b = buyersCache.find(x => x.id === id); if (b) b.status = status;
   renderBuyersList();
+  if (!silent) toast('Status updated');
+}
+
+/* ---- REMOTE SALES FORCE APPLICATIONS ---- */
+let remoteSalesCache = [];
+let activeRemoteSalesId = null;
+async function loadRemoteSales(){
+  const { data, error } = await sb.from('remote_sales_applications').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  remoteSalesCache = data || [];
+  renderRemoteSalesList();
+  if (activeRemoteSalesId && remoteSalesCache.find(r => r.id === activeRemoteSalesId)) openRemoteSales(activeRemoteSalesId);
+}
+function renderRemoteSalesList(){
+  const list = document.getElementById('remoteSalesList');
+  if (!remoteSalesCache.length) { list.innerHTML = '<div class="inbox-empty">No applications yet.</div>'; return; }
+  list.innerHTML = remoteSalesCache.map(r => `
+    <div class="inbox-row ${r.id===activeRemoteSalesId?'active':''}" onclick="openRemoteSales('${r.id}')">
+      <div class="ir-top"><span>${esc(r.name)}${r.status==='new'?' <span class="pill on" style="padding:1px 6px;font-size:10px">New</span>':''}</span><span class="ir-date">${new Date(r.created_at).toLocaleDateString()}</span></div>
+      <div class="ir-sub">${esc(r.location || 'Location not given')}</div>
+    </div>`).join('');
+}
+function openRemoteSales(id){
+  activeRemoteSalesId = id;
+  renderRemoteSalesList();
+  const r = remoteSalesCache.find(x => x.id === id);
+  const detail = document.getElementById('remoteSalesDetail');
+  if (!r) return;
+  detail.innerHTML = `
+    <h3>${esc(r.name)}</h3>
+    <p class="hint">Applied ${new Date(r.created_at).toLocaleString()}</p>
+    <div class="detail-grid">
+      <div><b>Phone</b><span>${esc(r.phone)}</span></div>
+      <div><b>Email</b><span>${esc(r.email||'—')}</span></div>
+      <div><b>Based in</b><span>${esc(r.location||'—')}</span></div>
+      <div><b>Sales experience</b><span>${esc(r.experience||'—')}</span></div>
+    </div>
+    ${r.message?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Message</b><div class="detail-desc">${esc(r.message)}</div>`:''}
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+      <label class="hint" style="margin:0">Status</label>
+      <select onchange="updateRemoteSalesStatus('${r.id}',this.value)">
+        <option value="new" ${r.status==='new'?'selected':''}>New</option>
+        <option value="read" ${r.status==='read'?'selected':''}>Read</option>
+        <option value="contacted" ${r.status==='contacted'?'selected':''}>Contacted</option>
+        <option value="onboarded" ${r.status==='onboarded'?'selected':''}>Onboarded</option>
+        <option value="closed" ${r.status==='closed'?'selected':''}>Closed</option>
+      </select>
+    </div>`;
+  if (r.status === 'new') updateRemoteSalesStatus(r.id, 'read', true);
+}
+async function updateRemoteSalesStatus(id, status, silent){
+  const { error } = await sb.from('remote_sales_applications').update({ status }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  const r = remoteSalesCache.find(x => x.id === id); if (r) r.status = status;
+  renderRemoteSalesList();
   if (!silent) toast('Status updated');
 }
 

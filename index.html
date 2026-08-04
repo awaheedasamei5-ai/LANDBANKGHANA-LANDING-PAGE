@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1" id="viewportMeta"/>
-<title>LandBank Ghana — Litigation-Free Land, Made Simple</title>
-<meta name="description" content="LandBank Ghana helps you acquire litigation-free land with full due diligence, and helps sellers connect safely with verified buyers."/>
+<title>Trulander JSF Limited — Genuine Land, Made Accessible</title>
+<meta name="description" content="Trulander JSF Limited is a GREDA-registered real estate company selling verified, litigation-free land — home of Royal Palm Enclave, Tsopoli."/>
 <meta name="theme-color" content="#0B1F13"/>
-<link rel="icon" type="image/png" href="assets/logo.png"/>
-<meta property="og:title" content="LandBank Ghana — Litigation-Free Land, Made Simple"/>
-<meta property="og:description" content="Due diligence, litigation-free acquisition, and safe land sales — LandBank Ghana helps you every step of the way."/>
+<link rel="icon" type="image/png" href="assets/trulander-logo.png"/>
+<meta property="og:title" content="Trulander JSF Limited — Genuine Land, Made Accessible"/>
+<meta property="og:description" content="We are the land people. GREDA-registered, fully documented land sales — home of Royal Palm Enclave, Tsopoli."/>
 <meta property="og:type" content="website"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -208,10 +208,16 @@ section{position:relative;}
 .plot-card:hover{transform:translateY(-5px);box-shadow:var(--shadow);}
 .plot-card .img-wrap{position:relative;aspect-ratio:4/3;background:var(--bg);}
 .plot-card .img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
-.plot-status{position:absolute;top:12px;left:12px;background:var(--brand);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;}
+.plot-badges{position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:1;}
+.plot-status{background:var(--brand);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;}
 .plot-status.reserved{background:#E08A00;}
 .plot-status.sold{background:#6b6b6b;}
-.plot-featured{position:absolute;top:12px;right:12px;background:var(--ink);color:var(--brand);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;}
+.plot-featured{background:var(--ink);color:var(--brand);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;}
+.plot-company-badge{background:#fff;color:var(--brand-dark);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em;}
+.plot-fav-btn{position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;border-radius:50%;background:rgba(8,25,16,.5);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;backdrop-filter:blur(4px);}
+.plot-fav-btn svg{width:17px;height:17px;transition:transform .15s;}
+.plot-fav-btn.active{color:#ff5a6e;}
+.plot-fav-btn.active svg{fill:#ff5a6e;transform:scale(1.1);}
 .plot-body{padding:20px;}
 .plot-body h4{font-size:16.5px;margin-bottom:8px;}
 .plot-meta{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);margin-bottom:12px;}
@@ -220,7 +226,18 @@ section{position:relative;}
 .plots-empty{border:1.5px dashed var(--line);border-radius:var(--radius);padding:50px 30px;text-align:center;color:var(--muted);}
 .plots-empty svg{width:34px;height:34px;color:var(--brand);margin:0 auto 14px;}
 .plots-empty h4{font-size:17px;color:var(--ink);margin-bottom:8px;}
+.plots-toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px;align-items:center;}
+.plots-search{flex:1 1 220px;position:relative;}
+.plots-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);}
+.plots-search input{width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-family:inherit;font-size:14px;color:var(--ink);}
+.plots-toolbar select{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-family:inherit;font-size:13.5px;color:var(--ink);flex:0 0 auto;}
+.plots-fav-toggle{display:flex;align-items:center;gap:7px;padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;flex:0 0 auto;}
+.plots-fav-toggle svg{width:15px;height:15px;}
+.plots-fav-toggle.active{background:var(--brand-light);border-color:var(--brand);color:var(--brand-dark);}
+.plots-fav-toggle.active svg{fill:var(--brand-dark);}
+.plots-no-match{grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;}
 @media (max-width:1000px){.plots-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:640px){.plots-toolbar select,.plots-fav-toggle{flex:1 1 auto;}}
 @media (max-width:640px){.plots-grid{grid-template-columns:1fr;}}
 
 /* ---- plot modal ---- */
@@ -296,7 +313,7 @@ section{position:relative;}
 #process{padding:68px 0;background:var(--ink);color:#fff;}
 #process .sec-head p{color:rgba(255,255,255,.65);}
 #process .eyebrow{background:rgba(255,255,255,.1);color:var(--brand);}
-.timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;counter-reset:step;}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:step;}
 .tstep{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:26px 20px;position:relative;}
 .tstep::before{counter-increment:step;content:counter(step);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
 .tstep h4{font-size:15.5px;margin-bottom:8px;}
@@ -418,7 +435,46 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 .footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:24px;font-size:13px;flex-wrap:wrap;gap:10px;}
 .footer-bottom a{opacity:.8;}
 .footer-bottom a:hover{color:var(--brand);}
+.marketed-by{display:flex;align-items:center;gap:10px;}
+.marketed-by-label{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;opacity:.6;}
+.marketed-by .client-tile{padding:7px 14px;font-size:13px;background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.15);}
+.marketed-by .client-tile img{width:20px;height:20px;}
+.marketed-by .client-tile.clickable:hover{border-color:var(--brand);}
+.marketed-by .client-popover{top:auto;bottom:calc(100% + 8px);}
 @media (max-width:800px){.footer-grid{grid-template-columns:1fr 1fr;}}
+
+/* ---------- ROYAL PALM ENCLAVE ---------- */
+#royal-palm{background:var(--ink);color:#fff;}
+#royal-palm .eyebrow{background:rgba(255,255,255,.1);color:var(--brand);}
+#royal-palm .sec-head p{color:rgba(255,255,255,.65);}
+.rp-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;margin-bottom:22px;}
+.rp-facts{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.rp-fact{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px 18px;}
+.rp-fact b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--brand);margin-bottom:6px;}
+.rp-fact span{font-size:14.5px;font-weight:600;line-height:1.4;}
+.rp-features{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.rp-feature{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;font-size:13.5px;font-weight:600;}
+.rp-feature svg{width:26px;height:26px;color:var(--brand);}
+.rp-growth{display:flex;align-items:center;gap:22px;background:linear-gradient(135deg,rgba(34,165,76,.18),rgba(34,165,76,.04));border:1px solid rgba(34,165,76,.3);border-radius:20px;padding:26px 28px;margin-bottom:22px;}
+.rp-growth-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(38px,6vw,54px);color:var(--brand);flex:none;}
+.rp-growth-txt{font-size:15px;color:rgba(255,255,255,.8);line-height:1.5;}
+.rp-nearby h4{font-size:16px;margin-bottom:14px;}
+.rp-nearby-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px;}
+.rp-nearby-grid div{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 15px;font-size:13.5px;color:rgba(255,255,255,.75);line-height:1.5;}
+.rp-cta{display:flex;gap:12px;flex-wrap:wrap;}
+@media (max-width:900px){.rp-grid{grid-template-columns:1fr;}.rp-nearby-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.rp-facts,.rp-features{grid-template-columns:1fr;}.rp-nearby-grid{grid-template-columns:1fr;}.rp-growth{flex-direction:column;text-align:center;gap:10px;}}
+
+/* ---------- REMOTE SALES / REFER & EARN ---------- */
+#remote-sales{background:linear-gradient(150deg,var(--brand-light),var(--bg));}
+.rs-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;}
+.rs-copy .big-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(40px,6vw,58px);color:var(--brand-dark);line-height:1;margin-bottom:6px;}
+.rs-copy .big-num-lbl{font-size:14px;color:var(--muted);margin-bottom:22px;}
+.rs-copy ul{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:12px;}
+.rs-copy li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink-soft);}
+.rs-copy li svg{width:18px;height:18px;color:var(--brand);flex:none;margin-top:2px;}
+.rs-form-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:32px;}
+@media (max-width:900px){.rs-grid{grid-template-columns:1fr;}.rs-form-card{padding:24px;}}
 
 /* ---------- WHATSAPP FLOAT ---------- */
 #wa-float{position:fixed;right:22px;bottom:22px;z-index:80;width:58px;height:58px;border-radius:50%;background:var(--brand);display:none;align-items:center;justify-content:center;box-shadow:0 14px 30px -10px rgba(34,165,76,.6);}
@@ -465,11 +521,15 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 <!-- ============ NAV ============ -->
 <header id="nav">
   <div class="wrap navbar">
-    <a href="#home" class="brand"><img src="assets/logo.png" alt="LandBank Ghana logo"/> LandBank <span style="color:var(--brand)">Ghana</span></a>
+    <a href="#home" class="brand"><img src="assets/trulander-logo.png" alt="Trulander JSF Limited logo"/> Trulander <span style="color:var(--brand)">JSF</span></a>
     <nav class="nav-links">
       <a href="#home" class="active" data-nav>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
         Home
+      </a>
+      <a href="#royal-palm" data-nav>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12M12 12c-4-1-6-4-6-8 4 0 7 2 8 6"/><path d="M12 12c4-1 6-4 6-8-4 0-7 2-8 6"/></svg>
+        Royal Palm
       </a>
       <a href="#about" data-nav>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
@@ -485,7 +545,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
       </a>
     </nav>
     <div class="nav-cta">
-      <a href="#qualify" class="btn btn-ghost">Free Land Check</a>
+      <a href="#royal-palm" class="btn btn-ghost">Free Site Visit</a>
       <a href="#contact" class="btn btn-primary">Get Started</a>
       <button class="view-toggle" id="viewToggleBtn" type="button" aria-label="Switch between mobile and desktop view" title="Switch between mobile and desktop view">
         <svg id="viewToggleIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
@@ -501,6 +561,10 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   <a href="#home" data-nav-mobile>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
     Home
+  </a>
+  <a href="#royal-palm" data-nav-mobile>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12M12 12c-4-1-6-4-6-8 4 0 7 2 8 6"/><path d="M12 12c4-1 6-4 6-8-4 0-7 2-8 6"/></svg>
+    Royal Palm Enclave
   </a>
   <a href="#about" data-nav-mobile>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
@@ -523,10 +587,10 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
     <div class="hero-copy reveal">
       <span class="eyebrow">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
-        <span id="heroBadgeText">Verified &amp; Litigation-Free</span>
+        <span id="heroBadgeText">GREDA Registered · Verified Title</span>
       </span>
-      <h1 id="heroHeadline">Own Land You <span class="accent">Can Trust.</span></h1>
-      <p class="lead" id="heroSub">We help you find, verify, and secure litigation-free land in Ghana — from due diligence to documentation, every step of the way.</p>
+      <h1 id="heroHeadline">Own Royal Palm Enclave, <span class="accent">Risk-Free.</span></h1>
+      <p class="lead" id="heroSub">Trulander JSF Limited makes genuine land accessible for all — GREDA-registered, fully documented, and backed by real due diligence on every plot we sell.</p>
       <div class="hero-ctas">
         <a href="#qualify" class="btn btn-accent">I Want to Buy Land</a>
         <a href="#qualify" class="btn btn-ghost">I Want to Sell Land</a>
@@ -537,7 +601,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
       </div>
     </div>
     <div class="hero-visual reveal">
-      <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.png" alt="LandBank Ghana helps you own land safely"/>
+      <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.png" alt="Trulander JSF Limited helps you own land safely"/>
       <div class="hero-badge b1"><span class="num" id="statYears">7+</span><span class="lbl">Years Experience</span></div>
       <div class="hero-badge b2"><span class="num" id="statAcres">1,200+</span><span class="lbl">Acres Secured</span></div>
       <div class="hero-badge b3"><span class="num" id="statClients">500+</span><span class="lbl">Happy Clients</span></div>
@@ -561,13 +625,57 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   </div>
 </section>
 
+<!-- ============ ROYAL PALM ENCLAVE ============ -->
+<section id="royal-palm">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Now Selling · GREDA Registered</span>
+      <h2>Royal Palm Enclave, Tsopoli</h2>
+      <p>Your gateway to serene living — 200 acres of fully documented land in Ghana's fastest-growing corridor, roughly 44km from Ashaiman via Tema.</p>
+    </div>
+    <div class="rp-grid">
+      <div class="rp-facts reveal">
+        <div class="rp-fact"><b>Total Land Size</b><span>200 acres — Phase One is 72 acres</span></div>
+        <div class="rp-fact"><b>Lease Period</b><span>85 years, sub-lease registered at the Lands Commission</span></div>
+        <div class="rp-fact"><b>Location</b><span>Tsopoli, Ningo-Prampram District — dubbed "the New Airport City"</span></div>
+        <div class="rp-fact"><b>Headlease Owner</b><span>Dorsi Animle Family, Shai Osudoku — fully certified headlease</span></div>
+      </div>
+      <div class="rp-features reveal">
+        <div class="rp-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>Electricity</div>
+        <div class="rp-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18c3-2 6 2 9 0s6 2 9 0"/><path d="M3 12c3-2 6 2 9 0s6 2 9 0"/></svg>Planned Roads</div>
+        <div class="rp-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M9 5h6"/><path d="M12 8c3 3.5 5 6.5 5 9a5 5 0 0 1-10 0c0-2.5 2-5.5 5-9z"/></svg>Running Water</div>
+        <div class="rp-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V10l8-6 8 6v12"/><path d="M9 22v-6h6v6"/><path d="M4 10h16"/></svg>Gated Community</div>
+      </div>
+    </div>
+    <div class="rp-growth reveal">
+      <div class="rp-growth-num">+638%</div>
+      <div class="rp-growth-txt">Tsopoli land value grew from roughly GHS 6,500 in 2019 to roughly GHS 48,000 by 2026 — averaging about 33% a year, outperforming Treasury Bill yields over the same period.</div>
+    </div>
+    <div class="rp-nearby reveal">
+      <h4>What's driving the growth around Tsopoli</h4>
+      <div class="rp-nearby-grid">
+        <div><b>New Airport City</b> — a 60,000-acre aerotropolis just off the Accra-Aflao highway.</div>
+        <div><b>Tema-Aflao Road Phase 1</b> — will make Tsopoli-to-Accra Mall faster than from Adenta.</div>
+        <div><b>Dawa Industrial Zone</b> — 2,000 acres of light &amp; heavy industry nearby.</div>
+        <div><b>Central University</b> — minutes away, driving housing demand in the area.</div>
+        <div><b>Saglemi Housing Project</b> — a $200M, 5,000-unit development 10 minutes away.</div>
+        <div><b>Devtraco Woodlands</b> — a 592-acre gated community 1 minute from Central University.</div>
+      </div>
+    </div>
+    <div class="rp-cta reveal">
+      <button type="button" class="btn btn-accent" id="rpSiteVisitBtn">Book a Free Site Visit</button>
+      <a href="#plots" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Browse Available Plots</a>
+    </div>
+  </div>
+</section>
+
 <!-- ============ HOW WE HELP ============ -->
 <section id="help">
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow">How We Help</span>
       <h2>Help is the whole point.</h2>
-      <p>Land in Ghana can be confusing and risky to navigate alone. LandBank Ghana exists to stand between you and every bad deal — with real verification, real people, and real follow-through.</p>
+      <p>Land in Ghana can be confusing and risky to navigate alone. Trulander JSF Limited exists to stand between you and every bad deal — with real verification, real people, and real follow-through.</p>
     </div>
     <div class="help-grid">
       <div class="help-card reveal">
@@ -631,6 +739,33 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
       <span class="eyebrow">Hot Plots</span>
       <h2>Selling fast — available now.</h2>
       <p>A live, limited selection of verified plots from trusted sellers. Once they're gone, they're gone.</p>
+    </div>
+    <div class="plots-toolbar reveal" id="plotsToolbar" style="display:none">
+      <div class="plots-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="plotsSearchInput" placeholder="Search by title or location..."/>
+      </div>
+      <select id="plotsStatusFilter">
+        <option value="">All statuses</option>
+        <option value="available">Available</option>
+        <option value="reserved">Reserved</option>
+        <option value="sold">Sold</option>
+      </select>
+      <select id="plotsTypeFilter">
+        <option value="">All listings</option>
+        <option value="company">Trulander Listings</option>
+        <option value="third_party">Third-Party Listings</option>
+      </select>
+      <select id="plotsSortSelect">
+        <option value="default">Sort: Featured first</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="newest">Newest first</option>
+      </select>
+      <button type="button" class="plots-fav-toggle" id="plotsFavToggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        Saved
+      </button>
     </div>
     <div class="plots-grid" id="plotsGrid"></div>
     <div class="plots-empty reveal" id="plotsEmpty">
@@ -832,17 +967,18 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Our Process</span>
-      <h2>How we take you from inquiry to handover.</h2>
-      <p>A clear, five-step process built around one goal: no surprises after you've paid.</p>
+      <h2>The Trulander Transaction Process.</h2>
+      <p>The exact steps every buyer goes through with us — nothing skipped, nothing rushed.</p>
     </div>
     <div class="timeline">
-      <div class="tstep reveal"><h4>Tell Us What You Need</h4><p>Share your budget, purpose, and preferred location — residential, commercial, or investment.</p></div>
-      <div class="tstep reveal"><h4>We Search &amp; Verify</h4><p>Lands Commission search, family/court records check, and boundary confirmation on every shortlisted plot.</p></div>
-      <div class="tstep reveal"><h4>You Visit, We Confirm</h4><p>An accompanied site visit where we walk the actual boundaries with you, in person.</p></div>
-      <div class="tstep reveal"><h4>Documentation &amp; Registration</h4><p>We support the indenture, site plan, and registration paperwork so everything is on record.</p></div>
-      <div class="tstep reveal"><h4>Safe Handover</h4><p>Final handover with every document filed and copies in your hands.</p></div>
+      <div class="tstep reveal"><h4>Talk To Our Team</h4><p>An initial conversation with our sales team, then we schedule your free site visit to Royal Palm Enclave.</p></div>
+      <div class="tstep reveal"><h4>Independent Land Search</h4><p>We hand you everything you need to verify the land yourself at the Lands Commission — no pressure, no rush.</p></div>
+      <div class="tstep reveal"><h4>Quotation &amp; Contract</h4><p>Once you're satisfied and accept your quotation, formal registration forms and the contract for sale are signed.</p></div>
+      <div class="tstep reveal"><h4>Secure Payment</h4><p>Payment goes directly to Trulander's accounts only — never cash — with a receipt issued for every payment made.</p></div>
+      <div class="tstep reveal"><h4>Indenture Prepared</h4><p>Indenture preparation begins once your 50% deposit is in, and is ready within 1–10 days.</p></div>
+      <div class="tstep reveal"><h4>Land Allocated</h4><p>Your plot is allocated at 50% payment — you can start your project right after the initial deposit.</p></div>
     </div>
-    <div class="process-photo reveal" id="processPhoto"><img id="processPhotoImg" alt="LandBank Ghana team on site"/></div>
+    <div class="process-photo reveal" id="processPhoto"><img id="processPhotoImg" alt="Trulander JSF Limited team on site"/></div>
     <div class="seller-note reveal"><b>Selling instead?</b> The same team verifies your title, prepares your documents, and matches your land with buyers who are ready to move — safely and on your terms.</div>
   </div>
 </section>
@@ -863,21 +999,21 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 <section id="about">
   <div class="wrap about-grid">
     <div class="about-card reveal" id="aboutCard">
-      <img class="about-photo" id="aboutPhotoImg" src="assets/photos/about.jpg" alt="A LandBank Ghana team member"/>
+      <img class="about-photo" id="aboutPhotoImg" src="assets/photos/about.jpg" alt="A Trulander JSF Limited team member"/>
       <div class="about-overlay"></div>
       <div class="about-card-content">
-        <div class="quote">"Too many people lose money to land guarders and double sales. We exist to put <span class="accent">help</span> first."</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.55)">— The LandBank Ghana team</div>
+        <div class="quote">"Property as risk-free and available as air — everywhere, for <span class="accent">everyone</span>."</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.55)">— Trulander JSF Limited, Vision Statement</div>
       </div>
     </div>
     <div class="reveal">
-      <span class="eyebrow">About Us</span>
-      <h2 style="margin-top:14px;font-size:clamp(26px,4vw,38px)">Built to help Ghanaians own land safely.</h2>
-      <p style="margin-top:16px;color:var(--muted);font-size:16px;">LandBank Ghana was founded to close the trust gap in land transactions — where verification is thorough, sellers are vetted, and buyers are protected from disputes before they ever sign. Whether you're securing your first plot or selling family land the right way, we stay with you from first inquiry to final handover.</p>
+      <span class="eyebrow">About Us — Who Are We?</span>
+      <h2 style="margin-top:14px;font-size:clamp(26px,4vw,38px)">We are the land experts.</h2>
+      <p style="margin-top:16px;color:var(--muted);font-size:16px;">Trulander JSF Limited is a registered real estate company, and a GREDA (Ghana Real Estate Developers Association) member. At Trulander, we aim to provide genuine land offerings, accessible and available for all. Every property we market and sell goes through rigorous due diligence to ensure it's void of any foreseeable risk — so you can acquire land for your dream home or project in peace.</p>
       <div class="values-grid">
-        <div class="value"><h4>Integrity</h4><p>We tell you what we find — even when it means walking away from a deal.</p></div>
-        <div class="value"><h4>Transparency</h4><p>Every search, fee, and step is explained before you commit to anything.</p></div>
-        <div class="value"><h4>Diligence</h4><p>No shortcuts on title checks, boundary verification, or documentation.</p></div>
+        <div class="value"><h4>Our Mission</h4><p>To help humanity prosper by providing property void of risk, at your convenience.</p></div>
+        <div class="value"><h4>Our Vision</h4><p>Property as risk-free and available as air — everywhere, for everyone.</p></div>
+        <div class="value"><h4>GREDA Registered</h4><p>Every headlease and sub-lease we sell is certified and registered with the Lands Commission.</p></div>
         <div class="value"><h4>People-First</h4><p>Real people guide your transaction — not a listing you're left to figure out alone.</p></div>
       </div>
     </div>
@@ -889,7 +1025,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow">Gallery</span>
-      <h2>More from LandBank Ghana</h2>
+      <h2>More from Trulander JSF Limited</h2>
     </div>
     <div class="gallery-carousel reveal" id="galleryCarousel">
       <div class="gallery-stage" id="galleryStage"></div>
@@ -942,6 +1078,39 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   </div>
 </section>
 
+<!-- ============ REMOTE SALES / REFER & EARN ============ -->
+<section id="remote-sales">
+  <div class="wrap rs-grid">
+    <div class="rs-copy reveal">
+      <span class="eyebrow">Refer &amp; Earn</span>
+      <h2 style="margin:14px 0 18px;font-size:clamp(26px,4vw,36px)">Earn selling Royal Palm Enclave — from anywhere.</h2>
+      <div class="big-num">GHS 1,500</div>
+      <div class="big-num-lbl">paid per successful referral, one week after the month your sale completes.</div>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> No office, no fixed hours — refer from wherever you are.</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> We handle the site visit, verification, and paperwork.</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Fill the form below and our team will call to onboard you.</li>
+      </ul>
+    </div>
+    <div class="rs-form-card reveal">
+      <form id="remoteSalesForm">
+        <div class="form-row">
+          <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Abena Osei"/></div>
+          <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+          <div class="field"><label>Where are you based?</label><input type="text" name="location" placeholder="e.g. Kumasi, or Diaspora - UK"/></div>
+        </div>
+        <div class="field"><label>Any sales experience? (optional)</label><input type="text" name="experience" placeholder="e.g. Real estate, insurance, none — that's fine too"/></div>
+        <div class="field"><label>Anything else? (optional)</label><textarea name="message" placeholder="Tell us a bit about yourself..."></textarea></div>
+        <button type="submit" class="btn btn-accent btn-block">Join the Referral Program</button>
+        <p class="form-msg" id="remoteSalesMsg"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
 <!-- ============ CONTACT ============ -->
 <section id="contact">
   <div class="wrap contact-grid">
@@ -987,14 +1156,10 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 </section>
 
 <!-- ============ CLIENTS ============ -->
-<section id="clients">
+<section id="clients" style="display:none">
   <div class="wrap">
     <p class="clients-head">Trusted by</p>
-    <div class="clients-row" id="clientsRow">
-      <div class="client-tile-wrap">
-        <div class="client-tile"><span class="dot"></span> Trulander Jsf Limited</div>
-      </div>
-    </div>
+    <div class="clients-row" id="clientsRow"></div>
   </div>
 </section>
 
@@ -1003,30 +1168,30 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="#home" class="brand"><img src="assets/logo.png" alt="LandBank Ghana logo"/> LandBank Ghana</a>
-        <p>Helping buyers acquire litigation-free land and helping sellers connect safely with verified buyers, across Ghana.</p>
+        <a href="#home" class="brand"><img src="assets/trulander-logo.png" alt="Trulander JSF Limited logo"/> Trulander JSF Limited</a>
+        <p>We are the land people — making genuine land offerings accessible and available for all, home of Royal Palm Enclave, Tsopoli.</p>
       </div>
       <div>
         <h5>Explore</h5>
         <ul>
           <li><a href="#home">Home</a></li>
+          <li><a href="#royal-palm">Royal Palm Enclave</a></li>
           <li><a href="#about">About Us</a></li>
-          <li><a href="#help">Services</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
       </div>
       <div>
         <h5>Company</h5>
         <ul>
-          <li><a href="#qualify">Free Land Check</a></li>
+          <li><a href="#remote-sales">Earn With Us</a></li>
           <li><a href="#process">Our Process</a></li>
           <li><a href="admin/index.html">Staff Login</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© <span id="year"></span> LandBank Ghana. All rights reserved.</span>
-      <span>Built for landbankghana.com</span>
+      <span>© <span id="year"></span> Trulander JSF Limited. All rights reserved.</span>
+      <div class="marketed-by" id="marketedByWrap"></div>
     </div>
   </div>
 </footer>
@@ -1069,7 +1234,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 const navEl = document.getElementById('nav');
 window.addEventListener('scroll', () => {
   navEl.classList.toggle('scrolled', window.scrollY > 20);
-  const secs = ['home','about','help','contact'];
+  const secs = ['home','royal-palm','about','help','contact'];
   let current = secs[0];
   for (const id of secs) {
     const el = document.getElementById(id);
@@ -1318,6 +1483,44 @@ document.getElementById('year').textContent = new Date().getFullYear();
   });
 })();
 
+/* --- "Book a free site visit" on the Royal Palm Enclave section opens the
+   buyer inquiry modal with the location already filled in --- */
+document.getElementById('rpSiteVisitBtn')?.addEventListener('click', () => {
+  const overlay = document.getElementById('buyerModalOverlay');
+  const locationField = document.querySelector('#buyerForm [name="interested_location"]');
+  if (locationField) locationField.value = 'Royal Palm Enclave, Tsopoli';
+  overlay?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+});
+
+/* --- remote sales / referral program application --- */
+document.getElementById('remoteSalesForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const msg = document.getElementById('remoteSalesMsg');
+  const btn = form.querySelector('button[type=submit]');
+  const data = Object.fromEntries(new FormData(form).entries());
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  msg.className = 'form-msg';
+  try {
+    if (!sb) throw new Error('offline');
+    const { error } = await sb.from('remote_sales_applications').insert({
+      name: data.name, phone: data.phone, email: data.email || null,
+      location: data.location || null, experience: data.experience || null,
+      message: data.message || null
+    });
+    if (error) throw error;
+    msg.textContent = "You're in! Our team will call you soon to get you onboarded.";
+    msg.className = 'form-msg ok';
+    form.reset();
+  } catch (err) {
+    msg.textContent = 'Something went wrong submitting your application. Please try again, or reach us directly via WhatsApp.';
+    msg.className = 'form-msg err';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Join the Referral Program';
+  }
+});
+
 /* --- news bell: draggable floating button + slide-in panel (independent of Supabase) --- */
 (function setupNewsBell(){
   const bell = document.getElementById('newsBell');
@@ -1436,7 +1639,12 @@ async function loadContent(){
     }
 
     if (clientsData && clientsData.length) {
-      document.getElementById('clientsRow').innerHTML = clientsData.map((c,i) => {
+      // LandBankGhana.com is the marketing partner credited separately in the
+      // footer, not a "trusted by" client — keep it out of the general strip.
+      const marketedBy = clientsData.find(c => c.name === 'LandBankGhana.com');
+      const trustedByClients = clientsData.filter(c => c.name !== 'LandBankGhana.com');
+
+      const clientTile = (c, i, idPrefix) => {
         const socials = [
           c.facebook_url ? { p:'facebook', url:c.facebook_url } : null,
           c.instagram_url ? { p:'instagram', url:c.instagram_url } : null,
@@ -1445,12 +1653,22 @@ async function loadContent(){
         const clickable = socials.length > 0;
         return `
         <div class="client-tile-wrap">
-          <div class="client-tile${clickable?' clickable':''}"${clickable?` onclick="toggleClientPopover(${i})"`:''}>
+          <div class="client-tile${clickable?' clickable':''}"${clickable?` onclick="toggleClientPopover('${idPrefix}${i}')"`:''}>
             ${c.logo_url ? `<img src="${esc(c.logo_url)}" alt="${esc(c.name)}"/>` : '<span class="dot"></span>'} ${esc(c.name)}
           </div>
-          ${clickable ? `<div class="client-popover" id="clientPopover${i}">${socials.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener" aria-label="${esc(s.p)}">${socialIcon(s.p)}</a>`).join('')}</div>` : ''}
+          ${clickable ? `<div class="client-popover" id="clientPopover${idPrefix}${i}">${socials.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener" aria-label="${esc(s.p)}">${socialIcon(s.p)}</a>`).join('')}</div>` : ''}
         </div>`;
-      }).join('');
+      };
+
+      if (trustedByClients.length) {
+        document.getElementById('clientsRow').innerHTML = trustedByClients.map((c,i) => clientTile(c, i, '')).join('');
+        document.getElementById('clients').style.display = 'block';
+      }
+      if (marketedBy) {
+        document.getElementById('marketedByWrap').innerHTML = `
+          <span class="marketed-by-label">Marketed by</span>
+          ${clientTile(marketedBy, 0, 'mb')}`;
+      }
     }
 
     if (social && social.length) {
@@ -1514,23 +1732,85 @@ async function loadContent(){
 
 /* --- Hot Plots marketplace --- */
 let plotsCache = [];
+let plotsFilteredCache = [];
 let sellersCache = {};
 function formatPrice(p){
   return p.price_amount != null ? `${esc(p.currency||'GHS')} ${Number(p.price_amount).toLocaleString()}` : 'Price on request';
 }
+
+/* --- saved/favorite plots (localStorage, no login needed) --- */
+function getFavoritePlots(){
+  try { return JSON.parse(localStorage.getItem('lb_favorite_plots') || '[]'); } catch(e) { return []; }
+}
+function isFavoritePlot(id){ return getFavoritePlots().includes(id); }
+function toggleFavoritePlot(id, btn){
+  let favs = getFavoritePlots();
+  const on = favs.includes(id);
+  favs = on ? favs.filter(x => x !== id) : favs.concat([id]);
+  localStorage.setItem('lb_favorite_plots', JSON.stringify(favs));
+  if (btn) btn.classList.toggle('active', !on);
+  const favToggle = document.getElementById('plotsFavToggle');
+  if (favToggle && favToggle.classList.contains('active')) applyPlotsFilters();
+}
+
 function renderPlots(plots, sellers){
   plotsCache = plots;
   sellersCache = Object.fromEntries(sellers.map(s => [s.id, s]));
+  const toolbar = document.getElementById('plotsToolbar');
+  if (!plots.length){
+    document.getElementById('plotsEmpty').style.display = 'block';
+    document.getElementById('plotsGrid').innerHTML = '';
+    toolbar.style.display = 'none';
+    return;
+  }
+  document.getElementById('plotsEmpty').style.display = 'none';
+  toolbar.style.display = 'flex';
+  applyPlotsFilters();
+}
+
+function applyPlotsFilters(){
+  const q = (document.getElementById('plotsSearchInput').value || '').trim().toLowerCase();
+  const status = document.getElementById('plotsStatusFilter').value;
+  const type = document.getElementById('plotsTypeFilter').value;
+  const sort = document.getElementById('plotsSortSelect').value;
+  const favOnly = document.getElementById('plotsFavToggle').classList.contains('active');
+  const favs = getFavoritePlots();
+
+  let list = plotsCache.filter(p => {
+    if (q && !(`${p.title} ${p.location}`.toLowerCase().includes(q))) return false;
+    if (status && p.status !== status) return false;
+    if (type && (p.listing_type || 'third_party') !== type) return false;
+    if (favOnly && !favs.includes(p.id)) return false;
+    return true;
+  });
+
+  if (sort === 'price_asc') list.sort((a,b) => (a.price_amount ?? Infinity) - (b.price_amount ?? Infinity));
+  else if (sort === 'price_desc') list.sort((a,b) => (b.price_amount ?? -Infinity) - (a.price_amount ?? -Infinity));
+  else if (sort === 'newest') list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  else list.sort((a,b) => (b.featured === true) - (a.featured === true));
+
+  plotsFilteredCache = list;
+  renderPlotsGrid(list);
+}
+
+function renderPlotsGrid(plots){
   const grid = document.getElementById('plotsGrid');
-  const empty = document.getElementById('plotsEmpty');
-  if (!plots.length){ empty.style.display = 'block'; grid.innerHTML = ''; return; }
-  empty.style.display = 'none';
+  if (!plots.length){
+    grid.innerHTML = '<div class="plots-no-match">No plots match your filters right now — try clearing a filter or searching something else.</div>';
+    return;
+  }
   grid.innerHTML = plots.map((p, i) => `
     <div class="plot-card reveal in" onclick="openPlotModal(${i})">
       <div class="img-wrap">
         <img src="${esc(p.image_url || '')}" alt="${esc(p.title)}"/>
-        <span class="plot-status ${esc(p.status)}">${p.status === 'available' ? 'Available' : p.status}</span>
-        ${p.featured ? '<span class="plot-featured">Hot</span>' : ''}
+        <div class="plot-badges">
+          <span class="plot-status ${esc(p.status)}">${p.status === 'available' ? 'Available' : p.status}</span>
+          ${p.featured ? '<span class="plot-featured">Hot</span>' : ''}
+          ${p.listing_type === 'company' ? '<span class="plot-company-badge">Trulander</span>' : ''}
+        </div>
+        <button type="button" class="plot-fav-btn${isFavoritePlot(p.id)?' active':''}" aria-label="Save plot" onclick="event.stopPropagation(); toggleFavoritePlot('${p.id}', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
       </div>
       <div class="plot-body">
         <h4>${esc(p.title)}</h4>
@@ -1539,6 +1819,13 @@ function renderPlots(plots, sellers){
       </div>
     </div>`).join('');
 }
+
+['plotsSearchInput'].forEach(id => document.getElementById(id).addEventListener('input', applyPlotsFilters));
+['plotsStatusFilter','plotsTypeFilter','plotsSortSelect'].forEach(id => document.getElementById(id).addEventListener('change', applyPlotsFilters));
+document.getElementById('plotsFavToggle').addEventListener('click', function(){
+  this.classList.toggle('active');
+  applyPlotsFilters();
+});
 function tagIcon(tag){
   const t = (tag||'').toLowerCase();
   if (t === 'verified') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
@@ -1575,7 +1862,7 @@ function renderSellerCard(s){
     </div>`;
 }
 function openPlotModal(i){
-  const p = plotsCache[i];
+  const p = plotsFilteredCache[i];
   const seller = p.seller_id ? sellersCache[p.seller_id] : null;
   const imgs = [p.image_url, p.image_url_2, p.image_url_3].filter(Boolean);
   document.getElementById('plotModalBody').innerHTML = `
@@ -1584,8 +1871,21 @@ function openPlotModal(i){
       ${imgs.length > 1 ? `<div class="modal-thumbs">${imgs.map(u => `<img src="${esc(u)}" onclick="document.getElementById('modalMainImg').src='${esc(u)}'"/>`).join('')}</div>` : ''}
     </div>
     <div class="modal-content">
-      <span class="plot-status ${esc(p.status)}" style="position:static;display:inline-block;margin-bottom:10px">${esc(p.status)}</span>
-      ${p.featured ? '<span class="plot-featured" style="position:static;display:inline-block;margin-bottom:10px;margin-left:8px">Hot</span>' : ''}
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">
+        <div>
+          <span class="plot-status ${esc(p.status)}" style="position:static;display:inline-block">${esc(p.status)}</span>
+          ${p.featured ? '<span class="plot-featured" style="position:static;display:inline-block;margin-left:8px">Hot</span>' : ''}
+          ${p.listing_type === 'company' ? '<span class="plot-company-badge" style="position:static;display:inline-block;margin-left:8px;border:1px solid var(--line)">Trulander Listing</span>' : ''}
+        </div>
+        <div style="display:flex;gap:8px;flex:none;">
+          <button type="button" class="modal-close" style="position:static;width:36px;height:36px;" aria-label="Save plot" onclick="toggleFavoritePlot('${p.id}'); updateModalFavIcon('${p.id}')">
+            <svg id="modalFavIcon" viewBox="0 0 24 24" fill="${isFavoritePlot(p.id)?'#ff5a6e':'none'}" stroke="${isFavoritePlot(p.id)?'#ff5a6e':'currentColor'}" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          </button>
+          <button type="button" class="modal-close" style="position:static;width:36px;height:36px;" aria-label="Share plot" onclick="sharePlot('${esc(p.title)}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9"/></svg>
+          </button>
+        </div>
+      </div>
       <h3>${esc(p.title)}</h3>
       <div class="modal-price">${formatPrice(p)}</div>
       <div class="modal-facts">
@@ -1596,8 +1896,26 @@ function openPlotModal(i){
       ${p.description ? `<p class="modal-desc">${esc(p.description)}</p>` : ''}
       ${seller ? renderSellerCard(seller) : ''}
       <a href="#contact" class="btn btn-accent btn-block" onclick="closePlotModal()">Enquire About This Plot</a>
+      <p class="form-msg" id="shareMsg" style="text-align:center"></p>
     </div>`;
   document.getElementById('plotModalOverlay').classList.add('open');
+}
+function updateModalFavIcon(id){
+  const icon = document.getElementById('modalFavIcon');
+  if (!icon) return;
+  const on = isFavoritePlot(id);
+  icon.setAttribute('fill', on ? '#ff5a6e' : 'none');
+  icon.setAttribute('stroke', on ? '#ff5a6e' : 'currentColor');
+}
+async function sharePlot(title){
+  const url = location.href.split('#')[0] + '#plots';
+  const shareData = { title: title + ' — Trulander JSF Limited', text: `Check out this plot: ${title}`, url };
+  try {
+    if (navigator.share) { await navigator.share(shareData); return; }
+    await navigator.clipboard.writeText(url);
+    const msg = document.getElementById('shareMsg');
+    if (msg) { msg.textContent = 'Link copied to clipboard!'; msg.className = 'form-msg ok'; }
+  } catch (e) { /* user cancelled share — nothing to do */ }
 }
 function closePlotModal(){ document.getElementById('plotModalOverlay').classList.remove('open'); }
 document.getElementById('plotModalClose').addEventListener('click', closePlotModal);
