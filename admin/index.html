@@ -538,7 +538,10 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <!-- SELLER SUBMISSIONS -->
       <div class="panel" id="panel-submissions">
         <div class="panel-card">
-          <h3>Seller submissions</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h3 style="margin:0">Seller submissions</h3>
+            <button type="button" class="btn btn-ghost" id="submissionsExportBtn">Download All (CSV)</button>
+          </div>
           <p class="desc">Every "Yes, help me sell" form from the homepage lands here with the seller's full details, documents, and photos. Verify everything, then approve to publish it as a Hot Plot — or reject if it doesn't check out.</p>
           <div class="inbox">
             <div class="inbox-list" id="submissionsList"></div>
@@ -550,7 +553,10 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <!-- BUYER INQUIRIES -->
       <div class="panel" id="panel-buyers">
         <div class="panel-card">
-          <h3>Buyer inquiries</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h3 style="margin:0">Buyer inquiries</h3>
+            <button type="button" class="btn btn-ghost" id="buyersExportBtn">Download All (CSV)</button>
+          </div>
           <p class="desc">Every "Yes, help me buy" form from the homepage — follow up with each one, then mark it contacted or closed.</p>
           <div class="inbox">
             <div class="inbox-list" id="buyersList"></div>
@@ -562,7 +568,10 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <!-- REMOTE SALES FORCE -->
       <div class="panel" id="panel-remotesales">
         <div class="panel-card">
-          <h3>Remote sales force applications</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h3 style="margin:0">Remote sales force applications</h3>
+            <button type="button" class="btn btn-ghost" id="remoteSalesExportBtn">Download All (CSV)</button>
+          </div>
           <p class="desc">Everyone who applied through the "Refer &amp; Earn" section — call them to get them onboarded, then update their status.</p>
           <div class="inbox">
             <div class="inbox-list" id="remoteSalesList"></div>
@@ -574,7 +583,10 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <!-- SERVICE REQUESTS -->
       <div class="panel" id="panel-servicerequests">
         <div class="panel-card">
-          <h3>Service requests</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h3 style="margin:0">Service requests</h3>
+            <button type="button" class="btn btn-ghost" id="serviceRequestsExportBtn">Download All (CSV)</button>
+          </div>
           <p class="desc">Surveyor, land issue, legal, and documentation requests from the Services hub on the homepage.</p>
           <div class="field" style="max-width:280px;margin-bottom:16px">
             <label>Filter by type</label>
@@ -1761,6 +1773,9 @@ document.getElementById('leadsExportBtn').addEventListener('click', () => {
 
 /* ---- SELLER SUBMISSIONS ---- */
 let submissionsCache = [];
+document.getElementById('submissionsExportBtn').addEventListener('click', () => {
+  exportCSV(submissionsCache, ['name','company_name','phone','email','land_title','land_location','nearest_landmark','land_size','asking_price_amount','currency','status','created_at'], `seller-submissions-${new Date().toISOString().slice(0,10)}.csv`);
+});
 let submissionFilesCache = {};
 let activeSubmissionId = null;
 
@@ -1888,6 +1903,9 @@ async function rejectSubmission(id){
 
 /* ---- BUYER INQUIRIES ---- */
 let buyersCache = [];
+document.getElementById('buyersExportBtn').addEventListener('click', () => {
+  exportCSV(buyersCache, ['name','phone','email','preferred_contact','budget_range','interested_location','has_existing_land','wants_plot_recommendations','message','status','created_at'], `buyer-inquiries-${new Date().toISOString().slice(0,10)}.csv`);
+});
 let activeBuyerId = null;
 async function loadBuyers(){
   const { data, error } = await sb.from('buyer_inquiries').select('*').order('created_at', { ascending: false });
@@ -1951,6 +1969,9 @@ async function updateBuyerStatus(id, status, silent){
 
 /* ---- REMOTE SALES FORCE APPLICATIONS ---- */
 let remoteSalesCache = [];
+document.getElementById('remoteSalesExportBtn').addEventListener('click', () => {
+  exportCSV(remoteSalesCache, ['name','phone','email','location','experience','message','status','created_at'], `remote-sales-applications-${new Date().toISOString().slice(0,10)}.csv`);
+});
 let activeRemoteSalesId = null;
 async function loadRemoteSales(){
   const { data, error } = await sb.from('remote_sales_applications').select('*').order('created_at', { ascending: false });
@@ -2011,6 +2032,9 @@ async function updateRemoteSalesStatus(id, status, silent){
 
 /* ---- SERVICE REQUESTS ---- */
 let serviceRequestsCache = [];
+document.getElementById('serviceRequestsExportBtn').addEventListener('click', () => {
+  exportCSV(serviceRequestsCache, ['service_type','name','phone','email','location','details','status','created_at'], `service-requests-${new Date().toISOString().slice(0,10)}.csv`);
+});
 let activeServiceRequestId = null;
 const SERVICE_TYPE_LABEL = { surveyor: 'Surveyor Help', land_issue: 'Land Issue Help', legal: 'Legal Help', documentation: 'Land Documentation' };
 async function loadServiceRequests(){
