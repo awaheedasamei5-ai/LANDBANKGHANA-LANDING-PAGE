@@ -1000,7 +1000,7 @@ activateForm.addEventListener('submit', async (e) => {
     const { data: invited, error: checkErr } = await sb.rpc('email_is_invited_admin', { check_email: d.email });
     if (checkErr) { showAuthMsg(checkErr.message); return; }
     if (!invited) { showAuthMsg('That email has not been invited as an admin, or has already been activated.'); return; }
-    const { data: signUpData, error: signUpErr } = await sb.auth.signUp({ email: d.email, password: d.password });
+    const { data: signUpData, error: signUpErr } = await sb.auth.signUp({ email: d.email, password: d.password, options: { emailRedirectTo: location.href.split('#')[0] } });
     if (signUpErr) { showAuthMsg(signUpErr.message); return; }
     if (!signUpData.session) {
       showAuthMsg('Account created! If your project requires email confirmation, check your inbox, confirm, then use "Sign in" — your admin access activates automatically on first sign-in.', true);
