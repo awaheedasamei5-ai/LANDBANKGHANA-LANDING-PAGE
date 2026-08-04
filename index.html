@@ -104,7 +104,7 @@ section{position:relative;}
   background:radial-gradient(circle,rgba(34,165,76,.4),transparent 70%);filter:blur(48px);z-index:0;}
 .hero-photo{position:relative;z-index:1;max-height:560px;width:auto;max-width:100%;object-fit:contain;
   filter:drop-shadow(0 26px 30px rgba(8,25,16,.22));}
-.hero-badge{position:absolute;z-index:2;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 16px 34px -14px rgba(8,25,16,.35);display:flex;flex-direction:column;gap:2px;min-width:120px;}
+.hero-badge{position:absolute;z-index:2;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 16px 34px -14px rgba(8,25,16,.35),0 0 0 1px rgba(34,165,76,.14);display:flex;flex-direction:column;gap:2px;min-width:120px;}
 .hero-badge .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--ink);}
 .hero-badge .lbl{font-size:11px;color:var(--muted);font-weight:600;}
 .hero-badge.b1{top:20%;right:-6%;}
@@ -113,9 +113,24 @@ section{position:relative;}
 .hero-badge.b3 .num{color:#fff;}
 .hero-badge.b3 .lbl{color:rgba(255,255,255,.7);}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.hero-badge{animation:floaty 5s ease-in-out infinite;}
-.hero-badge.b2{animation-delay:.8s;}
-.hero-badge.b3{animation-delay:1.6s;}
+@keyframes heroBadgeIn{0%{opacity:0;transform:scale(.35) translateY(6px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+.hero-badge{animation:heroBadgeIn .65s cubic-bezier(.34,1.56,.64,1) backwards, floaty 5s ease-in-out infinite;}
+.hero-badge.b1{animation-delay:.85s,.8s;}
+.hero-badge.b2{animation-delay:.2s,0s;}
+.hero-badge.b3{animation-delay:1.25s,1.6s;}
+
+/* ---- hero flow: stat badges appear to stream out of the laptop screen ---- */
+.hero-flow{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible;}
+.hero-flow .flow-path{fill:none;stroke:url(#heroFlowGradient);stroke-width:.55;stroke-linecap:round;stroke-dasharray:3.2 2.6;filter:drop-shadow(0 0 2.5px rgba(34,165,76,.65));opacity:0;animation:heroFlowFadeIn .6s ease-out .5s forwards, heroFlowDash 1.4s linear .5s infinite;}
+@keyframes heroFlowFadeIn{to{opacity:.85;}}
+@keyframes heroFlowDash{to{stroke-dashoffset:-11.6;}}
+.hero-flow .flow-source{fill:url(#heroSourceGlow);transform-box:fill-box;transform-origin:center;animation:heroSourcePulse 2.1s ease-in-out infinite;}
+@keyframes heroSourcePulse{0%,100%{opacity:.55;transform:scale(1);}50%{opacity:1;transform:scale(1.22);}}
+.hero-flow .flow-dot{fill:#fff;filter:drop-shadow(0 0 4px #22A54C) drop-shadow(0 0 7px rgba(34,165,76,.8));}
+@media (prefers-reduced-motion: reduce){
+  .hero-flow{display:none;}
+  .hero-badge{animation:none;}
+}
 
 @media (max-width:900px){
   .hero-grid{grid-template-columns:1fr;}
@@ -800,6 +815,28 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
     </div>
     <div class="hero-visual reveal">
       <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.png" alt="Trulander JSF Limited helps you own land safely"/>
+      <svg class="hero-flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="heroFlowGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#22A54C" stop-opacity="0"/>
+            <stop offset="50%" stop-color="#22A54C" stop-opacity=".9"/>
+            <stop offset="100%" stop-color="#22A54C" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="heroSourceGlow">
+            <stop offset="0%" stop-color="#22A54C" stop-opacity=".85"/>
+            <stop offset="100%" stop-color="#22A54C" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle class="flow-source" cx="66" cy="68" r="7"/>
+        <path id="heroFlowPathLeft" class="flow-path" d="M66,68 Q40,34 5,26"/>
+        <path id="heroFlowPathRight" class="flow-path" d="M66,68 Q80,38 91,26"/>
+        <circle class="flow-dot" r="1.1">
+          <animateMotion dur="2.1s" repeatCount="indefinite" begin="0s"><mpath href="#heroFlowPathLeft"/></animateMotion>
+        </circle>
+        <circle class="flow-dot" r="1.1">
+          <animateMotion dur="2.1s" repeatCount="indefinite" begin="1.05s"><mpath href="#heroFlowPathRight"/></animateMotion>
+        </circle>
+      </svg>
       <div class="hero-badge b1"><span class="num" id="statYears">7+</span><span class="lbl">Years Experience</span></div>
       <div class="hero-badge b2"><span class="num" id="statAcres">1,200+</span><span class="lbl">Acres Secured</span></div>
       <div class="hero-badge b3"><span class="num" id="statClients">500+</span><span class="lbl">Happy Clients</span></div>
