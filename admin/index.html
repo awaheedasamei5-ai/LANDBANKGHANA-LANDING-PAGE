@@ -975,8 +975,6 @@ signinForm.addEventListener('submit', async (e) => {
     const d = Object.fromEntries(new FormData(signinForm).entries());
     const { error } = await sb.auth.signInWithPassword({ email: d.email, password: d.password });
     if (error) { showAuthMsg(error.message); return; }
-    // Idempotent: only actually claims the row if this email was invited and unclaimed.
-    await sb.rpc('claim_admin', { check_email: d.email }).catch(() => {});
     btn.textContent = 'Loading your dashboard...';
     await checkSession();
   } catch (err) {
@@ -1035,24 +1033,30 @@ async function checkSession(){
 
   // Auto-link this session to a matching invited admins row if it isn't
   // linked yet — covers accounts created via magic link, or created
-  // directly in the Supabase Dashboard (which skip claim_admin()).
-  await sb.rpc('link_admin_account').catch(() => {});
+  // directly in the Supabase Dashboard (which skip claim_admin()). Uses a
+  // plain table update (not /rpc/) since some networks/extensions block
+  // requests whose path contains "rpc", which was silently breaking this
+  // step even though sign-in itself succeeded.
+  await sb.from('admins').update({ user_id: session.user.id, claimed: true })
+    .is('user_id', null).ilike('email', session.user.email).then(() => {}, () => {});
 
   // A valid Supabase login is not the same as being an approved admin — verify
   // before ever showing the dashboard, so a non-admin account can't land in a
   // UI where every save silently fails or gets rejected. The sign-in itself
   // already succeeded by the time we get here, so a failure below is NOT a
   // wrong password — it's this specific check failing (a dropped request,
-  // an ad-blocker on the /rpc/ path, etc.) — retry a few times before giving
-  // up, and say so accurately rather than blaming "signing in".
-  let isAdmin, error;
+  // a blocked path, etc.) — retry a few times before giving up, and say so
+  // accurately rather than blaming "signing in".
+  let row, error;
   try {
-    ({ data: isAdmin, error } = await withRetry(() => sb.rpc('is_admin')));
+    ({ data: row, error } = await withRetry(() =>
+      sb.from('admins').select('claimed').eq('user_id', session.user.id).maybeSingle()
+    ));
   } catch (err) {
     showAuthMsg("Signed in, but couldn't verify admin access after several tries — your session is still active, so just click Sign in again, or reload the page. If this keeps happening, try disabling any ad-blocker/VPN for this site.");
     return;
   }
-  if (error || !isAdmin) {
+  if (error || !row || !row.claimed) {
     await sb.auth.signOut();
     showAuthMsg('This account is signed in but is not an approved admin. Ask an existing admin to invite this email under Team, then activate again.');
     return;
