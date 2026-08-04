@@ -1006,6 +1006,18 @@ activateForm.addEventListener('submit', async (e) => {
 
 document.getElementById('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
 
+// Calls fn() up to 3 times with a short delay, for one-off network blips
+// (a dropped request, a slow proxy) on calls that must succeed for the
+// admin check to be trustworthy — retrying beats forcing a full re-login.
+async function withRetry(fn, attempts = 3, delayMs = 700){
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try { return await fn(); } catch (err) { lastErr = err; }
+    if (i < attempts - 1) await new Promise(r => setTimeout(r, delayMs));
+  }
+  throw lastErr;
+}
+
 async function checkSession(){
   if (!sb) return;
   const { data: { session } } = await sb.auth.getSession();
@@ -1018,8 +1030,18 @@ async function checkSession(){
 
   // A valid Supabase login is not the same as being an approved admin — verify
   // before ever showing the dashboard, so a non-admin account can't land in a
-  // UI where every save silently fails or gets rejected.
-  const { data: isAdmin, error } = await sb.rpc('is_admin');
+  // UI where every save silently fails or gets rejected. The sign-in itself
+  // already succeeded by the time we get here, so a failure below is NOT a
+  // wrong password — it's this specific check failing (a dropped request,
+  // an ad-blocker on the /rpc/ path, etc.) — retry a few times before giving
+  // up, and say so accurately rather than blaming "signing in".
+  let isAdmin, error;
+  try {
+    ({ data: isAdmin, error } = await withRetry(() => sb.rpc('is_admin')));
+  } catch (err) {
+    showAuthMsg("Signed in, but couldn't verify admin access after several tries — your session is still active, so just click Sign in again, or reload the page. If this keeps happening, try disabling any ad-blocker/VPN for this site.");
+    return;
+  }
   if (error || !isAdmin) {
     await sb.auth.signOut();
     showAuthMsg('This account is signed in but is not an approved admin. Ask an existing admin to invite this email under Team, then activate again.');
