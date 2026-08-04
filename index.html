@@ -195,14 +195,16 @@ section{position:relative;}
 
 /* ---------- PROMO CAROUSEL ---------- */
 #promo{padding:40px 0 48px;}
-.promo-carousel{position:relative;overflow:hidden;box-shadow:var(--shadow);background:var(--ink);}
+/* The carousel's aspect-ratio is set inline by JS to match the actual
+   uploaded banner's real dimensions, so the image fills the frame edge to
+   edge with no letterbox gap — the 2/1 below is only a pre-load fallback. */
+.promo-carousel{position:relative;overflow:hidden;box-shadow:var(--shadow);background:var(--bg);aspect-ratio:2/1;max-height:420px;}
 .promo-carousel::before{content:'';position:absolute;inset:-2px;z-index:0;padding:2px;
   background:linear-gradient(120deg,var(--brand),transparent 30%,transparent 70%,var(--brand));
   opacity:.7;pointer-events:none;}
-.promo-track{display:flex;position:relative;z-index:1;transition:transform .65s cubic-bezier(.65,0,.35,1);}
-.promo-slide{flex:0 0 100%;position:relative;aspect-ratio:2/1;max-height:420px;overflow:hidden;}
-.promo-slide-bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(30px) brightness(.55) saturate(1.2);transform:scale(1.15);}
-.promo-slide img{position:relative;width:100%;height:100%;object-fit:contain;display:block;transform:scale(.98);transition:transform 8s ease-out;filter:drop-shadow(0 20px 40px rgba(0,0,0,.35));}
+.promo-track{display:flex;position:relative;z-index:1;height:100%;transition:transform .65s cubic-bezier(.65,0,.35,1);}
+.promo-slide{flex:0 0 100%;position:relative;height:100%;overflow:hidden;}
+.promo-slide img{position:relative;width:100%;height:100%;object-fit:cover;display:block;transform:scale(.98);transition:transform 8s ease-out;}
 .promo-slide.active img{transform:scale(1.02);}
 .promo-slide button{position:absolute;inset:0;display:block;z-index:2;border:none;background:none;padding:0;cursor:pointer;}
 .promo-arrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.92);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px -8px rgba(0,0,0,.4);z-index:5;color:var(--ink);}
@@ -212,8 +214,8 @@ section{position:relative;}
 .promo-dots{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5;}
 .promo-dots button{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.5);border:none;cursor:pointer;padding:0;transition:width .2s,background .2s;}
 .promo-dots button.active{background:#fff;width:24px;border-radius:6px;}
-@media (max-width:700px){.promo-slide{aspect-ratio:2/1;max-height:260px;}.promo-arrow{width:32px;height:32px;}.promo-arrow svg{width:16px;height:16px;}.promo-dots{bottom:10px;}}
-@media (max-width:480px){.promo-slide{aspect-ratio:2/1;max-height:190px;}}
+@media (max-width:700px){.promo-carousel{max-height:260px;}.promo-arrow{width:32px;height:32px;}.promo-arrow svg{width:16px;height:16px;}.promo-dots{bottom:10px;}}
+@media (max-width:480px){.promo-carousel{max-height:190px;}}
 
 /* ---------- HELP CARDS ---------- */
 #help{padding:68px 0;}
@@ -3082,12 +3084,25 @@ function initPromoCarousel(slides){
   promoSlidesCache = slides;
   const track = document.getElementById('promoTrack');
   const dotsWrap = document.getElementById('promoDots');
+  const carousel = document.getElementById('promoCarousel');
   track.innerHTML = slides.map((s, i) => {
-    const bg = `<div class="promo-slide-bg" style="background-image:url('${esc(s.image_url)}')"></div>`;
     const img = `<img src="${esc(s.image_url)}" alt="${esc(s.headline || 'Trulander JSF Limited')}"/>`;
-    return `<div class="promo-slide${i===0?' active':''}"><button type="button" onclick="openPromoLightbox(${i})" aria-label="View banner: ${esc(s.headline||'Read more')}">${bg}${img}</button></div>`;
+    return `<div class="promo-slide${i===0?' active':''}"><button type="button" onclick="openPromoLightbox(${i})" aria-label="View banner: ${esc(s.headline||'Read more')}">${img}</button></div>`;
   }).join('');
   dotsWrap.innerHTML = slides.map((_, i) => `<button aria-label="Go to slide ${i+1}" class="${i===0?'active':''}"></button>`).join('');
+
+  // Size the frame to the real banner's own aspect ratio instead of a fixed
+  // guess, so the image fills it edge to edge with no letterbox gap.
+  const firstImg = track.querySelector('.promo-slide img');
+  if (firstImg) {
+    const applyRatio = () => {
+      if (firstImg.naturalWidth && firstImg.naturalHeight) {
+        carousel.style.aspectRatio = `${firstImg.naturalWidth} / ${firstImg.naturalHeight}`;
+      }
+    };
+    if (firstImg.complete) applyRatio();
+    else firstImg.addEventListener('load', applyRatio, { once: true });
+  }
 
   let current = 0;
   const slideEls = track.querySelectorAll('.promo-slide');
@@ -3107,7 +3122,6 @@ function initPromoCarousel(slides){
     if (timer) clearInterval(timer);
     if (slides.length > 1) timer = setInterval(() => show(current + 1), 5500);
   }
-  const carousel = document.getElementById('promoCarousel');
   carousel.addEventListener('mouseenter', () => { if (timer) clearInterval(timer); });
   carousel.addEventListener('mouseleave', resetAutoplay);
   resetAutoplay();
