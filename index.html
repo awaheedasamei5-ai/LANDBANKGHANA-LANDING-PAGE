@@ -99,16 +99,16 @@ section{position:relative;}
 .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px;}
 .hero-trust{display:flex;align-items:center;gap:10px;margin-top:26px;font-size:13px;color:var(--muted);}
 .hero-trust svg{width:18px;height:18px;color:var(--brand);flex:none;}
-.hero-visual{position:relative;min-height:440px;display:flex;align-items:flex-end;justify-content:center;}
+.hero-visual{position:relative;min-height:520px;display:flex;align-items:flex-end;justify-content:center;}
 .hero-visual::before{content:'';position:absolute;width:82%;height:82%;left:9%;top:6%;border-radius:50%;
   background:radial-gradient(circle,rgba(34,165,76,.4),transparent 70%);filter:blur(48px);z-index:0;}
-.hero-photo{position:relative;z-index:1;max-height:480px;width:auto;max-width:100%;object-fit:contain;
+.hero-photo{position:relative;z-index:1;max-height:560px;width:auto;max-width:100%;object-fit:contain;
   filter:drop-shadow(0 26px 30px rgba(8,25,16,.22));}
 .hero-badge{position:absolute;z-index:2;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 16px 34px -14px rgba(8,25,16,.35);display:flex;flex-direction:column;gap:2px;min-width:120px;}
 .hero-badge .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--ink);}
 .hero-badge .lbl{font-size:11px;color:var(--muted);font-weight:600;}
-.hero-badge.b1{top:2%;left:0;}
-.hero-badge.b2{bottom:14%;right:0;}
+.hero-badge.b1{bottom:16%;right:-10px;}
+.hero-badge.b2{top:2%;left:0;}
 .hero-badge.b3{top:38%;left:-4%;background:var(--ink);color:#fff;}
 .hero-badge.b3 .num{color:#fff;}
 .hero-badge.b3 .lbl{color:rgba(255,255,255,.7);}
@@ -119,18 +119,18 @@ section{position:relative;}
 
 @media (max-width:900px){
   .hero-grid{grid-template-columns:1fr;}
-  .hero-visual{max-width:420px;margin:0 auto;min-height:380px;}
-  .hero-photo{max-height:400px;}
+  .hero-visual{max-width:480px;margin:0 auto;min-height:440px;}
+  .hero-photo{max-height:460px;}
 }
 @media (max-width:480px){
   #home{padding:110px 0 40px;}
-  .hero-visual{min-height:380px;max-width:320px;}
-  .hero-photo{max-height:380px;}
+  .hero-visual{min-height:430px;max-width:370px;}
+  .hero-photo{max-height:420px;}
   .hero-badge{padding:10px 13px;min-width:0;border-radius:13px;gap:0;}
   .hero-badge .num{font-size:17px;}
   .hero-badge .lbl{font-size:9.5px;white-space:nowrap;}
-  .hero-badge.b1{top:10%;left:2px;}
-  .hero-badge.b2{bottom:18%;right:2px;}
+  .hero-badge.b1{bottom:20%;right:-6px;}
+  .hero-badge.b2{top:10%;left:2px;}
   .hero-badge.b3{top:44%;left:-10px;}
 }
 
@@ -157,7 +157,7 @@ section{position:relative;}
 .sec-head p{margin-top:14px;color:var(--muted);font-size:16px;}
 
 /* ---------- PROMO CAROUSEL ---------- */
-#promo{padding:40px 0 8px;}
+#promo{padding:40px 0 48px;}
 .promo-carousel{position:relative;overflow:hidden;box-shadow:var(--shadow);background:var(--ink);}
 .promo-carousel::before{content:'';position:absolute;inset:-2px;z-index:0;padding:2px;
   background:linear-gradient(120deg,var(--brand),transparent 30%,transparent 70%,var(--brand));
@@ -183,7 +183,7 @@ section{position:relative;}
 .help-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
 .help-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:30px 24px;transition:transform .25s ease,box-shadow .25s ease,background .25s ease;}
 .help-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);}
-.help-card.hi{background:var(--ink);border-color:var(--ink);color:#fff;}
+.help-card.hi{background:linear-gradient(135deg,var(--brand),var(--brand-dark));border-color:var(--brand);color:#fff;}
 .help-card .ic{width:52px;height:52px;border-radius:14px;background:var(--brand-light);color:var(--brand-dark);display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
 .help-card.hi .ic{background:rgba(255,255,255,.12);color:var(--brand);}
 .help-card .ic svg{width:26px;height:26px;}
@@ -917,7 +917,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <h3>Support for Buyers</h3>
         <p>From shortlisting the right plot to registration and documentation, we walk with you to a safe, stress-free handover.</p>
       </div>
-      <div class="help-card reveal">
+      <div class="help-card hi reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
         <h3>Support for Sellers</h3>
         <p>Selling land safely takes more than a signboard. We help you package, verify, and connect your land with serious, ready buyers.</p>
