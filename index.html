@@ -967,7 +967,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       </div>
       <div class="rp-cta reveal">
         <button type="button" class="btn btn-accent" id="rpSiteVisitBtn">Book a Free Site Visit</button>
-        <a href="#/plots" class="btn btn-ghost">Browse Available Plots</a>
+        <a href="#/plots?q=Royal%20Palm" class="btn btn-ghost">Browse Available Plots</a>
       </div>
     </div>
   </div>
@@ -1974,7 +1974,8 @@ const ROUTE_SECTION = {
 };
 let pendingSharedPlotId = null;
 function applyRoute(){
-  const hash = location.hash.replace(/^#\/?/, '').replace(/\/$/, '');
+  const rawHash = location.hash.replace(/^#\/?/, '').replace(/\/$/, '');
+  const [hash, queryString] = rawHash.split('?');
   const isHome = hash === '';
   document.body.classList.toggle('is-subpage', !isHome);
 
@@ -1997,7 +1998,19 @@ function applyRoute(){
       const el = document.getElementById(id);
       if (el) el.classList.toggle('route-hidden', !targets.includes(id));
     });
-    if (targets.includes('plots') && typeof applyPlotsFilters === 'function') { try { applyPlotsFilters(); } catch(e){} }
+    if (targets.includes('plots') && typeof applyPlotsFilters === 'function') {
+      try {
+        // "Browse Available Plots" links can arrive with a ?q= filter (e.g.
+        // from the Royal Palm Enclave section) — prefill the search box
+        // with it so the Plots page opens pre-filtered.
+        if (queryString) {
+          const qParam = new URLSearchParams(queryString).get('q');
+          const searchInput = document.getElementById('plotsSearchInput');
+          if (qParam != null && searchInput) searchInput.value = qParam;
+        }
+        applyPlotsFilters();
+      } catch(e){}
+    }
   }
 
   document.querySelectorAll('[data-route-link]').forEach(a => {
