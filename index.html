@@ -558,8 +558,18 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 body:not(.is-subpage) .page-breadcrumb{display:none;}
 #royal-palm .page-breadcrumb{color:rgba(255,255,255,.55);}
 #royal-palm .page-breadcrumb a{color:var(--brand);}
-body.is-subpage section#about,body.is-subpage section#contact,body.is-subpage section#plots{padding-top:120px;}
+body.is-subpage section#about,body.is-subpage section#contact,body.is-subpage section#plots,
+body.is-subpage section#services,body.is-subpage section#service-surveyor,body.is-subpage section#service-legal,
+body.is-subpage section#service-documentation,body.is-subpage section#service-help,
+body.is-subpage section#site-visit,body.is-subpage section#remote-sales{padding-top:120px;}
 body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
+@media (max-width:760px){
+  body.is-subpage section#about,body.is-subpage section#contact,body.is-subpage section#plots,
+  body.is-subpage section#services,body.is-subpage section#service-surveyor,body.is-subpage section#service-legal,
+  body.is-subpage section#service-documentation,body.is-subpage section#service-help,
+  body.is-subpage section#site-visit,body.is-subpage section#remote-sales{padding-top:100px;}
+  body.is-subpage section#royal-palm .rp-hero{padding-top:108px;}
+}
 
 .plots-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
 .plots-preview-empty{text-align:center;padding:50px 20px;color:var(--muted);}
@@ -1308,6 +1318,11 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 
 <!-- ============ REMOTE SALES / REFER & EARN ============ -->
 <section id="remote-sales">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal">
+      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Refer &amp; Earn
+    </div>
+  </div>
   <div class="wrap rs-grid">
     <div class="rs-copy reveal">
       <span class="eyebrow">Refer &amp; Earn</span>
