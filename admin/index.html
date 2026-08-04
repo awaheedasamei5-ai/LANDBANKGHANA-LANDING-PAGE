@@ -187,6 +187,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="clients">Clients</button>
       <button class="nav-item" data-panel="social">Social Links</button>
       <button class="nav-item" data-panel="settings">Contact Info</button>
+      <button class="nav-item" data-panel="pagecontent">Page Content</button>
       <button class="nav-item" data-panel="news">News</button>
       <button class="nav-item" data-panel="team">Team</button>
       <button class="nav-item" data-panel="plots">Hot Plots</button>
@@ -393,6 +394,25 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
             </div>
             <button class="btn btn-accent" type="submit">Save contact info</button>
           </form>
+        </div>
+      </div>
+
+      <!-- PAGE CONTENT (field-based editing) -->
+      <div class="panel" id="panel-pagecontent">
+        <div class="panel-card">
+          <h3>About Us</h3>
+          <p class="desc">Edit the text on the About Us section. Leave a field blank to show the site's default wording.</p>
+          <form class="copy-form" data-group="about" id="copyFormAbout"></form>
+        </div>
+        <div class="panel-card">
+          <h3>Royal Palm Enclave</h3>
+          <p class="desc">Edit the intro copy at the top of the Royal Palm Enclave page.</p>
+          <form class="copy-form" data-group="royalpalm" id="copyFormRoyalpalm"></form>
+        </div>
+        <div class="panel-card">
+          <h3>Services</h3>
+          <p class="desc">Edit the intro copy at the top of the Services hub page.</p>
+          <form class="copy-form" data-group="services" id="copyFormServices"></form>
         </div>
       </div>
 
@@ -965,7 +985,7 @@ document.querySelectorAll('.side .nav-item').forEach(btn => {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteCopy();
 }
 
 /* ---- BANNERS ---- */
@@ -1235,6 +1255,60 @@ async function loadSettings(){
   settingsForm.urgent_phone.value = data.urgent_phone||'';
   settingsForm.referral_bonus_amount.value = data.referral_bonus_amount ?? '';
   settingsForm.referral_bonus_currency.value = data.referral_bonus_currency || 'GHS';
+}
+
+/* ---- PAGE CONTENT (field-based editing) ---- */
+const SITE_COPY_GROUPS = {
+  about: [
+    ['aboutEyebrow', 'Eyebrow label', 'text', 'About Us — Who Are We?'],
+    ['aboutHeading', 'Heading', 'text', 'We are the land experts.'],
+    ['aboutBody', 'Body paragraph', 'textarea', "Trulander JSF Limited is a registered real estate company, and a GREDA (Ghana Real Estate Developers Association) member. At Trulander, we aim to provide genuine land offerings, accessible and available for all. Every property we market and sell goes through rigorous due diligence to ensure it's void of any foreseeable risk — so you can acquire land for your dream home or project in peace."],
+    ['aboutQuote', 'Quote (shown on the photo card)', 'textarea', '"Property as risk-free and available as air — everywhere, for everyone."'],
+    ['aboutQuoteAttribution', 'Quote attribution', 'text', '— Trulander JSF Limited, Vision Statement'],
+    ['aboutMission', '"Our Mission" text', 'textarea', 'To help humanity prosper by providing property void of risk, at your convenience.'],
+    ['aboutVision', '"Our Vision" text', 'textarea', 'Property as risk-free and available as air — everywhere, for everyone.'],
+    ['aboutGreda', '"GREDA Registered" text', 'textarea', 'Every headlease and sub-lease we sell is certified and registered with the Lands Commission.'],
+    ['aboutPeopleFirst', '"People-First" text', 'textarea', "Real people guide your transaction — not a listing you're left to figure out alone."]
+  ],
+  royalpalm: [
+    ['rpEyebrow', 'Eyebrow label', 'text', 'Now Selling · GREDA Registered'],
+    ['rpHeading', 'Heading', 'text', 'Royal Palm Enclave, Tsopoli'],
+    ['rpSubtext', 'Subtext', 'textarea', "Your gateway to serene living — 200 acres of fully documented land in Ghana's fastest-growing corridor, roughly 44km from Ashaiman via Tema."]
+  ],
+  services: [
+    ['servicesEyebrow', 'Eyebrow label', 'text', "We're Here To Help"],
+    ['servicesHeading', 'Heading', 'text', "Whatever stage you're at, start with us."],
+    ['servicesSubtext', 'Subtext', 'textarea', 'Land in Ghana comes with real questions — surveying, disputes, legal steps, paperwork. Tell us what you need and our team takes it from there.']
+  ]
+};
+let siteCopyCache = {};
+function renderCopyForms(){
+  document.querySelectorAll('.copy-form').forEach(form => {
+    const fields = SITE_COPY_GROUPS[form.dataset.group];
+    form.innerHTML = fields.map(([key,label,type,fallback]) => `
+      <div class="field">
+        <label>${esc(label)}</label>
+        ${type === 'textarea'
+          ? `<textarea name="${key}" rows="2" placeholder="${esc(fallback)}">${esc(siteCopyCache[key]||'')}</textarea>`
+          : `<input name="${key}" placeholder="${esc(fallback)}" value="${esc(siteCopyCache[key]||'')}"/>`}
+      </div>`).join('') + `<button class="btn btn-accent" type="submit">Save ${esc(form.dataset.group === 'royalpalm' ? 'Royal Palm' : form.dataset.group)} content</button><p class="form-msg copy-form-msg"></p>`;
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const msg = form.querySelector('.copy-form-msg');
+      const d = Object.fromEntries(new FormData(form).entries());
+      const rows = Object.entries(d).map(([key,value]) => ({ key, value: value || null }));
+      const { error } = await sb.from('site_copy').upsert(rows);
+      if (error) { msg.textContent = 'Error: ' + error.message; msg.className = 'form-msg copy-form-msg err'; return; }
+      Object.assign(siteCopyCache, d);
+      msg.textContent = 'Saved'; msg.className = 'form-msg copy-form-msg ok';
+      toast('Content saved');
+    };
+  });
+}
+async function loadSiteCopy(){
+  const { data } = await sb.from('site_copy').select('*');
+  siteCopyCache = Object.fromEntries((data||[]).map(r => [r.key, r.value]));
+  renderCopyForms();
 }
 
 /* ---- NEWS ---- */

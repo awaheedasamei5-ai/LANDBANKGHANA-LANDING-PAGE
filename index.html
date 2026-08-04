@@ -726,9 +726,9 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Royal Palm Enclave
       </div>
       <div class="sec-head reveal">
-        <span class="eyebrow">Now Selling · GREDA Registered</span>
-        <h2>Royal Palm Enclave, Tsopoli</h2>
-        <p>Your gateway to serene living — 200 acres of fully documented land in Ghana's fastest-growing corridor, roughly 44km from Ashaiman via Tema.</p>
+        <span class="eyebrow" id="rpEyebrow">Now Selling · GREDA Registered</span>
+        <h2 id="rpHeading">Royal Palm Enclave, Tsopoli</h2>
+        <p id="rpSubtext">Your gateway to serene living — 200 acres of fully documented land in Ghana's fastest-growing corridor, roughly 44km from Ashaiman via Tema.</p>
       </div>
       <div class="rp-facts reveal">
         <div class="rp-fact">
@@ -1142,19 +1142,19 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <img class="about-photo" id="aboutPhotoImg" src="assets/photos/about.jpg" alt="A Trulander JSF Limited team member"/>
       <div class="about-overlay"></div>
       <div class="about-card-content">
-        <div class="quote">"Property as risk-free and available as air — everywhere, for <span class="accent">everyone</span>."</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.55)">— Trulander JSF Limited, Vision Statement</div>
+        <div class="quote" id="aboutQuote">"Property as risk-free and available as air — everywhere, for everyone."</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.55)" id="aboutQuoteAttribution">— Trulander JSF Limited, Vision Statement</div>
       </div>
     </div>
     <div class="reveal">
-      <span class="eyebrow">About Us — Who Are We?</span>
-      <h2 style="margin-top:14px;font-size:clamp(26px,4vw,38px)">We are the land experts.</h2>
-      <p style="margin-top:16px;color:var(--muted);font-size:16px;">Trulander JSF Limited is a registered real estate company, and a GREDA (Ghana Real Estate Developers Association) member. At Trulander, we aim to provide genuine land offerings, accessible and available for all. Every property we market and sell goes through rigorous due diligence to ensure it's void of any foreseeable risk — so you can acquire land for your dream home or project in peace.</p>
+      <span class="eyebrow" id="aboutEyebrow">About Us — Who Are We?</span>
+      <h2 style="margin-top:14px;font-size:clamp(26px,4vw,38px)" id="aboutHeading">We are the land experts.</h2>
+      <p style="margin-top:16px;color:var(--muted);font-size:16px;" id="aboutBody">Trulander JSF Limited is a registered real estate company, and a GREDA (Ghana Real Estate Developers Association) member. At Trulander, we aim to provide genuine land offerings, accessible and available for all. Every property we market and sell goes through rigorous due diligence to ensure it's void of any foreseeable risk — so you can acquire land for your dream home or project in peace.</p>
       <div class="values-grid">
-        <div class="value"><h4>Our Mission</h4><p>To help humanity prosper by providing property void of risk, at your convenience.</p></div>
-        <div class="value"><h4>Our Vision</h4><p>Property as risk-free and available as air — everywhere, for everyone.</p></div>
-        <div class="value"><h4>GREDA Registered</h4><p>Every headlease and sub-lease we sell is certified and registered with the Lands Commission.</p></div>
-        <div class="value"><h4>People-First</h4><p>Real people guide your transaction — not a listing you're left to figure out alone.</p></div>
+        <div class="value"><h4>Our Mission</h4><p id="aboutMission">To help humanity prosper by providing property void of risk, at your convenience.</p></div>
+        <div class="value"><h4>Our Vision</h4><p id="aboutVision">Property as risk-free and available as air — everywhere, for everyone.</p></div>
+        <div class="value"><h4>GREDA Registered</h4><p id="aboutGreda">Every headlease and sub-lease we sell is certified and registered with the Lands Commission.</p></div>
+        <div class="value"><h4>People-First</h4><p id="aboutPeopleFirst">Real people guide your transaction — not a listing you're left to figure out alone.</p></div>
       </div>
     </div>
   </div>
@@ -1286,9 +1286,9 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Services
     </div>
     <div class="sec-head center reveal">
-      <span class="eyebrow">We're Here To Help</span>
-      <h2>Whatever stage you're at, start with us.</h2>
-      <p>Land in Ghana comes with real questions — surveying, disputes, legal steps, paperwork. Tell us what you need and our team takes it from there.</p>
+      <span class="eyebrow" id="servicesEyebrow">We're Here To Help</span>
+      <h2 id="servicesHeading">Whatever stage you're at, start with us.</h2>
+      <p id="servicesSubtext">Land in Ghana comes with real questions — surveying, disputes, legal steps, paperwork. Tell us what you need and our team takes it from there.</p>
     </div>
     <div class="services-hub-grid">
       <div class="service-hub-card reveal">
@@ -2258,7 +2258,7 @@ try {
 async function loadContent(){
   if (!sb) return;
   try{
-    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}] = await Promise.all([
+    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}, {data:copyRows}] = await Promise.all([
       sb.from('banners').select('*').eq('kind','hero').eq('active',true).order('sort_order').limit(1),
       sb.from('banners').select('*').eq('kind','promo').eq('active',true).order('sort_order'),
       sb.from('stats').select('*').eq('active',true).order('sort_order'),
@@ -2269,8 +2269,17 @@ async function loadContent(){
       sb.from('news').select('*').eq('active',true).order('published_at',{ascending:false}),
       sb.from('plots').select('*').eq('active',true).order('sort_order'),
       sb.from('sellers').select('*').eq('active',true),
-      sb.from('reviews').select('*').eq('approved',true).order('created_at',{ascending:false})
+      sb.from('reviews').select('*').eq('approved',true).order('created_at',{ascending:false}),
+      sb.from('site_copy').select('*')
     ]);
+
+    if (copyRows && copyRows.length) {
+      copyRows.forEach(({ key, value }) => {
+        if (!value) return;
+        const el = document.getElementById(key);
+        if (el) el.textContent = value;
+      });
+    }
 
     if (banners && banners[0]) {
       const b = banners[0];
