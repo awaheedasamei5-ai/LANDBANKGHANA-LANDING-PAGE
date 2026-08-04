@@ -2811,17 +2811,17 @@ async function loadContent(){
       }
       if (settings.whatsapp) {
         const wa = document.getElementById('wa-float');
-        wa.href = 'https://wa.me/' + settings.whatsapp.replace(/[^0-9]/g,'');
+        wa.href = 'https://wa.me/' + toIntlPhone(settings.whatsapp);
         wa.classList.add('show');
       }
       const urgentNumber = settings.urgent_phone || settings.whatsapp;
       if (urgentNumber) {
         const call = document.getElementById('urgent-call');
-        call.href = 'tel:+' + urgentNumber.replace(/[^0-9]/g,'');
+        call.href = 'tel:+' + toIntlPhone(urgentNumber);
         call.classList.add('show');
       }
-      const callDigits = (settings.phone || settings.whatsapp || '').replace(/[^0-9]/g,'');
-      const waDigits = (settings.whatsapp || settings.phone || '').replace(/[^0-9]/g,'');
+      const callDigits = toIntlPhone(settings.phone || settings.whatsapp || '');
+      const waDigits = toIntlPhone(settings.whatsapp || settings.phone || '');
       if (callDigits) document.querySelectorAll('.sp-call-btn').forEach(a => a.href = 'tel:+' + callDigits);
       if (waDigits) document.querySelectorAll('.sp-wa-btn').forEach(a => a.href = 'https://wa.me/' + waDigits);
 
@@ -3070,8 +3070,8 @@ function tagClass(tag){
 function renderDirectContactCard(p){
   const settings = siteSettingsCache;
   if (!settings || (!settings.phone && !settings.whatsapp)) return '';
-  const callNumber = (settings.phone || settings.whatsapp).replace(/[^0-9]/g,'');
-  const waNumber = (settings.whatsapp || settings.phone).replace(/[^0-9]/g,'');
+  const callNumber = toIntlPhone(settings.phone || settings.whatsapp);
+  const waNumber = toIntlPhone(settings.whatsapp || settings.phone);
   return `
     <div class="seller-card">
       <div class="seller-head">
@@ -3092,8 +3092,8 @@ function renderSellerCard(s){
   const tags = (s.tags||[]).map(t => `<span class="seller-tag ${tagClass(t)}">${tagIcon(t)}${esc(t)}</span>`).join('');
   const docs = (s.document_types||[]).map(d => `<span class="doc-pill">${esc(d)}</span>`).join('');
   const contacts = [];
-  if (s.phone) contacts.push(`<a href="tel:+${esc(s.phone.replace(/[^0-9]/g,''))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg> Call</a>`);
-  if (s.phone) contacts.push(`<a href="https://wa.me/${esc(s.phone.replace(/[^0-9]/g,''))}" target="_blank" rel="noopener">${socialIcon('whatsapp')} WhatsApp</a>`);
+  if (s.phone) contacts.push(`<a href="tel:+${esc(toIntlPhone(s.phone))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg> Call</a>`);
+  if (s.phone) contacts.push(`<a href="https://wa.me/${esc(toIntlPhone(s.phone))}" target="_blank" rel="noopener">${socialIcon('whatsapp')} WhatsApp</a>`);
   if (s.email) contacts.push(`<a href="mailto:${esc(s.email)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg> Email</a>`);
   return `
     <div class="seller-card">
@@ -3449,6 +3449,17 @@ document.addEventListener('keydown', (e) => {
 });
 
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+// Sellers/buyers usually enter numbers in local 0XX... format. A bare digit
+// strip leaves that leading 0 in place, which breaks tel:/wa.me links (dialing
+// "+0546416566" fails, and WhatsApp reports the number doesn't exist). Ghana
+// numbers only, matching every other hardcoded "+" assumption in this file.
+function toIntlPhone(phone){
+  let digits = (phone || '').replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('0')) digits = '233' + digits.slice(1);
+  else if (!digits.startsWith('233')) digits = '233' + digits;
+  return digits;
+}
 function toggleClientPopover(i){
   const target = document.getElementById('clientPopover'+i);
   const wasOpen = target.classList.contains('open');

@@ -798,6 +798,15 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, m => ({'&':'&am
 // mailto: depends on the device having a mail client configured, which many
 // don't — open Gmail's own compose UI with the recipient already filled in.
 function gmailComposeHref(email){ return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`; }
+// Sellers/buyers usually enter numbers in local 0XX... format. A bare digit
+// strip leaves that leading 0 in place, which breaks tel:/wa.me links.
+function toIntlPhone(phone){
+  let digits = (phone || '').replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('0')) digits = '233' + digits.slice(1);
+  else if (!digits.startsWith('233')) digits = '233' + digits;
+  return digits;
+}
 function exportCSV(rows, cols, filename){
   if (!rows || !rows.length) return toast('Nothing to export yet');
   const csvEsc = (v) => `"${String(v ?? '').replace(/"/g,'""')}"`;
@@ -1832,7 +1841,7 @@ async function loadLeads(){
       <td>${esc(l.name)}</td>
       <td>
         <div class="row-actions" style="flex-wrap:wrap">
-          ${l.phone?`<a class="btn btn-ghost" style="padding:6px 10px" href="tel:+${esc(l.phone.replace(/[^0-9]/g,''))}" title="Call">Call</a><a class="btn btn-ghost" style="padding:6px 10px" href="https://wa.me/${esc(l.phone.replace(/[^0-9]/g,''))}" target="_blank" rel="noopener" title="WhatsApp">WhatsApp</a>`:''}
+          ${l.phone?`<a class="btn btn-ghost" style="padding:6px 10px" href="tel:+${esc(toIntlPhone(l.phone))}" title="Call">Call</a><a class="btn btn-ghost" style="padding:6px 10px" href="https://wa.me/${esc(toIntlPhone(l.phone))}" target="_blank" rel="noopener" title="WhatsApp">WhatsApp</a>`:''}
           ${l.email?`<a class="btn btn-ghost" style="padding:6px 10px" href="${gmailComposeHref(l.email)}" target="_blank" rel="noopener" title="Email">Email</a>`:''}
         </div>
         <div class="hint" style="margin-top:4px">${esc(l.phone||'')}${l.email?' · '+esc(l.email):''}</div>
@@ -1913,8 +1922,8 @@ async function openSubmission(id){
       <div><b>Documents held</b><span>${esc((sub.documents_held||[]).join(', ')||'—')}</span></div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-      <a class="btn btn-ghost" href="tel:+${esc((sub.phone||'').replace(/[^0-9]/g,''))}">Call</a>
-      <a class="btn btn-ghost" href="https://wa.me/${esc((sub.phone||'').replace(/[^0-9]/g,''))}" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-ghost" href="tel:+${esc(toIntlPhone(sub.phone))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc(toIntlPhone(sub.phone))}" target="_blank" rel="noopener">WhatsApp</a>
       ${sub.email?`<a class="btn btn-ghost" href="${gmailComposeHref(sub.email)}" target="_blank" rel="noopener">Email</a>`:''}
     </div>
     <b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Full details</b>
@@ -2050,8 +2059,8 @@ function openBuyer(id){
     ${b.existing_land_details?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Existing land details</b><div class="detail-desc">${esc(b.existing_land_details)}</div>`:''}
     ${b.message?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Message</b><div class="detail-desc">${esc(b.message)}</div>`:''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-      <a class="btn btn-ghost" href="tel:+${esc((b.phone||'').replace(/[^0-9]/g,''))}">Call</a>
-      <a class="btn btn-ghost" href="https://wa.me/${esc((b.phone||'').replace(/[^0-9]/g,''))}" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-ghost" href="tel:+${esc(toIntlPhone(b.phone))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc(toIntlPhone(b.phone))}" target="_blank" rel="noopener">WhatsApp</a>
       ${b.email?`<a class="btn btn-ghost" href="${gmailComposeHref(b.email)}" target="_blank" rel="noopener">Email</a>`:''}
     </div>
     <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
@@ -2112,8 +2121,8 @@ function openRemoteSales(id){
     </div>
     ${r.message?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Message</b><div class="detail-desc">${esc(r.message)}</div>`:''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-      <a class="btn btn-ghost" href="tel:+${esc((r.phone||'').replace(/[^0-9]/g,''))}">Call</a>
-      <a class="btn btn-ghost" href="https://wa.me/${esc((r.phone||'').replace(/[^0-9]/g,''))}" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-ghost" href="tel:+${esc(toIntlPhone(r.phone))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc(toIntlPhone(r.phone))}" target="_blank" rel="noopener">WhatsApp</a>
       ${r.email?`<a class="btn btn-ghost" href="${gmailComposeHref(r.email)}" target="_blank" rel="noopener">Email</a>`:''}
     </div>
     <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
@@ -2178,8 +2187,8 @@ function openServiceRequest(id){
     </div>
     ${r.details?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Details</b><div class="detail-desc">${esc(r.details)}</div>`:''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-      <a class="btn btn-ghost" href="tel:+${esc((r.phone||'').replace(/[^0-9]/g,''))}">Call</a>
-      <a class="btn btn-ghost" href="https://wa.me/${esc((r.phone||'').replace(/[^0-9]/g,''))}" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-ghost" href="tel:+${esc(toIntlPhone(r.phone))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc(toIntlPhone(r.phone))}" target="_blank" rel="noopener">WhatsApp</a>
       ${r.email?`<a class="btn btn-ghost" href="${gmailComposeHref(r.email)}" target="_blank" rel="noopener">Email</a>`:''}
     </div>
     <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
@@ -2342,7 +2351,7 @@ function sendSiteVisitWhatsApp(id, kind){
     const daysAwayLabel = daysAway === 0 ? 'today' : daysAway === 1 ? 'in 1 day' : daysAway > 1 ? `in ${daysAway} days` : 'coming up';
     text = `Hi ${r.full_name}, this is a reminder that your free site visit to Royal Palm Enclave, Tsopoli with Trulander JSF Limited is ${daysAwayLabel} (${r.confirmed_visit_date}). Your pickup location is ${r.pickup_location || 'to be confirmed'}. Please let us know if anything changes. See you soon!`;
   }
-  const digits = r.contact.replace(/[^0-9]/g,'');
+  const digits = toIntlPhone(r.contact);
   window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
 }
 document.getElementById('siteVisitExportBtn').addEventListener('click', () => {
