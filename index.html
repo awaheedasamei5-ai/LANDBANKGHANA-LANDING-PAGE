@@ -160,6 +160,16 @@ section{position:relative;}
   .hero-badge.b2{bottom:14%;right:0;}
   .hero-badge.b3{top:48%;left:-8px;}
 }
+/* The photo/badge composition is a desktop-only flourish — on phones it
+   just eats space, so the mobile hero is text + CTAs only. */
+@media (max-width:760px){
+  #home{padding:104px 0 40px;}
+  .hero-visual{display:none;}
+  .hero-copy{text-align:center;}
+  .hero-copy p.lead{margin-left:auto;margin-right:auto;}
+  .hero-ctas{justify-content:center;}
+  .hero-trust{justify-content:center;text-align:left;}
+}
 
 /* ---------- CLIENTS STRIP ---------- */
 #clients{padding:44px 0;border-top:1px solid var(--line);background:#fff;}
