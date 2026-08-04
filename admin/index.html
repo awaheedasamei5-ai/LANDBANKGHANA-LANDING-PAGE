@@ -718,7 +718,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
             <button type="button" class="btn btn-ghost" id="reviewsExportBtn">Download All (CSV)</button>
           </div>
           <p class="desc">Approve a review to show it publicly in the homepage's "Client Stories" section.</p>
-          <table><thead><tr><th>Name</th><th>Rating</th><th>Comment</th><th>Status</th><th></th></tr></thead><tbody id="reviewsTable"></tbody></table>
+          <table><thead><tr><th>Photo</th><th>Name</th><th>Rating</th><th>Comment</th><th>Status</th><th></th></tr></thead><tbody id="reviewsTable"></tbody></table>
         </div>
       </div>
 
@@ -1711,6 +1711,7 @@ async function loadReviews(){
   reviewsCache = data || [];
   document.getElementById('reviewsTable').innerHTML = (data||[]).map(r => `
     <tr>
+      <td>${r.photo_url?`<img class="thumb" src="${esc(r.photo_url)}" alt=""/>`:'—'}</td>
       <td>${esc(r.reviewer_name)}</td>
       <td>${adminStars(r.rating)}</td>
       <td style="max-width:260px">${esc(r.comment||'')}</td>
@@ -1719,7 +1720,7 @@ async function loadReviews(){
         ${!r.approved?`<button class="btn btn-accent" onclick="approveReview('${r.id}')">Approve</button>`:`<button class="btn" onclick="unapproveReview('${r.id}')">Unapprove</button>`}
         <button class="btn btn-danger" onclick="deleteRow('reviews','${r.id}',loadReviews)">Delete</button>
       </td>
-    </tr>`).join('') || '<tr><td colspan="5">No reviews yet.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="6">No reviews yet.</td></tr>';
 }
 async function approveReview(id){
   const { error } = await sb.from('reviews').update({ approved: true }).eq('id', id);
@@ -1732,7 +1733,7 @@ async function unapproveReview(id){
   toast('Review hidden'); loadReviews();
 }
 document.getElementById('reviewsExportBtn').addEventListener('click', () => {
-  exportCSV(reviewsCache, ['reviewer_name','rating','comment','approved','created_at'], `reviews-${new Date().toISOString().slice(0,10)}.csv`);
+  exportCSV(reviewsCache, ['reviewer_name','rating','comment','photo_url','approved','created_at'], `reviews-${new Date().toISOString().slice(0,10)}.csv`);
 });
 
 /* ---- LEADS ---- */

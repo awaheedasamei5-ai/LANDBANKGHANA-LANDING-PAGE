@@ -502,6 +502,9 @@ section{position:relative;}
 .testimonial-card .stars svg{width:16px;height:16px;}
 .testimonial-card p{font-size:14.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:14px;}
 .testimonial-card .t-name{font-weight:700;font-size:13.5px;}
+.testimonial-card .t-head{display:flex;align-items:center;gap:10px;}
+.testimonial-card .t-photo{width:38px;height:38px;border-radius:50%;object-fit:cover;flex:none;}
+.testimonial-card .t-photo-fallback{width:38px;height:38px;border-radius:50%;background:var(--brand-light);color:var(--brand-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;font-family:'Space Grotesk',sans-serif;flex:none;}
 @media (max-width:900px){.testimonials-grid{grid-template-columns:1fr;}}
 
 .review-form-wrap{max-width:560px;margin:44px auto 0;text-align:center;}
@@ -1468,6 +1471,9 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
           <div class="field"><label>Your name</label><input name="reviewer_name" required placeholder="e.g. Kwame Asante"/></div>
         </div>
         <div class="field"><label>Your experience</label><textarea name="comment" required placeholder="Tell us how it went..."></textarea></div>
+        <div class="field"><label>Your photo (optional)</label><input type="file" name="photo" id="reviewPhotoInput" accept="image/*"/>
+          <div class="hint">Shows next to your review so people can see it's a real person — totally optional.</div>
+        </div>
         <button type="submit" class="btn btn-accent">Submit Review</button>
         <p class="form-msg" id="reviewMsg"></p>
       </form>
@@ -3156,12 +3162,18 @@ function renderTestimonials(reviews){
   const wrap = document.getElementById('storiesContent');
   if (!wrap) return;
   if (!reviews.length) return; // keep the default empty state markup already in the HTML
-  wrap.innerHTML = `<div class="testimonials-grid">${reviews.map(r => `
+  wrap.innerHTML = `<div class="testimonials-grid">${reviews.map(r => {
+    const initials = (r.reviewer_name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    return `
     <div class="testimonial-card reveal in">
       <div class="stars">${Array.from({length:5}, (_, i) => starSvg(i < r.rating)).join('')}</div>
       <p>"${esc(r.comment || '')}"</p>
-      <div class="t-name">${esc(r.reviewer_name)}</div>
-    </div>`).join('')}</div>`;
+      <div class="t-head">
+        ${r.photo_url ? `<img class="t-photo" src="${esc(r.photo_url)}" alt="${esc(r.reviewer_name)}"/>` : `<div class="t-photo-fallback">${esc(initials)}</div>`}
+        <div class="t-name">${esc(r.reviewer_name)}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 /* --- promo banner carousel --- */
@@ -3421,10 +3433,20 @@ document.getElementById('reviewForm').addEventListener('submit', async (e) => {
   btn.disabled = true; btn.textContent = 'Submitting...';
   try{
     if (!sb) throw new Error('offline');
+    let photoUrl = null;
+    const photoFile = document.getElementById('reviewPhotoInput').files[0];
+    if (photoFile) {
+      const ext = (photoFile.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+      const path = `reviews/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error: uploadError } = await sb.storage.from('media').upload(path, photoFile, { upsert: false });
+      if (uploadError) throw uploadError;
+      photoUrl = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+    }
     const { error } = await withRetry(() => sb.from('reviews').insert({
       reviewer_name: data.reviewer_name,
       rating: parseInt(data.rating, 10),
-      comment: data.comment
+      comment: data.comment,
+      photo_url: photoUrl
     }));
     if (error) throw error;
     msg.textContent = 'Thanks for your review — it will appear publicly once we approve it.';
