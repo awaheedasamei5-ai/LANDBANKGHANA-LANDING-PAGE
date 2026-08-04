@@ -1877,6 +1877,17 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
    so it does not depend on `supabase` existing, and every block below is
    isolated with try/catch so one failure can't take down the rest of the page. */
 
+/* A single dropped request shouldn't be a hard failure for someone submitting
+   a form — retry a couple of times with a short delay before giving up. */
+async function withRetry(fn, attempts = 3, delayMs = 600){
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try { return await fn(); } catch (err) { lastErr = err; }
+    if (i < attempts - 1) await new Promise(r => setTimeout(r, delayMs));
+  }
+  throw lastErr;
+}
+
 /* --- nav scroll state --- */
 const navEl = document.getElementById('nav');
 window.addEventListener('scroll', () => {
@@ -2208,7 +2219,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
     msg.className = 'form-msg';
     try {
       if (!sb) throw new Error('offline');
-      const { error } = await sb.from('buyer_inquiries').insert({
+      const { error } = await withRetry(() => sb.from('buyer_inquiries').insert({
         name: data.name, phone: data.phone, email: data.email || null,
         has_existing_land: data.has_existing_land === '' ? null : data.has_existing_land === 'true',
         existing_land_details: data.existing_land_details || null,
@@ -2217,7 +2228,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
         budget_range: data.budget_range || null,
         preferred_contact: data.preferred_contact || 'phone',
         message: data.message || null
-      });
+      }));
       if (error) throw error;
       document.getElementById('buyerModalFormWrap').style.display = 'none';
       document.getElementById('buyerModalSuccess').style.display = 'block';
@@ -2243,7 +2254,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
     msg.className = 'form-msg';
     try {
       if (!sb) throw new Error('offline');
-      const { data: inserted, error } = await sb.from('seller_submissions').insert({
+      const { data: inserted, error } = await withRetry(() => sb.from('seller_submissions').insert({
         name: data.name, phone: data.phone, email: data.email || null,
         company_name: data.company_name || null,
         land_title: data.land_title, land_size: data.land_size || null,
@@ -2252,7 +2263,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
         has_search_result: data.has_search_result === '' ? null : data.has_search_result === 'true',
         documents_held: docsHeld,
         description: data.description
-      }).select('id').single();
+      }).select('id').single());
       if (error) throw error;
       const submissionId = inserted.id;
 
@@ -2274,7 +2285,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
         uploaded++; progress.textContent = `Uploading files... ${uploaded}/${totalFiles}`;
       }
       if (fileRows.length) {
-        const { error: fErr } = await sb.from('seller_submission_files').insert(fileRows);
+        const { error: fErr } = await withRetry(() => sb.from('seller_submission_files').insert(fileRows));
         if (fErr) throw fErr;
       }
       progress.classList.remove('show');
@@ -2309,11 +2320,11 @@ document.getElementById('remoteSalesForm')?.addEventListener('submit', async (e)
   msg.className = 'form-msg';
   try {
     if (!sb) throw new Error('offline');
-    const { error } = await sb.from('remote_sales_applications').insert({
+    const { error } = await withRetry(() => sb.from('remote_sales_applications').insert({
       name: data.name, phone: data.phone, email: data.email || null,
       location: data.location || null, experience: data.experience || null,
       message: data.message || null
-    });
+    }));
     if (error) throw error;
     msg.textContent = "You're in! Our team will call you soon to get you onboarded.";
     msg.className = 'form-msg ok';
@@ -2338,11 +2349,11 @@ document.querySelectorAll('.service-request-form').forEach(form => {
     msg.className = 'form-msg service-request-msg';
     try {
       if (!sb) throw new Error('offline');
-      const { error } = await sb.from('service_requests').insert({
+      const { error } = await withRetry(() => sb.from('service_requests').insert({
         service_type: form.dataset.serviceType,
         name: data.name, phone: data.phone, email: data.email || null,
         location: data.location || null, details: data.details || null
-      });
+      }));
       if (error) throw error;
       msg.textContent = "Request received! Our team will reach out shortly.";
       msg.className = 'form-msg service-request-msg ok';
@@ -2389,12 +2400,12 @@ siteVisitForm?.addEventListener('submit', async (e) => {
     // form data itself rather than depending on a returned row.
     let record;
     if (editingId) {
-      const { error } = await sb.from('site_visit_requests').update(payload).eq('id', editingId);
+      const { error } = await withRetry(() => sb.from('site_visit_requests').update(payload).eq('id', editingId));
       if (error) throw error;
       record = { ...siteVisitLastRecord, ...payload, id: editingId };
     } else {
       const id = crypto.randomUUID();
-      const { error } = await sb.from('site_visit_requests').insert({ ...payload, id });
+      const { error } = await withRetry(() => sb.from('site_visit_requests').insert({ ...payload, id }));
       if (error) throw error;
       record = { ...payload, id, status: 'pending', created_at: new Date().toISOString() };
     }
@@ -3241,10 +3252,10 @@ document.getElementById('leadForm').addEventListener('submit', async (e) => {
   btn.disabled = true; btn.textContent = 'Sending...';
   try{
     if (!sb) throw new Error('offline');
-    const { error } = await sb.from('leads').insert({
+    const { error } = await withRetry(() => sb.from('leads').insert({
       name: data.name, phone: data.phone, email: data.email || null,
       interest: data.interest, message: data.message || null
-    });
+    }));
     if (error) throw error;
     msg.textContent = "Thanks — we've received your message and will reach out within one business day.";
     msg.className = 'form-msg ok';
@@ -3277,11 +3288,11 @@ document.getElementById('reviewForm').addEventListener('submit', async (e) => {
   btn.disabled = true; btn.textContent = 'Submitting...';
   try{
     if (!sb) throw new Error('offline');
-    const { error } = await sb.from('reviews').insert({
+    const { error } = await withRetry(() => sb.from('reviews').insert({
       reviewer_name: data.reviewer_name,
       rating: parseInt(data.rating, 10),
       comment: data.comment
-    });
+    }));
     if (error) throw error;
     msg.textContent = 'Thanks for your review — it will appear publicly once we approve it.';
     msg.className = 'form-msg ok';
