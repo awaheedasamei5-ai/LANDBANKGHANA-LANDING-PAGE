@@ -65,6 +65,47 @@ th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;le
 .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:14px 20px;border-radius:12px;font-size:14px;display:none;box-shadow:0 14px 30px -10px rgba(0,0,0,.3);}
 .toast.show{display:block;}
 img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
+
+/* ---- modals (crop tool, submission detail) ---- */
+.modal-overlay{position:fixed;inset:0;background:rgba(8,25,16,.55);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-card{background:#fff;border-radius:20px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;padding:26px;position:relative;}
+.modal-card h3{font-size:17px;margin-bottom:4px;}
+
+/* ---- crop tool ---- */
+#cropStage{position:relative;width:100%;background:#0c0c0c;border-radius:12px;overflow:hidden;cursor:grab;touch-action:none;user-select:none;}
+#cropStage.dragging{cursor:grabbing;}
+#cropStage img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;pointer-events:none;-webkit-user-drag:none;}
+.crop-controls{display:flex;align-items:center;gap:10px;margin-top:14px;}
+.crop-controls svg{width:16px;height:16px;color:var(--muted);flex:none;}
+.crop-controls input[type=range]{flex:1;}
+
+/* ---- inbox (buyer inquiries / seller submissions) ---- */
+.inbox{display:grid;grid-template-columns:280px 1fr;gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;min-height:420px;}
+.inbox-list{border-right:1px solid var(--line);max-height:640px;overflow-y:auto;}
+.inbox-row{padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer;}
+.inbox-row:hover{background:var(--bg);}
+.inbox-row.active{background:var(--brand-light);}
+.inbox-row .ir-top{display:flex;justify-content:space-between;gap:8px;font-weight:700;font-size:13.5px;}
+.inbox-row .ir-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.inbox-row .ir-date{font-size:11px;color:var(--muted);white-space:nowrap;}
+.inbox-empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13.5px;}
+.inbox-detail{padding:22px 24px;overflow-y:auto;max-height:640px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+.detail-grid div{background:var(--bg);border-radius:10px;padding:10px 12px;}
+.detail-grid b{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:3px;}
+.detail-grid span{font-size:13.5px;font-weight:600;}
+.detail-desc{background:var(--bg);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;margin-bottom:16px;}
+.file-thumb-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.file-thumb-grid img{width:84px;height:84px;object-fit:cover;border-radius:10px;cursor:pointer;border:1px solid var(--line);}
+.doc-item{display:flex;align-items:center;gap:8px;font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;}
+.doc-item svg{width:15px;height:15px;color:var(--brand);flex:none;}
+.doc-item .dl-btn{margin-left:auto;font-size:12px;padding:5px 10px;}
+@media(max-width:800px){
+  .inbox{grid-template-columns:1fr;}
+  .inbox-list{border-right:none;border-bottom:1px solid var(--line);max-height:260px;}
+  .inbox-detail{max-height:none;}
+}
 @media(max-width:800px){
   .shell{grid-template-columns:1fr;padding:16px 12px 60px;}
   .side{position:static;display:flex;overflow-x:auto;gap:6px;padding:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
@@ -137,6 +178,8 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="team">Team</button>
       <button class="nav-item" data-panel="plots">Hot Plots</button>
       <button class="nav-item" data-panel="sellers">Sellers</button>
+      <button class="nav-item" data-panel="submissions">Seller Submissions</button>
+      <button class="nav-item" data-panel="buyers">Buyer Inquiries</button>
       <button class="nav-item" data-panel="reviews">Reviews</button>
       <button class="nav-item" data-panel="leads">Leads</button>
     </div>
@@ -425,6 +468,30 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
         </div>
       </div>
 
+      <!-- SELLER SUBMISSIONS -->
+      <div class="panel" id="panel-submissions">
+        <div class="panel-card">
+          <h3>Seller submissions</h3>
+          <p class="desc">Every "Yes, help me sell" form from the homepage lands here with the seller's full details, documents, and photos. Verify everything, then approve to publish it as a Hot Plot — or reject if it doesn't check out.</p>
+          <div class="inbox">
+            <div class="inbox-list" id="submissionsList"></div>
+            <div class="inbox-detail" id="submissionsDetail"><div class="inbox-empty">Select a submission to view its details.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUYER INQUIRIES -->
+      <div class="panel" id="panel-buyers">
+        <div class="panel-card">
+          <h3>Buyer inquiries</h3>
+          <p class="desc">Every "Yes, help me buy" form from the homepage — follow up with each one, then mark it contacted or closed.</p>
+          <div class="inbox">
+            <div class="inbox-list" id="buyersList"></div>
+            <div class="inbox-detail" id="buyersDetail"><div class="inbox-empty">Select an inquiry to view its details.</div></div>
+          </div>
+        </div>
+      </div>
+
       <!-- PLOTS -->
       <div class="panel" id="panel-plots">
         <div class="panel-card">
@@ -499,6 +566,31 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
   </div>
 </div>
 
+<!-- CROP TOOL -->
+<div class="modal-overlay" id="cropModalOverlay">
+  <div class="modal-card">
+    <h3>Crop &amp; position image</h3>
+    <p class="hint" style="margin-bottom:14px;">Drag the image to reposition it, use the slider to zoom in.</p>
+    <div id="cropStage"><img id="cropImg" draggable="false" alt=""/></div>
+    <div class="crop-controls">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="range" id="cropZoom" min="100" max="300" value="100"/>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;">
+      <button class="btn btn-accent" type="button" id="cropApplyBtn" style="flex:1;justify-content:center;">Apply crop</button>
+      <button class="btn" type="button" id="cropCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEDIA VIEWER (for image attachments) -->
+<div class="modal-overlay" id="mediaViewerOverlay">
+  <div class="modal-card" style="max-width:80vw;padding:16px;text-align:center;">
+    <img id="mediaViewerImg" style="max-width:100%;max-height:78vh;border-radius:10px;" alt=""/>
+    <div style="margin-top:12px;"><button class="btn" type="button" id="mediaViewerClose">Close</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="../assets/supabase-config.js"></script>
@@ -517,26 +609,137 @@ let editing = {};
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-function resizeImage(file, maxDim){
-  return new Promise((resolve,reject)=>{
+/* ============ CROP TOOL + STORAGE UPLOAD ============
+   Every admin image field goes through this: pick a file -> crop/reposition
+   it to a fixed aspect ratio in an interactive stage -> upload the result to
+   the `media` Storage bucket (not into the database as base64) -> the field
+   gets back a small public URL. Storing real files instead of base64 text is
+   what actually fixes "the backend is slow" — every save and every page load
+   used to move whole embedded images through Postgres. */
+const cropModalOverlay = document.getElementById('cropModalOverlay');
+const cropStage = document.getElementById('cropStage');
+const cropImg = document.getElementById('cropImg');
+const cropZoom = document.getElementById('cropZoom');
+let cropState = null;
+
+function openCropTool(file, aspectRatio, outputWidth){
+  return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        let {width,height} = img;
-        if (width > height && width > maxDim){ height*=maxDim/width; width=maxDim; }
-        else if (height > maxDim){ width*=maxDim/height; height=maxDim; }
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        canvas.getContext('2d').drawImage(img,0,0,width,height);
-        resolve(canvas.toDataURL('image/jpeg', .82));
+    reader.onload = (e) => {
+      const probe = new Image();
+      probe.onload = () => {
+        cropStage.style.aspectRatio = String(aspectRatio);
+        cropModalOverlay.classList.add('open');
+        requestAnimationFrame(() => {
+          const stageW = cropStage.clientWidth, stageH = cropStage.clientHeight;
+          const baseScale = Math.max(stageW / probe.naturalWidth, stageH / probe.naturalHeight);
+          cropState = {
+            naturalW: probe.naturalWidth, naturalH: probe.naturalHeight,
+            baseScale, scale: baseScale,
+            offsetX: (stageW - probe.naturalWidth*baseScale)/2,
+            offsetY: (stageH - probe.naturalHeight*baseScale)/2,
+            outputW: outputWidth, outputH: Math.round(outputWidth / aspectRatio),
+            resolve
+          };
+          cropImg.src = e.target.result;
+          cropZoom.value = 100;
+          applyCropTransform();
+        });
       };
-      img.onerror = reject;
-      img.src = e.target.result;
+      probe.onerror = () => resolve(null);
+      probe.src = e.target.result;
     };
-    reader.onerror = reject;
+    reader.onerror = () => resolve(null);
     reader.readAsDataURL(file);
   });
+}
+function applyCropTransform(){
+  cropImg.style.width = cropState.naturalW * cropState.scale + 'px';
+  cropImg.style.height = cropState.naturalH * cropState.scale + 'px';
+  cropImg.style.transform = `translate(${cropState.offsetX}px, ${cropState.offsetY}px)`;
+}
+function clampCropOffset(){
+  const stageW = cropStage.clientWidth, stageH = cropStage.clientHeight;
+  const dispW = cropState.naturalW * cropState.scale, dispH = cropState.naturalH * cropState.scale;
+  cropState.offsetX = Math.min(0, Math.max(stageW - dispW, cropState.offsetX));
+  cropState.offsetY = Math.min(0, Math.max(stageH - dispH, cropState.offsetY));
+}
+cropZoom.addEventListener('input', () => {
+  if (!cropState) return;
+  const stageW = cropStage.clientWidth, stageH = cropStage.clientHeight;
+  const cx = stageW/2, cy = stageH/2;
+  const imgCx = (cx - cropState.offsetX) / cropState.scale;
+  const imgCy = (cy - cropState.offsetY) / cropState.scale;
+  cropState.scale = cropState.baseScale * (parseInt(cropZoom.value,10)/100);
+  cropState.offsetX = cx - imgCx * cropState.scale;
+  cropState.offsetY = cy - imgCy * cropState.scale;
+  clampCropOffset();
+  applyCropTransform();
+});
+let cropDragging = null;
+cropStage.addEventListener('pointerdown', (e) => {
+  if (!cropState) return;
+  cropDragging = { startX: e.clientX, startY: e.clientY, offX: cropState.offsetX, offY: cropState.offsetY };
+  cropStage.classList.add('dragging');
+  cropStage.setPointerCapture(e.pointerId);
+});
+cropStage.addEventListener('pointermove', (e) => {
+  if (!cropDragging || !cropState) return;
+  cropState.offsetX = cropDragging.offX + (e.clientX - cropDragging.startX);
+  cropState.offsetY = cropDragging.offY + (e.clientY - cropDragging.startY);
+  clampCropOffset();
+  applyCropTransform();
+});
+function endCropDrag(){ cropDragging = null; cropStage.classList.remove('dragging'); }
+cropStage.addEventListener('pointerup', endCropDrag);
+cropStage.addEventListener('pointerleave', endCropDrag);
+
+function closeCropTool(result){
+  cropModalOverlay.classList.remove('open');
+  if (cropState) { const resolve = cropState.resolve; cropState = null; resolve(result); }
+}
+document.getElementById('cropCancelBtn').addEventListener('click', () => closeCropTool(null));
+document.getElementById('cropApplyBtn').addEventListener('click', () => {
+  if (!cropState) return closeCropTool(null);
+  const stageW = cropStage.clientWidth;
+  const ratio = cropState.outputW / stageW;
+  const canvas = document.createElement('canvas');
+  canvas.width = cropState.outputW; canvas.height = cropState.outputH;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(cropImg, cropState.offsetX*ratio, cropState.offsetY*ratio, cropState.naturalW*cropState.scale*ratio, cropState.naturalH*cropState.scale*ratio);
+  canvas.toBlob((blob) => closeCropTool(blob), 'image/jpeg', .85);
+});
+cropModalOverlay.addEventListener('click', (e) => { if (e.target === cropModalOverlay) closeCropTool(null); });
+
+async function uploadImage(file, aspectRatio, outputWidth, prefix){
+  const blob = await openCropTool(file, aspectRatio, outputWidth);
+  if (!blob) return null;
+  if (!sb) { toast('Could not connect to the server — check your internet connection and try again.'); return null; }
+  try {
+    const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+    const { error } = await sb.storage.from('media').upload(path, blob, { contentType: 'image/jpeg' });
+    if (error) { toast('Upload error: ' + error.message); return null; }
+    const { data } = sb.storage.from('media').getPublicUrl(path);
+    return data.publicUrl;
+  } catch (err) {
+    toast('Upload failed: ' + (err.message || 'unknown error'));
+    return null;
+  }
+}
+
+/* ---- media viewer + document download (used by Seller Submissions) ---- */
+function viewMedia(url){
+  document.getElementById('mediaViewerImg').src = url;
+  document.getElementById('mediaViewerOverlay').classList.add('open');
+}
+document.getElementById('mediaViewerClose').addEventListener('click', () => document.getElementById('mediaViewerOverlay').classList.remove('open'));
+document.getElementById('mediaViewerOverlay').addEventListener('click', (e) => { if (e.target.id === 'mediaViewerOverlay') e.target.classList.remove('open'); });
+async function downloadDocument(path, name){
+  const { data, error } = await sb.storage.from('documents').createSignedUrl(path, 300);
+  if (error) return toast('Error opening file: ' + error.message);
+  const a = document.createElement('a');
+  a.href = data.signedUrl; a.download = name; a.target = '_blank'; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); a.remove();
 }
 
 /* ============ AUTH ============ */
@@ -621,13 +824,14 @@ document.querySelectorAll('.side .nav-item').forEach(btn => {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers();
 }
 
 /* ---- BANNERS ---- */
 const bannerForm = document.getElementById('bannerForm');
 document.getElementById('bannerImgFile').addEventListener('change', async (e) => {
-  if (e.target.files[0]) bannerForm.image_url.value = await resizeImage(e.target.files[0], 1200);
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 16/9, 1400, 'banners'); if (url) bannerForm.image_url.value = url; }
+  e.target.value = '';
 });
 bannerForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -665,9 +869,9 @@ function editBanner(b){
 
 /* ---- PHOTOS (named slots + gallery) ---- */
 const NAMED_SLOTS = [
-  { key: 'hero', label: 'Hero photo (homepage top)', hint: 'Replaces the abstract artwork behind the headline.' },
-  { key: 'about', label: 'About section photo', hint: 'Shown behind the quote card in the About Us section.' },
-  { key: 'process', label: 'Process section photo', hint: 'Shown under the "How we take you from inquiry to handover" steps.' }
+  { key: 'hero', label: 'Hero photo (homepage top)', hint: 'Replaces the abstract artwork behind the headline.', ar: 3/4 },
+  { key: 'about', label: 'About section photo', hint: 'Shown behind the quote card in the About Us section.', ar: 4/3 },
+  { key: 'process', label: 'Process section photo', hint: 'Shown under the "How we take you from inquiry to handover" steps.', ar: 4/3 }
 ];
 let contentBlocksCache = [];
 
@@ -704,7 +908,8 @@ function renderNamedSlots(){
   NAMED_SLOTS.forEach(slot => {
     const fileInput = document.getElementById('slotFile_'+slot.key);
     fileInput.addEventListener('change', async (e) => {
-      if (e.target.files[0]) document.getElementById('slotUrl_'+slot.key).value = await resizeImage(e.target.files[0], 1600);
+      if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], slot.ar, 1600, 'photos/'+slot.key); if (url) document.getElementById('slotUrl_'+slot.key).value = url; }
+      e.target.value = '';
     });
   });
 }
@@ -724,7 +929,8 @@ async function clearNamedSlot(key){
 
 const galleryForm = document.getElementById('galleryForm');
 document.getElementById('galleryImgFile').addEventListener('change', async (e) => {
-  if (e.target.files[0]) galleryForm.image_url.value = await resizeImage(e.target.files[0], 1400);
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1400, 'photos/gallery'); if (url) galleryForm.image_url.value = url; }
+  e.target.value = '';
 });
 galleryForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -797,7 +1003,8 @@ function editStat(s){
 /* ---- CLIENTS ---- */
 const clientForm = document.getElementById('clientForm');
 document.getElementById('clientLogoFile').addEventListener('change', async (e) => {
-  if (e.target.files[0]) clientForm.logo_url.value = await resizeImage(e.target.files[0], 300);
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 1/1, 300, 'clients'); if (url) clientForm.logo_url.value = url; }
+  e.target.value = '';
 });
 clientForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -885,7 +1092,8 @@ async function loadSettings(){
 /* ---- NEWS ---- */
 const newsForm = document.getElementById('newsForm');
 document.getElementById('newsImgFile').addEventListener('change', async (e) => {
-  if (e.target.files[0]) newsForm.image_url.value = await resizeImage(e.target.files[0], 1200);
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 16/9, 1200, 'news'); if (url) newsForm.image_url.value = url; }
+  e.target.value = '';
 });
 newsForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -923,7 +1131,8 @@ function editNews(n){
 let myEmail = null;
 const myProfileForm = document.getElementById('myProfileForm');
 document.getElementById('myAvatarFile').addEventListener('change', async (e) => {
-  if (e.target.files[0]) myProfileForm.avatar_url.value = await resizeImage(e.target.files[0], 400);
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 1/1, 400, 'team'); if (url) myProfileForm.avatar_url.value = url; }
+  e.target.value = '';
 });
 myProfileForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -978,7 +1187,8 @@ async function removeTeamMember(email){
 let sellersListCache = [];
 const sellerForm = document.getElementById('sellerForm');
 document.getElementById('sellerAvatarFile').addEventListener('change', async (e) => {
-  if (e.target.files[0]) sellerForm.avatar_url.value = await resizeImage(e.target.files[0], 300);
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 1/1, 300, 'sellers'); if (url) sellerForm.avatar_url.value = url; }
+  e.target.value = '';
 });
 function splitList(s){ return (s||'').split(',').map(x=>x.trim()).filter(Boolean); }
 sellerForm.addEventListener('submit', async (e) => {
@@ -1029,13 +1239,16 @@ function editSeller(s){
 /* ---- PLOTS ---- */
 const plotForm = document.getElementById('plotForm');
 document.getElementById('plotImgFile1').addEventListener('change', async (e) => {
-  if (e.target.files[0]) plotForm.image_url.value = await resizeImage(e.target.files[0], 1200);
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1200, 'plots'); if (url) plotForm.image_url.value = url; }
+  e.target.value = '';
 });
 document.getElementById('plotImgFile2').addEventListener('change', async (e) => {
-  if (e.target.files[0]) plotForm.image_url_2.value = await resizeImage(e.target.files[0], 1200);
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1200, 'plots'); if (url) plotForm.image_url_2.value = url; }
+  e.target.value = '';
 });
 document.getElementById('plotImgFile3').addEventListener('change', async (e) => {
-  if (e.target.files[0]) plotForm.image_url_3.value = await resizeImage(e.target.files[0], 1200);
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1200, 'plots'); if (url) plotForm.image_url_3.value = url; }
+  e.target.value = '';
 });
 plotForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -1132,6 +1345,186 @@ async function loadLeads(){
 async function updateLeadStatus(id, status){
   const { error } = await sb.from('leads').update({ status }).eq('id', id);
   toast(error ? 'Error updating status' : 'Status updated');
+}
+
+/* ---- SELLER SUBMISSIONS ---- */
+let submissionsCache = [];
+let submissionFilesCache = {};
+let activeSubmissionId = null;
+
+async function loadSubmissions(){
+  const { data, error } = await sb.from('seller_submissions').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  submissionsCache = data || [];
+  renderSubmissionsList();
+  if (activeSubmissionId && submissionsCache.find(s => s.id === activeSubmissionId)) openSubmission(activeSubmissionId);
+}
+function renderSubmissionsList(){
+  const list = document.getElementById('submissionsList');
+  if (!submissionsCache.length) { list.innerHTML = '<div class="inbox-empty">No submissions yet.</div>'; return; }
+  list.innerHTML = submissionsCache.map(s => `
+    <div class="inbox-row ${s.id===activeSubmissionId?'active':''}" onclick="openSubmission('${s.id}')">
+      <div class="ir-top"><span>${esc(s.name)}</span><span class="ir-date">${new Date(s.created_at).toLocaleDateString()}</span></div>
+      <div class="ir-sub">${esc(s.land_title)} · <span class="pill ${s.status==='approved'?'on':s.status==='rejected'?'off':''}" style="padding:1px 8px">${esc(s.status)}</span></div>
+    </div>`).join('');
+}
+async function openSubmission(id){
+  activeSubmissionId = id;
+  renderSubmissionsList();
+  const sub = submissionsCache.find(s => s.id === id);
+  const detail = document.getElementById('submissionsDetail');
+  if (!sub) return;
+  detail.innerHTML = '<div class="inbox-empty">Loading...</div>';
+  let files = submissionFilesCache[id];
+  if (!files) {
+    const { data, error } = await sb.from('seller_submission_files').select('*').eq('submission_id', id).order('sort_order');
+    files = error ? [] : (data || []);
+    submissionFilesCache[id] = files;
+  }
+  const images = files.filter(f => f.kind === 'image');
+  const docs = files.filter(f => f.kind === 'document');
+  detail.innerHTML = `
+    <h3>${esc(sub.land_title)}</h3>
+    <p class="hint">Submitted ${new Date(sub.created_at).toLocaleString()} · <span class="pill ${sub.status==='approved'?'on':sub.status==='rejected'?'off':''}">${esc(sub.status)}</span></p>
+    <div class="detail-grid">
+      <div><b>Seller</b><span>${esc(sub.name)}</span></div>
+      <div><b>Company</b><span>${esc(sub.company_name||'—')}</span></div>
+      <div><b>Phone</b><span>${esc(sub.phone)}</span></div>
+      <div><b>Email</b><span>${esc(sub.email||'—')}</span></div>
+      <div><b>Location</b><span>${esc(sub.land_location)}</span></div>
+      <div><b>Nearest landmark</b><span>${esc(sub.nearest_landmark||'—')}</span></div>
+      <div><b>Size</b><span>${esc(sub.land_size||'—')}</span></div>
+      <div><b>Asking price</b><span>${sub.asking_price_amount!=null?esc(sub.currency||'GHS')+' '+Number(sub.asking_price_amount).toLocaleString():'—'}</span></div>
+      <div><b>Search result?</b><span>${sub.has_search_result==null?'—':(sub.has_search_result?'Yes':'No')}</span></div>
+      <div><b>Documents held</b><span>${esc((sub.documents_held||[]).join(', ')||'—')}</span></div>
+    </div>
+    <b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Full details</b>
+    <div class="detail-desc">${esc(sub.description)}</div>
+    <b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:8px">Land photos (${images.length})</b>
+    ${images.length ? `<div class="file-thumb-grid">${images.map(f=>`<img src="${esc(f.file_url)}" onclick="viewMedia('${esc(f.file_url)}')"/>`).join('')}</div>` : '<p class="hint" style="margin-bottom:16px">No photos attached.</p>'}
+    <b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:8px">Supporting documents (${docs.length})</b>
+    ${docs.length ? docs.map(f=>`
+      <div class="doc-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+        <span>${esc(f.file_name)}</span>
+        <button class="btn dl-btn" type="button" onclick="downloadDocument('${esc(f.file_path)}','${esc(f.file_name)}')">Download</button>
+      </div>`).join('') : '<p class="hint" style="margin-bottom:16px">No documents attached.</p>'}
+    <div style="display:flex;gap:10px;margin-top:18px">
+      ${sub.status==='pending' ? `
+        <button class="btn btn-accent" type="button" onclick="approveSubmission('${sub.id}')">Approve &amp; publish as Hot Plot</button>
+        <button class="btn btn-danger" type="button" onclick="rejectSubmission('${sub.id}')">Reject</button>
+      ` : sub.status==='approved' ? `<span class="hint">Published as a Hot Plot.</span>` : `<span class="hint">Rejected — not published.</span>`}
+    </div>`;
+}
+async function approveSubmission(id){
+  const sub = submissionsCache.find(s => s.id === id);
+  if (!sub) return;
+  if (!confirm(`Publish "${sub.land_title}" as a Hot Plot? Make sure you've verified the details and documents first.`)) return;
+  let files = submissionFilesCache[id];
+  if (!files) {
+    const { data } = await sb.from('seller_submission_files').select('*').eq('submission_id', id).order('sort_order');
+    files = data || [];
+  }
+  const images = files.filter(f => f.kind === 'image');
+
+  let sellerId = null;
+  const { data: existingSeller } = await sb.from('sellers').select('id').eq('phone', sub.phone).maybeSingle();
+  if (existingSeller) {
+    sellerId = existingSeller.id;
+  } else {
+    const { data: newSeller, error: sErr } = await sb.from('sellers').insert({
+      name: sub.name, company_name: sub.company_name, phone: sub.phone, email: sub.email,
+      document_types: sub.documents_held || [], active: true
+    }).select('id').single();
+    if (sErr) return toast('Error creating seller record: ' + sErr.message);
+    sellerId = newSeller.id;
+  }
+
+  const { data: plot, error: pErr } = await sb.from('plots').insert({
+    title: sub.land_title, size: sub.land_size || 'Not specified', location: sub.land_location,
+    nearest_landmark: sub.nearest_landmark, description: sub.description,
+    price_amount: sub.asking_price_amount, currency: sub.currency || 'GHS',
+    image_url: images[0]?.file_url || null, image_url_2: images[1]?.file_url || null, image_url_3: images[2]?.file_url || null,
+    seller_id: sellerId, status: 'available', active: true
+  }).select('id').single();
+  if (pErr) return toast('Error publishing plot: ' + pErr.message);
+
+  const { data: userData } = await sb.auth.getUser();
+  const { error: uErr } = await sb.from('seller_submissions').update({
+    status: 'approved', linked_plot_id: plot.id, reviewed_at: new Date().toISOString(),
+    reviewed_by: userData?.user?.email || null
+  }).eq('id', id);
+  if (uErr) return toast('Error updating submission: ' + uErr.message);
+
+  toast('Approved — now live in Hot Plots');
+  await loadSubmissions(); loadPlots(); loadSellers();
+}
+async function rejectSubmission(id){
+  if (!confirm('Reject this submission? It will not be published.')) return;
+  const { data: userData } = await sb.auth.getUser();
+  const { error } = await sb.from('seller_submissions').update({
+    status: 'rejected', reviewed_at: new Date().toISOString(), reviewed_by: userData?.user?.email || null
+  }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  toast('Submission rejected'); loadSubmissions();
+}
+
+/* ---- BUYER INQUIRIES ---- */
+let buyersCache = [];
+let activeBuyerId = null;
+async function loadBuyers(){
+  const { data, error } = await sb.from('buyer_inquiries').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  buyersCache = data || [];
+  renderBuyersList();
+  if (activeBuyerId && buyersCache.find(b => b.id === activeBuyerId)) openBuyer(activeBuyerId);
+}
+function renderBuyersList(){
+  const list = document.getElementById('buyersList');
+  if (!buyersCache.length) { list.innerHTML = '<div class="inbox-empty">No inquiries yet.</div>'; return; }
+  list.innerHTML = buyersCache.map(b => `
+    <div class="inbox-row ${b.id===activeBuyerId?'active':''}" onclick="openBuyer('${b.id}')">
+      <div class="ir-top"><span>${esc(b.name)}${b.status==='new'?' <span class="pill on" style="padding:1px 6px;font-size:10px">New</span>':''}</span><span class="ir-date">${new Date(b.created_at).toLocaleDateString()}</span></div>
+      <div class="ir-sub">${esc(b.interested_location || (b.has_existing_land ? 'Has existing land' : 'General inquiry'))}</div>
+    </div>`).join('');
+}
+function openBuyer(id){
+  activeBuyerId = id;
+  renderBuyersList();
+  const b = buyersCache.find(x => x.id === id);
+  const detail = document.getElementById('buyersDetail');
+  if (!b) return;
+  detail.innerHTML = `
+    <h3>${esc(b.name)}</h3>
+    <p class="hint">Submitted ${new Date(b.created_at).toLocaleString()}</p>
+    <div class="detail-grid">
+      <div><b>Phone</b><span>${esc(b.phone)}</span></div>
+      <div><b>Email</b><span>${esc(b.email||'—')}</span></div>
+      <div><b>Preferred contact</b><span>${esc(b.preferred_contact||'phone')}</span></div>
+      <div><b>Budget range</b><span>${esc(b.budget_range||'—')}</span></div>
+      <div><b>Has existing land?</b><span>${b.has_existing_land==null?'—':(b.has_existing_land?'Yes':'No')}</span></div>
+      <div><b>Wants plot options?</b><span>${b.wants_plot_recommendations==null?'—':(b.wants_plot_recommendations?'Yes':'No')}</span></div>
+      <div style="grid-column:1/-1"><b>Interested location</b><span>${esc(b.interested_location||'—')}</span></div>
+    </div>
+    ${b.existing_land_details?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Existing land details</b><div class="detail-desc">${esc(b.existing_land_details)}</div>`:''}
+    ${b.message?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Message</b><div class="detail-desc">${esc(b.message)}</div>`:''}
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+      <label class="hint" style="margin:0">Status</label>
+      <select onchange="updateBuyerStatus('${b.id}',this.value)">
+        <option value="new" ${b.status==='new'?'selected':''}>New</option>
+        <option value="read" ${b.status==='read'?'selected':''}>Read</option>
+        <option value="contacted" ${b.status==='contacted'?'selected':''}>Contacted</option>
+        <option value="closed" ${b.status==='closed'?'selected':''}>Closed</option>
+      </select>
+    </div>`;
+  if (b.status === 'new') updateBuyerStatus(b.id, 'read', true);
+}
+async function updateBuyerStatus(id, status, silent){
+  const { error } = await sb.from('buyer_inquiries').update({ status }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  const b = buyersCache.find(x => x.id === id); if (b) b.status = status;
+  renderBuyersList();
+  if (!silent) toast('Status updated');
 }
 
 /* ---- shared delete ---- */

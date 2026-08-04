@@ -259,6 +259,39 @@ section{position:relative;}
 .seller-contact svg{width:14px;height:14px;}
 @media (max-width:700px){.modal-facts{grid-template-columns:1fr 1fr;}.modal-content{padding:22px 20px 26px;}}
 
+/* ---------- INQUIRY MODALS (buyer/seller forms) ---------- */
+.inquiry-modal .modal-content{padding:32px 30px 30px;}
+.inquiry-head{margin-bottom:22px;}
+.inquiry-head .eyebrow{margin-bottom:10px;}
+.inquiry-head h3{font-size:22px;}
+.inquiry-head p{color:var(--muted);font-size:14px;margin-top:8px;}
+.field-hint{font-size:12px;color:var(--muted);margin-top:5px;}
+.yn-toggle{display:flex;gap:8px;}
+.yn-toggle button{flex:1;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-weight:600;font-size:13.5px;cursor:pointer;color:var(--muted);font-family:inherit;transition:.15s;}
+.yn-toggle button.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+.chip-group{display:flex;flex-wrap:wrap;gap:8px;}
+.chip-check{position:relative;}
+.chip-check input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0;}
+.chip-check span{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;background:var(--bg);border:1px solid var(--line);padding:8px 13px;border-radius:999px;color:var(--ink-soft);}
+.chip-check input:checked + span{background:var(--brand-light);border-color:var(--brand);color:var(--brand-dark);}
+.file-drop{border:1.5px dashed var(--line);border-radius:14px;padding:18px;text-align:center;cursor:pointer;background:var(--bg);}
+.file-drop input{display:none;}
+.file-drop .fd-label{font-size:13px;font-weight:600;color:var(--ink-soft);}
+.file-drop .fd-sub{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.file-drop svg{width:22px;height:22px;color:var(--brand);margin-bottom:6px;}
+.file-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.file-item{display:flex;align-items:center;gap:8px;font-size:12.5px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px 10px;}
+.file-item .fi-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-item .fi-remove{background:none;border:none;cursor:pointer;color:var(--muted);display:flex;padding:2px;}
+.file-item .fi-remove svg{width:13px;height:13px;}
+.file-item img.fi-thumb{width:26px;height:26px;border-radius:6px;object-fit:cover;flex:none;}
+.inquiry-success{padding:50px 34px;text-align:center;}
+.inquiry-success svg{width:52px;height:52px;color:var(--brand);margin-bottom:16px;}
+.inquiry-success h3{font-size:20px;margin-bottom:8px;}
+.inquiry-success p{color:var(--muted);font-size:14.5px;max-width:340px;margin:0 auto;}
+.upload-progress{font-size:12.5px;color:var(--muted);margin-top:8px;display:none;}
+.upload-progress.show{display:block;}
+
 /* ---------- PROCESS ---------- */
 #process{padding:68px 0;background:var(--ink);color:#fff;}
 #process .sec-head p{color:rgba(255,255,255,.65);}
@@ -560,7 +593,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
         <h3>Are you interested in acquiring litigation-free land?</h3>
         <p>Tell us your budget and preferred area — we'll shortlist verified, dispute-free plots and handle the due diligence.</p>
         <div class="qbtns">
-          <a href="#contact" class="btn btn-accent" data-interest="buyer">Yes, help me buy</a>
+          <button type="button" class="btn btn-accent" id="openBuyerModalBtn">Yes, help me buy</button>
           <a href="#help" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Not sure yet</a>
         </div>
       </div>
@@ -569,7 +602,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
         <h3>Do you have land you want to sell, safely and properly?</h3>
         <p>We verify your documents, help you value it fairly, and connect you with serious, vetted buyers — no middlemen wahala.</p>
         <div class="qbtns">
-          <a href="#contact" class="btn btn-primary" data-interest="seller">Yes, help me sell</a>
+          <button type="button" class="btn btn-primary" id="openSellerModalBtn">Yes, help me sell</button>
           <a href="#help" class="btn btn-ghost">Learn how</a>
         </div>
       </div>
@@ -613,6 +646,170 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   <div class="phone-frame">
     <div class="phone-frame-loading" id="phonePreviewLoading"><span class="spin"></span><span>Loading preview…</span></div>
     <iframe id="phonePreviewFrame" title="Mobile preview of landbankghana.com"></iframe>
+  </div>
+</div>
+
+<!-- ============ BUYER INQUIRY MODAL ============ -->
+<div class="modal-overlay inquiry-modal" id="buyerModalOverlay">
+  <div class="modal-card" style="max-width:640px;">
+    <button class="modal-close" id="buyerModalClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-content">
+      <div id="buyerModalFormWrap">
+        <div class="inquiry-head">
+          <span class="eyebrow">Help Me Buy</span>
+          <h3>A few details so we can help you properly.</h3>
+          <p>Tell us where you are in the process — we'll get back to you with the right next step, not a generic reply.</p>
+        </div>
+        <form id="buyerForm">
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Ama Owusu"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+
+          <div class="field">
+            <label>Do you already have land you'd like us to run due diligence on?</label>
+            <div class="yn-toggle" data-yn="has_existing_land">
+              <button type="button" data-val="true">Yes</button>
+              <button type="button" data-val="false">No</button>
+            </div>
+          </div>
+          <div class="field" id="existingLandDetailsWrap" style="display:none;">
+            <label>Tell us about that land</label>
+            <textarea name="existing_land_details" placeholder="Location, size, what documents you currently have..."></textarea>
+          </div>
+
+          <div class="field"><label>Is there a location you're interested in acquiring land in?</label>
+            <input type="text" name="interested_location" placeholder="e.g. Kumasi - Ahodwo, or 'open to suggestions'"/>
+          </div>
+
+          <div class="field">
+            <label>Would you like us to show you available plot options?</label>
+            <div class="yn-toggle" data-yn="wants_plot_recommendations">
+              <button type="button" data-val="true">Yes, show me options</button>
+              <button type="button" data-val="false">Not yet</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field"><label>Budget range (optional)</label><input type="text" name="budget_range" placeholder="e.g. GHS 50,000 - 100,000"/></div>
+            <div class="field"><label>Best way to reach you</label>
+              <select name="preferred_contact">
+                <option value="phone">Phone call</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="email">Email</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Anything else we should know?</label><textarea name="message" placeholder="Any other details that will help us serve you well..."></textarea></div>
+          <input type="hidden" name="has_existing_land" value=""/>
+          <input type="hidden" name="wants_plot_recommendations" value=""/>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;">Send my request</button>
+          <div class="form-msg" id="buyerFormMsg"></div>
+        </form>
+      </div>
+      <div id="buyerModalSuccess" class="inquiry-success" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        <h3>Request received.</h3>
+        <p>Thanks — our team will reach out to you shortly to help you move forward.</p>
+        <button type="button" class="btn btn-ghost" id="buyerModalDoneBtn" style="margin-top:20px;">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SELLER SUBMISSION MODAL ============ -->
+<div class="modal-overlay inquiry-modal" id="sellerModalOverlay">
+  <div class="modal-card" style="max-width:680px;">
+    <button class="modal-close" id="sellerModalClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-content">
+      <div id="sellerModalFormWrap">
+        <div class="inquiry-head">
+          <span class="eyebrow">Help Me Sell</span>
+          <h3>Tell us about your land.</h3>
+          <p>Every submission is reviewed by our team before it ever goes live — nothing is published without your details being verified first.</p>
+        </div>
+        <form id="sellerForm">
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Kofi Mensah"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+            <div class="field"><label>Company (optional)</label><input type="text" name="company_name" placeholder="If selling on behalf of a company"/></div>
+          </div>
+
+          <div class="field"><label>Land title / name *</label><input type="text" name="land_title" required placeholder="e.g. 2-Plot Residential Land, East Legon Hills"/></div>
+          <div class="form-row">
+            <div class="field"><label>Land size</label><input type="text" name="land_size" placeholder="e.g. 100x100 ft / 2 plots"/></div>
+            <div class="field"><label>Asking price (optional)</label><input type="number" name="asking_price_amount" min="0" step="any" placeholder="Amount in GHS"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Location *</label><input type="text" name="land_location" required placeholder="e.g. Kumasi, Ahodwo"/></div>
+            <div class="field"><label>Nearest landmark</label><input type="text" name="nearest_landmark" placeholder="e.g. Near KNUST North Gate"/></div>
+          </div>
+
+          <div class="field">
+            <label>Do you have a search result for this land?</label>
+            <div class="yn-toggle" data-yn="has_search_result">
+              <button type="button" data-val="true">Yes</button>
+              <button type="button" data-val="false">No</button>
+            </div>
+            <input type="hidden" name="has_search_result" value=""/>
+          </div>
+
+          <div class="field">
+            <label>Which documents do you currently hold?</label>
+            <div class="chip-group" id="sellerDocsChips">
+              <label class="chip-check"><input type="checkbox" value="Title"/><span>Title</span></label>
+              <label class="chip-check"><input type="checkbox" value="Indenture"/><span>Indenture</span></label>
+              <label class="chip-check"><input type="checkbox" value="Site Plan"/><span>Site Plan</span></label>
+              <label class="chip-check"><input type="checkbox" value="Certified Site Plan"/><span>Certified Site Plan</span></label>
+              <label class="chip-check"><input type="checkbox" value="Search Report"/><span>Search Report</span></label>
+              <label class="chip-check"><input type="checkbox" value="Land Certificate"/><span>Land Certificate</span></label>
+            </div>
+          </div>
+
+          <div class="field"><label>Full details / description *</label><textarea name="description" required placeholder="Describe the land, its history, why you're selling, and anything a buyer should know..."></textarea></div>
+
+          <div class="field">
+            <label>Land photos</label>
+            <div class="file-drop" id="sellerImagesDrop">
+              <input type="file" id="sellerImagesInput" accept="image/*" multiple/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16l4.5-6 4 5 3-3.5L20 16"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
+              <div class="fd-label">Click to upload photos of the land</div>
+              <div class="fd-sub">JPG or PNG, as many as you like</div>
+            </div>
+            <div class="file-list" id="sellerImagesList"></div>
+          </div>
+
+          <div class="field">
+            <label>Supporting documents (optional)</label>
+            <div class="file-drop" id="sellerDocsDrop">
+              <input type="file" id="sellerDocsInput" accept="image/*,.pdf,.doc,.docx" multiple/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+              <div class="fd-label">Attach copies of title, indenture, search result, etc.</div>
+              <div class="fd-sub">PDF, Word, or image files</div>
+            </div>
+            <div class="file-list" id="sellerDocsList"></div>
+          </div>
+
+          <div class="upload-progress" id="sellerUploadProgress"></div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" id="sellerSubmitBtn">Submit for review</button>
+          <div class="form-msg" id="sellerFormMsg"></div>
+        </form>
+      </div>
+      <div id="sellerModalSuccess" class="inquiry-success" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        <h3>Submission received.</h3>
+        <p>Our team will verify your details and documents, then reach out before anything goes live.</p>
+        <button type="button" class="btn btn-ghost" id="sellerModalDoneBtn" style="margin-top:20px;">Close</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -927,15 +1124,175 @@ const io = new IntersectionObserver(entries => {
 }, { threshold: .12 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-/* --- interest preselect from qualifier buttons --- */
-document.querySelectorAll('[data-interest]').forEach(a => {
-  a.addEventListener('click', () => {
-    const sel = document.getElementById('interestSelect');
-    if (sel) sel.value = a.getAttribute('data-interest');
-  });
-});
-
 document.getElementById('year').textContent = new Date().getFullYear();
+
+/* --- buyer & seller inquiry modals --- */
+(function setupInquiryModals(){
+  function wireModal(openBtnId, overlayId, closeId){
+    const openBtn = document.getElementById(openBtnId);
+    const overlay = document.getElementById(overlayId);
+    const closeBtn = document.getElementById(closeId);
+    if (!openBtn || !overlay) return;
+    openBtn.addEventListener('click', () => { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; });
+    function close(){ overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    return close;
+  }
+  const closeBuyer = wireModal('openBuyerModalBtn', 'buyerModalOverlay', 'buyerModalClose');
+  const closeSeller = wireModal('openSellerModalBtn', 'sellerModalOverlay', 'sellerModalClose');
+  document.getElementById('buyerModalDoneBtn')?.addEventListener('click', closeBuyer);
+  document.getElementById('sellerModalDoneBtn')?.addEventListener('click', closeSeller);
+
+  /* yes/no toggles write into a same-named hidden input as 'true'/'false' */
+  document.querySelectorAll('.yn-toggle').forEach(group => {
+    const name = group.dataset.yn;
+    const hidden = group.closest('form')?.querySelector(`input[type=hidden][name="${name}"]`);
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (hidden) hidden.value = btn.dataset.val;
+        if (name === 'has_existing_land') {
+          document.getElementById('existingLandDetailsWrap').style.display = btn.dataset.val === 'true' ? 'block' : 'none';
+        }
+      });
+    });
+  });
+
+  /* --- generic multi-file picker with preview list --- */
+  function setupFilePicker(dropId, inputId, listId, isImage){
+    const drop = document.getElementById(dropId);
+    const input = document.getElementById(inputId);
+    const list = document.getElementById(listId);
+    if (!drop || !input) return { getFiles: () => [] };
+    let files = [];
+    drop.addEventListener('click', () => input.click());
+    input.addEventListener('change', () => {
+      files = files.concat(Array.from(input.files));
+      input.value = '';
+      render();
+    });
+    function remove(idx){ files.splice(idx, 1); render(); }
+    function render(){
+      list.innerHTML = files.map((f, i) => `
+        <div class="file-item">
+          ${isImage ? `<img class="fi-thumb" src="${URL.createObjectURL(f)}" alt=""/>` : ''}
+          <span class="fi-name">${esc(f.name)}</span>
+          <button type="button" class="fi-remove" data-idx="${i}" aria-label="Remove">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>`).join('');
+      list.querySelectorAll('.fi-remove').forEach(b => b.addEventListener('click', () => remove(parseInt(b.dataset.idx, 10))));
+    }
+    return { getFiles: () => files, reset: () => { files = []; render(); } };
+  }
+  const sellerImages = setupFilePicker('sellerImagesDrop', 'sellerImagesInput', 'sellerImagesList', true);
+  const sellerDocs = setupFilePicker('sellerDocsDrop', 'sellerDocsInput', 'sellerDocsList', false);
+
+  async function uploadFile(bucket, file, prefix){
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+    const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error } = await sb.storage.from(bucket).upload(path, file, { upsert: false });
+    if (error) throw error;
+    const { data } = sb.storage.from(bucket).getPublicUrl(path);
+    return { path, url: data.publicUrl };
+  }
+
+  /* --- buyer form submit --- */
+  const buyerForm = document.getElementById('buyerForm');
+  buyerForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('buyerFormMsg');
+    const btn = buyerForm.querySelector('button[type=submit]');
+    const data = Object.fromEntries(new FormData(buyerForm).entries());
+    btn.disabled = true; btn.textContent = 'Sending...';
+    msg.className = 'form-msg';
+    try {
+      if (!sb) throw new Error('offline');
+      const { error } = await sb.from('buyer_inquiries').insert({
+        name: data.name, phone: data.phone, email: data.email || null,
+        has_existing_land: data.has_existing_land === '' ? null : data.has_existing_land === 'true',
+        existing_land_details: data.existing_land_details || null,
+        interested_location: data.interested_location || null,
+        wants_plot_recommendations: data.wants_plot_recommendations === '' ? null : data.wants_plot_recommendations === 'true',
+        budget_range: data.budget_range || null,
+        preferred_contact: data.preferred_contact || 'phone',
+        message: data.message || null
+      });
+      if (error) throw error;
+      document.getElementById('buyerModalFormWrap').style.display = 'none';
+      document.getElementById('buyerModalSuccess').style.display = 'block';
+      buyerForm.reset();
+    } catch (err) {
+      msg.textContent = 'Something went wrong sending your request. Please try again, or reach us directly via WhatsApp.';
+      msg.className = 'form-msg err';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Send my request';
+    }
+  });
+
+  /* --- seller form submit --- */
+  const sellerForm = document.getElementById('sellerForm');
+  sellerForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('sellerFormMsg');
+    const progress = document.getElementById('sellerUploadProgress');
+    const btn = document.getElementById('sellerSubmitBtn');
+    const data = Object.fromEntries(new FormData(sellerForm).entries());
+    const docsHeld = Array.from(document.querySelectorAll('#sellerDocsChips input:checked')).map(c => c.value);
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    msg.className = 'form-msg';
+    try {
+      if (!sb) throw new Error('offline');
+      const { data: inserted, error } = await sb.from('seller_submissions').insert({
+        name: data.name, phone: data.phone, email: data.email || null,
+        company_name: data.company_name || null,
+        land_title: data.land_title, land_size: data.land_size || null,
+        asking_price_amount: data.asking_price_amount ? parseFloat(data.asking_price_amount) : null,
+        land_location: data.land_location, nearest_landmark: data.nearest_landmark || null,
+        has_search_result: data.has_search_result === '' ? null : data.has_search_result === 'true',
+        documents_held: docsHeld,
+        description: data.description
+      }).select('id').single();
+      if (error) throw error;
+      const submissionId = inserted.id;
+
+      const imgFiles = sellerImages.getFiles();
+      const docFiles = sellerDocs.getFiles();
+      const totalFiles = imgFiles.length + docFiles.length;
+      let uploaded = 0;
+      if (totalFiles) { progress.classList.add('show'); progress.textContent = `Uploading files... 0/${totalFiles}`; }
+
+      const fileRows = [];
+      for (let i = 0; i < imgFiles.length; i++) {
+        const { path, url } = await uploadFile('media', imgFiles[i], `seller-submissions/${submissionId}`);
+        fileRows.push({ submission_id: submissionId, kind: 'image', file_url: url, file_path: path, file_name: imgFiles[i].name, sort_order: i });
+        uploaded++; progress.textContent = `Uploading files... ${uploaded}/${totalFiles}`;
+      }
+      for (let i = 0; i < docFiles.length; i++) {
+        const { path, url } = await uploadFile('documents', docFiles[i], `seller-submissions/${submissionId}`);
+        fileRows.push({ submission_id: submissionId, kind: 'document', file_url: url, file_path: path, file_name: docFiles[i].name, sort_order: i });
+        uploaded++; progress.textContent = `Uploading files... ${uploaded}/${totalFiles}`;
+      }
+      if (fileRows.length) {
+        const { error: fErr } = await sb.from('seller_submission_files').insert(fileRows);
+        if (fErr) throw fErr;
+      }
+      progress.classList.remove('show');
+      document.getElementById('sellerModalFormWrap').style.display = 'none';
+      document.getElementById('sellerModalSuccess').style.display = 'block';
+      sellerForm.reset();
+      sellerImages.reset(); sellerDocs.reset();
+    } catch (err) {
+      progress.classList.remove('show');
+      msg.textContent = 'Something went wrong submitting your land details. Please try again, or reach us directly via WhatsApp.';
+      msg.className = 'form-msg err';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Submit for review';
+    }
+  });
+})();
 
 /* --- news bell: draggable floating button + slide-in panel (independent of Supabase) --- */
 (function setupNewsBell(){

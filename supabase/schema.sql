@@ -360,3 +360,112 @@ insert into public.banners (kind, headline, subheadline, image_url, cta_href, so
 -- fill in once they can verify it.
 insert into public.sellers (name, company_name, tags, document_types, phone, sort_order) values
   ('Trulander Jsf Limited', 'Trulander Jsf Limited', ARRAY['Verified','Premium'], ARRAY['Title','Certified Site Plan & Indenture'], '233546416566', 1);
+
+-- =====================================================================
+--  MIGRATION: add_storage_buckets_buyer_seller_forms
+--  Storage buckets for real file uploads (replacing base64-in-Postgres,
+--  which was a real driver of "the backend is slow" — every image was
+--  being sent whole through every save and every page load), plus the
+--  buyer inquiry / seller submission tables behind the qualifier forms.
+-- =====================================================================
+
+-- `media` (public): banners, gallery, plots, clients, avatars, news, and
+-- seller-submitted land photos — anything meant to be publicly visible.
+insert into storage.buckets (id, name, public)
+values ('media', 'media', true)
+on conflict (id) do nothing;
+
+-- `documents` (private): supporting documents attached to seller
+-- submissions (title deeds, search results, indentures) — admin-only read,
+-- accessed via short-lived signed URLs, never a public link.
+insert into storage.buckets (id, name, public)
+values ('documents', 'documents', false)
+on conflict (id) do nothing;
+
+create policy "media public read" on storage.objects for select
+  using (bucket_id = 'media');
+create policy "media public insert" on storage.objects for insert
+  with check (bucket_id = 'media');
+create policy "media admin update" on storage.objects for update
+  using (bucket_id = 'media' and is_admin());
+create policy "media admin delete" on storage.objects for delete
+  using (bucket_id = 'media' and is_admin());
+
+create policy "documents public insert" on storage.objects for insert
+  with check (bucket_id = 'documents');
+create policy "documents admin read" on storage.objects for select
+  using (bucket_id = 'documents' and is_admin());
+create policy "documents admin delete" on storage.objects for delete
+  using (bucket_id = 'documents' and is_admin());
+
+-- Buyer inquiries — the "Gmail kind of chat system" inbox behind the
+-- "Yes, help me buy" qualifier form.
+create table public.buyer_inquiries (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  phone text not null,
+  email text,
+  has_existing_land boolean,
+  existing_land_details text,
+  interested_location text,
+  wants_plot_recommendations boolean,
+  budget_range text,
+  preferred_contact text default 'phone' check (preferred_contact in ('phone','whatsapp','email')),
+  message text,
+  status text not null default 'new' check (status in ('new','read','contacted','closed')),
+  created_at timestamptz not null default now()
+);
+alter table public.buyer_inquiries enable row level security;
+create policy "buyer_inquiries public insert" on public.buyer_inquiries for insert with check (true);
+create policy "buyer_inquiries admin read" on public.buyer_inquiries for select using (is_admin());
+create policy "buyer_inquiries admin update" on public.buyer_inquiries for update using (is_admin());
+create policy "buyer_inquiries admin delete" on public.buyer_inquiries for delete using (is_admin());
+
+-- Seller submissions — behind the "Yes, help me sell" form. Every
+-- submission lands in the admin's "Seller Submissions" inbox for review;
+-- approving one auto-creates (or reuses) a seller record and publishes a
+-- linked row in `plots`, so it appears in the public Hot Plots section.
+create table public.seller_submissions (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  phone text not null,
+  email text,
+  company_name text,
+  land_title text not null,
+  land_size text,
+  land_location text not null,
+  nearest_landmark text,
+  has_search_result boolean,
+  documents_held text[] not null default '{}',
+  asking_price_amount numeric,
+  currency text default 'GHS',
+  description text not null,
+  status text not null default 'pending' check (status in ('pending','approved','rejected')),
+  linked_plot_id uuid references public.plots(id) on delete set null,
+  reviewed_by text,
+  reviewed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table public.seller_submissions enable row level security;
+create policy "seller_submissions public insert" on public.seller_submissions for insert with check (true);
+create policy "seller_submissions admin read" on public.seller_submissions for select using (is_admin());
+create policy "seller_submissions admin update" on public.seller_submissions for update using (is_admin());
+create policy "seller_submissions admin delete" on public.seller_submissions for delete using (is_admin());
+
+-- Attachments (land photos + supporting documents) for a seller submission.
+create table public.seller_submission_files (
+  id uuid primary key default gen_random_uuid(),
+  submission_id uuid not null references public.seller_submissions(id) on delete cascade,
+  kind text not null check (kind in ('image','document')),
+  file_url text not null,
+  file_path text not null,
+  file_name text not null,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+alter table public.seller_submission_files enable row level security;
+create policy "seller_submission_files public insert" on public.seller_submission_files for insert with check (true);
+create policy "seller_submission_files admin read" on public.seller_submission_files for select using (is_admin());
+create policy "seller_submission_files admin delete" on public.seller_submission_files for delete using (is_admin());
+
+insert into public.clients (name, sort_order) values ('Hollard Insurance', 2) on conflict do nothing;
