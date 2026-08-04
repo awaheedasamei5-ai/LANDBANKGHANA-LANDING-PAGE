@@ -683,6 +683,8 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 /* ---------- SITE VISIT REQUEST ---------- */
 .site-visit-page{padding:120px 0 70px;}
 .sv-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:start;}
+.sv-plot-context{background:var(--brand-light);border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:13.5px;color:var(--brand-dark);}
+.sv-plot-context b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
 .sv-copy ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:12px;}
 .sv-copy li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink-soft);}
 .sv-copy li svg{width:18px;height:18px;color:var(--brand);flex:none;margin-top:2px;}
@@ -1727,6 +1729,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <div class="rs-form-card reveal">
         <form id="siteVisitForm">
           <input type="hidden" name="id"/>
+          <div class="sv-plot-context" id="svPlotContext" style="display:none"></div>
           <div class="form-row">
             <div class="field"><label>Full name *</label><input type="text" name="full_name" required placeholder="e.g. Kojo Antwi"/></div>
             <div class="field"><label>Phone number *</label><input type="tel" name="contact" required placeholder="e.g. 024 000 0000"/></div>
@@ -1760,6 +1763,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
               <option value="Ashaiman China Mall">Ashaiman China Mall</option>
               <option value="Other">Other — I'll specify below</option>
             </select>
+            <div class="hint">Just pick the closest option — we'll confirm your exact pickup point and time by phone call before the visit, so nothing gets mixed up.</div>
           </div>
           <div class="field"><label>Any questions or comments for our team?</label><textarea name="visit_purpose" placeholder="Anything else we should know..."></textarea></div>
           <button type="submit" class="btn btn-accent btn-block">Submit Site Visit Request</button>
@@ -1973,6 +1977,7 @@ const ROUTE_SECTION = {
   'contact': 'contact'
 };
 let pendingSharedPlotId = null;
+let pendingSiteVisitPlotId = null;
 function applyRoute(){
   const rawHash = location.hash.replace(/^#\/?/, '').replace(/\/$/, '');
   const [hash, queryString] = rawHash.split('?');
@@ -2010,6 +2015,10 @@ function applyRoute(){
         }
         applyPlotsFilters();
       } catch(e){}
+    }
+    if (targets.includes('site-visit') && queryString) {
+      const plotId = new URLSearchParams(queryString).get('plot');
+      if (plotId) applySiteVisitPlotContext(plotId);
     }
   }
 
@@ -2439,6 +2448,26 @@ const SITE_VISIT_FIELDS = [
   ['pickup_location', 'Pick-up Location'], ['accompaniment_count', 'Accompanying'], ['visit_purpose', 'Questions / Comments']
 ];
 let siteVisitLastRecord = null;
+// "Book Site Visit" on a plot's modal arrives here as #/site-visit?plot=<id>
+// — show which plot this is about and fold its location into the notes
+// field, since the request form itself has no dedicated plot reference.
+function applySiteVisitPlotContext(id){
+  const form = document.getElementById('siteVisitForm');
+  if (!form) return;
+  const p = plotsCache.find(pl => String(pl.id) === String(id));
+  if (!p) { pendingSiteVisitPlotId = id; return; }
+  pendingSiteVisitPlotId = null;
+  const ctx = document.getElementById('svPlotContext');
+  if (ctx) {
+    ctx.innerHTML = `<b>Booking a site visit for</b>${esc(p.title)}${p.location ? ' — ' + esc(p.location) : ''}`;
+    ctx.style.display = 'block';
+  }
+  const purposeField = form.querySelector('[name="visit_purpose"]');
+  if (purposeField && !purposeField.value) {
+    const locNote = p.listing_type === 'third_party' && p.location ? ` (Land location as given by the seller: ${p.location})` : '';
+    purposeField.value = `Regarding: ${p.title}${locNote}`;
+  }
+}
 const siteVisitForm = document.getElementById('siteVisitForm');
 siteVisitForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -2833,6 +2862,7 @@ function renderPlots(plots, sellers){
   toolbar.style.display = 'flex';
   applyPlotsFilters();
   if (pendingSharedPlotId) { openPlotModalById(pendingSharedPlotId); pendingSharedPlotId = null; }
+  if (pendingSiteVisitPlotId) applySiteVisitPlotContext(pendingSiteVisitPlotId);
 }
 
 /* --- Home "Hot Plots" teaser: featured/newest plots only, links to the full Plots page --- */
@@ -3072,7 +3102,10 @@ function openPlotModalRecord(p){
       ${p.description ? `<p class="modal-desc">${esc(p.description)}</p>` : ''}
       ${p.location ? `<div class="plot-map-wrap"><iframe class="plot-map-frame" src="https://www.google.com/maps?q=${encodeURIComponent(p.location)}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map showing ${esc(p.location)}"></iframe></div>` : ''}
       ${seller ? renderSellerCard(seller) : renderDirectContactCard(p)}
-      <a href="#contact" class="btn btn-accent btn-block" onclick="closePlotModal()">Enquire About This Plot</a>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="#contact" class="btn btn-accent" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal()">Enquire About This Plot</a>
+        <a href="#/site-visit?plot=${encodeURIComponent(p.id)}" class="btn btn-ghost" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal()">Book Site Visit</a>
+      </div>
       <p class="form-msg" id="shareMsg" style="text-align:center"></p>
     </div>`;
   document.getElementById('plotModalOverlay').classList.add('open');
