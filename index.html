@@ -1939,6 +1939,12 @@ window.addEventListener('scroll', () => {
   });
 });
 
+// Declared here (ahead of applyRoute, which reads plotsCache for shared
+// plot deep links) so the very first synchronous applyRoute() call below
+// never hits a temporal-dead-zone error on a #/plots/<id> landing URL.
+let plotsCache = [];
+let plotsFilteredCache = [];
+
 /* --- router: gives each nav destination a real "page" feel while staying a
    single-file site — sections never move in the DOM, the router just shows
    exactly one "page" (a group of sections for Home, or a single section for
@@ -1966,10 +1972,16 @@ const ROUTE_SECTION = {
   'site-visit': 'site-visit',
   'contact': 'contact'
 };
+let pendingSharedPlotId = null;
 function applyRoute(){
   const hash = location.hash.replace(/^#\/?/, '').replace(/\/$/, '');
   const isHome = hash === '';
   document.body.classList.toggle('is-subpage', !isHome);
+
+  // Shared plot links look like #/plots/<id> — route to the Plots section
+  // like any other plots link, then open that specific plot's modal below.
+  const plotDeepLinkMatch = hash.match(/^plots\/(.+)$/);
+  const routeKey = plotDeepLinkMatch ? 'plots' : hash;
 
   if (isHome) {
     const homeSections = currentHomeSections();
@@ -1978,7 +1990,7 @@ function applyRoute(){
       if (el) el.classList.toggle('route-hidden', !homeSections.includes(id));
     });
   } else {
-    const raw = ROUTE_SECTION[hash];
+    const raw = ROUTE_SECTION[routeKey];
     const targets = Array.isArray(raw) ? raw : (raw ? [raw] : null);
     if (!targets || !document.getElementById(targets[0])) { location.hash = '#/'; return; }
     ROUTABLE_SECTIONS.forEach(id => {
@@ -1990,9 +2002,14 @@ function applyRoute(){
 
   document.querySelectorAll('[data-route-link]').forEach(a => {
     const r = a.dataset.routeLink;
-    const active = isHome ? r === 'home' : (r === 'services' ? (hash === 'services' || hash.indexOf('services/') === 0) : r === hash);
+    const active = isHome ? r === 'home' : (r === 'services' ? (routeKey === 'services' || routeKey.indexOf('services/') === 0) : r === routeKey);
     a.classList.toggle('active', active);
   });
+
+  if (plotDeepLinkMatch) {
+    pendingSharedPlotId = decodeURIComponent(plotDeepLinkMatch[1]);
+    if (plotsCache.length) { openPlotModalById(pendingSharedPlotId); pendingSharedPlotId = null; }
+  }
 
   window.scrollTo(0, 0);
 }
@@ -2766,8 +2783,6 @@ async function loadContent(){
 }
 
 /* --- Hot Plots marketplace --- */
-let plotsCache = [];
-let plotsFilteredCache = [];
 let sellersCache = {};
 let siteSettingsCache = null;
 function formatPrice(p){
@@ -2804,6 +2819,7 @@ function renderPlots(plots, sellers){
   document.getElementById('plotsEmpty').style.display = 'none';
   toolbar.style.display = 'flex';
   applyPlotsFilters();
+  if (pendingSharedPlotId) { openPlotModalById(pendingSharedPlotId); pendingSharedPlotId = null; }
 }
 
 /* --- Home "Hot Plots" teaser: featured/newest plots only, links to the full Plots page --- */
@@ -3001,7 +3017,14 @@ function renderSellerCard(s){
     </div>`;
 }
 function openPlotModal(i){
-  const p = plotsFilteredCache[i];
+  openPlotModalRecord(plotsFilteredCache[i]);
+}
+function openPlotModalById(id){
+  const p = plotsCache.find(pl => String(pl.id) === String(id));
+  if (p) openPlotModalRecord(p);
+}
+function openPlotModalRecord(p){
+  if (!p) return;
   const seller = p.seller_id ? sellersCache[p.seller_id] : null;
   const imgs = [p.image_url, p.image_url_2, p.image_url_3].filter(Boolean);
   document.getElementById('plotModalBody').innerHTML = `
@@ -3021,7 +3044,7 @@ function openPlotModal(i){
           <button type="button" class="modal-close" style="position:static;width:36px;height:36px;" aria-label="Save plot" onclick="toggleFavoritePlot('${p.id}'); updateModalFavIcon('${p.id}')">
             <svg id="modalFavIcon" viewBox="0 0 24 24" fill="${isFavoritePlot(p.id)?'#ff5a6e':'none'}" stroke="${isFavoritePlot(p.id)?'#ff5a6e':'currentColor'}" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
           </button>
-          <button type="button" class="modal-close" style="position:static;width:36px;height:36px;" aria-label="Share plot" onclick="sharePlot('${esc(p.title)}')">
+          <button type="button" class="modal-close" style="position:static;width:36px;height:36px;" aria-label="Share plot" onclick="sharePlot('${p.id}', '${esc(p.title)}')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9"/></svg>
           </button>
         </div>
@@ -3048,15 +3071,23 @@ function updateModalFavIcon(id){
   icon.setAttribute('fill', on ? '#ff5a6e' : 'none');
   icon.setAttribute('stroke', on ? '#ff5a6e' : 'currentColor');
 }
-async function sharePlot(title){
-  const url = location.href.split('#')[0] + '#/plots';
+async function sharePlot(id, title){
+  const url = location.href.split('#')[0] + '#/plots/' + encodeURIComponent(id);
   const shareData = { title: title + ' — Trulander JSF Limited', text: `Check out this plot: ${title}`, url };
+  const msg = document.getElementById('shareMsg');
   try {
     if (navigator.share) { await navigator.share(shareData); return; }
     await navigator.clipboard.writeText(url);
-    const msg = document.getElementById('shareMsg');
     if (msg) { msg.textContent = 'Link copied to clipboard!'; msg.className = 'form-msg ok'; }
-  } catch (e) { /* user cancelled share — nothing to do */ }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return; // user cancelled the share sheet
+    try {
+      await navigator.clipboard.writeText(url);
+      if (msg) { msg.textContent = 'Link copied to clipboard!'; msg.className = 'form-msg ok'; }
+    } catch (e2) {
+      if (msg) { msg.textContent = url; msg.className = 'form-msg'; }
+    }
+  }
 }
 function closePlotModal(){ document.getElementById('plotModalOverlay').classList.remove('open'); }
 document.getElementById('plotModalClose').addEventListener('click', closePlotModal);
