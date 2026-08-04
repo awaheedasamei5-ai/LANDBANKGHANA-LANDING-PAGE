@@ -1676,7 +1676,12 @@ function initGalleryCarousel(items){
     slideEls.forEach((el, idx) => el.classList.toggle('active', idx === current));
     thumbEls.forEach((el, idx) => el.classList.toggle('active', idx === current));
     const activeThumb = thumbEls[current];
-    if (activeThumb) activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (activeThumb) {
+      // Scroll only the horizontal thumbnail strip — never scrollIntoView here,
+      // its 'nearest' block option can still nudge the whole page vertically.
+      const target = activeThumb.offsetLeft - (thumbs.clientWidth - activeThumb.clientWidth) / 2;
+      thumbs.scrollTo({ left: target, behavior: 'smooth' });
+    }
     const label = items[current].label;
     caption.textContent = label || '';
     caption.classList.toggle('show', !!label);
