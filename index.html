@@ -901,6 +901,70 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </div>
 </section>
 
+
+<!-- ============ QUALIFIER QUESTIONS ============ -->
+<section id="qualify" class="section-divide">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Let's Get Specific</span>
+      <h2>What are you trying to do?</h2>
+    </div>
+    <div class="qual-grid">
+      <div class="qual-card buy reveal">
+        <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <h3>Are you interested in acquiring litigation-free land?</h3>
+        <p>Tell us your budget and preferred area — we'll shortlist verified, dispute-free plots and handle the due diligence.</p>
+        <div class="qbtns">
+          <button type="button" class="btn btn-accent" id="openBuyerModalBtn">Yes, help me buy</button>
+          <a href="#help" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Not sure yet</a>
+        </div>
+      </div>
+      <div class="qual-card sell reveal">
+        <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
+        <h3>Do you have land you want to sell, safely and properly?</h3>
+        <p>We verify your documents, help you value it fairly, and connect you with serious, vetted buyers — no middlemen wahala.</p>
+        <div class="qbtns">
+          <button type="button" class="btn btn-primary" id="openSellerModalBtn">Yes, help me sell</button>
+          <a href="#help" class="btn btn-ghost">Learn how</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section id="about" class="section-divide">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal">
+      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / About Us
+    </div>
+  </div>
+  <div class="wrap about-grid">
+    <div class="about-card reveal" id="aboutCard">
+      <img class="about-photo" id="aboutPhotoImg" src="assets/photos/about.jpg" alt="A Trulander JSF Limited team member"/>
+      <div class="about-overlay"></div>
+      <div class="about-card-content">
+        <button type="button" class="about-quotes" id="aboutQuotes" aria-label="Quote slideshow — click to pause and read"></button>
+        <div class="about-quotes-meta">
+          <div class="about-quotes-dots" id="aboutQuotesDots"></div>
+          <span class="about-quotes-status" id="aboutQuotesStatus"></span>
+        </div>
+      </div>
+    </div>
+    <div class="reveal">
+      <span class="eyebrow" id="aboutEyebrow">About Us — Who Are We?</span>
+      <h2 style="margin-top:14px;font-size:clamp(26px,4vw,38px)" id="aboutHeading">We are the land experts.</h2>
+      <p style="margin-top:16px;color:var(--muted);font-size:16px;" id="aboutBody">Trulander JSF Limited is a registered real estate company, and a GREDA (Ghana Real Estate Developers Association) member. At Trulander, we aim to provide genuine land offerings, accessible and available for all. Every property we market and sell goes through rigorous due diligence to ensure it's void of any foreseeable risk — so you can acquire land for your dream home or project in peace.</p>
+      <div class="values-grid">
+        <div class="value"><h4>Our Mission</h4><p id="aboutMission">To help humanity prosper by providing property void of risk, at your convenience.</p></div>
+        <div class="value"><h4>Our Vision</h4><p id="aboutVision">Property as risk-free and available as air — everywhere, for everyone.</p></div>
+        <div class="value"><h4>GREDA Registered</h4><p id="aboutGreda">Every headlease and sub-lease we sell is certified and registered with the Lands Commission.</p></div>
+        <div class="value"><h4>People-First</h4><p id="aboutPeopleFirst">Real people guide your transaction — not a listing you're left to figure out alone.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ ROYAL PALM ENCLAVE ============ -->
 <section id="royal-palm">
   <div class="rp-hero">
@@ -975,69 +1039,6 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <div class="rp-cta reveal">
         <button type="button" class="btn btn-accent" id="rpSiteVisitBtn">Book a Free Site Visit</button>
         <a href="#/plots?q=Royal%20Palm" class="btn btn-ghost">Browse Available Plots</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ HOW WE HELP ============ -->
-<section id="help" class="section-divide">
-  <div class="wrap">
-    <div class="sec-head center reveal">
-      <span class="eyebrow">How We Help</span>
-      <h2>Help is the whole point.</h2>
-      <p>Land in Ghana can be confusing and risky to navigate alone. Trulander JSF Limited exists to stand between you and every bad deal — with real verification, real people, and real follow-through.</p>
-    </div>
-    <div class="help-grid">
-      <div class="help-card reveal">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
-        <h3>Due Diligence &amp; Title Search</h3>
-        <p>We investigate every title at the Lands Commission, search court &amp; family records for disputes, and confirm boundaries before you spend a cedi.</p>
-      </div>
-      <div class="help-card hi reveal">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></div>
-        <h3>Litigation-Free Acquisition</h3>
-        <p>We only guide you toward land we've verified is free of family disputes, double sales, or court litigation — so what you buy stays yours.</p>
-      </div>
-      <div class="help-card reveal">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4-4 4"/><path d="M3 12h18"/></svg></div>
-        <h3>Support for Buyers</h3>
-        <p>From shortlisting the right plot to registration and documentation, we walk with you to a safe, stress-free handover.</p>
-      </div>
-      <div class="help-card hi reveal">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
-        <h3>Support for Sellers</h3>
-        <p>Selling land safely takes more than a signboard. We help you package, verify, and connect your land with serious, ready buyers.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ QUALIFIER QUESTIONS ============ -->
-<section id="qualify" class="section-divide">
-  <div class="wrap">
-    <div class="sec-head center reveal">
-      <span class="eyebrow">Let's Get Specific</span>
-      <h2>What are you trying to do?</h2>
-    </div>
-    <div class="qual-grid">
-      <div class="qual-card buy reveal">
-        <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
-        <h3>Are you interested in acquiring litigation-free land?</h3>
-        <p>Tell us your budget and preferred area — we'll shortlist verified, dispute-free plots and handle the due diligence.</p>
-        <div class="qbtns">
-          <button type="button" class="btn btn-accent" id="openBuyerModalBtn">Yes, help me buy</button>
-          <a href="#help" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Not sure yet</a>
-        </div>
-      </div>
-      <div class="qual-card sell reveal">
-        <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
-        <h3>Do you have land you want to sell, safely and properly?</h3>
-        <p>We verify your documents, help you value it fairly, and connect you with serious, vetted buyers — no middlemen wahala.</p>
-        <div class="qbtns">
-          <button type="button" class="btn btn-primary" id="openSellerModalBtn">Yes, help me sell</button>
-          <a href="#help" class="btn btn-ghost">Learn how</a>
-        </div>
       </div>
     </div>
   </div>
@@ -1141,6 +1142,169 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
     </div>
   </div>
 </section>
+
+<!-- ============ HOW WE HELP ============ -->
+<section id="help" class="section-divide">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">How We Help</span>
+      <h2>Help is the whole point.</h2>
+      <p>Land in Ghana can be confusing and risky to navigate alone. Trulander JSF Limited exists to stand between you and every bad deal — with real verification, real people, and real follow-through.</p>
+    </div>
+    <div class="help-grid">
+      <div class="help-card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <h3>Due Diligence &amp; Title Search</h3>
+        <p>We investigate every title at the Lands Commission, search court &amp; family records for disputes, and confirm boundaries before you spend a cedi.</p>
+      </div>
+      <div class="help-card hi reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></div>
+        <h3>Litigation-Free Acquisition</h3>
+        <p>We only guide you toward land we've verified is free of family disputes, double sales, or court litigation — so what you buy stays yours.</p>
+      </div>
+      <div class="help-card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4-4 4"/><path d="M3 12h18"/></svg></div>
+        <h3>Support for Buyers</h3>
+        <p>From shortlisting the right plot to registration and documentation, we walk with you to a safe, stress-free handover.</p>
+      </div>
+      <div class="help-card hi reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
+        <h3>Support for Sellers</h3>
+        <p>Selling land safely takes more than a signboard. We help you package, verify, and connect your land with serious, ready buyers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESS ============ -->
+<section id="process">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Our Process</span>
+      <h2>The Trulander Transaction Process.</h2>
+      <p>The exact steps every buyer goes through with us — nothing skipped, nothing rushed.</p>
+    </div>
+    <div class="timeline">
+      <div class="tstep reveal"><h4>Talk To Our Team</h4><p>An initial conversation with our sales team, then we schedule your free site visit to Royal Palm Enclave.</p></div>
+      <div class="tstep reveal"><h4>Independent Land Search</h4><p>We hand you everything you need to verify the land yourself at the Lands Commission — no pressure, no rush.</p></div>
+      <div class="tstep reveal"><h4>Quotation &amp; Contract</h4><p>Once you're satisfied and accept your quotation, formal registration forms and the contract for sale are signed.</p></div>
+      <div class="tstep reveal"><h4>Secure Payment</h4><p>Payment goes directly to Trulander's accounts only — never cash — with a receipt issued for every payment made.</p></div>
+      <div class="tstep reveal"><h4>Indenture Prepared</h4><p>Indenture preparation begins once your 50% deposit is in, and is ready within 1–10 days.</p></div>
+      <div class="tstep reveal"><h4>Land Allocated</h4><p>Your plot is allocated at 50% payment — you can start your project right after the initial deposit.</p></div>
+    </div>
+    <div class="process-photo reveal" id="processPhoto"><img id="processPhotoImg" alt="Trulander JSF Limited team on site"/></div>
+    <div class="seller-note reveal"><b>Selling instead?</b> The same team verifies your title, prepares your documents, and matches your land with buyers who are ready to move — safely and on your terms.</div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section id="stats" class="section-divide">
+  <div class="wrap">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat"><div class="val">7+</div><div class="lbl">Years of Experience</div></div>
+      <div class="stat"><div class="val">100%</div><div class="lbl">Litigation-Free Transfers</div></div>
+      <div class="stat"><div class="val">1,200+</div><div class="lbl">Acres Secured</div></div>
+      <div class="stat"><div class="val">500+</div><div class="lbl">Happy Clients</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY (auto-populated, hidden until admin adds photos) ============ -->
+<section id="gallery" class="section-divide" style="display:none">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Gallery</span>
+      <h2>More from Trulander JSF Limited</h2>
+    </div>
+    <div class="gallery-bento reveal" id="galleryBento"></div>
+  </div>
+</section>
+
+<!-- ============ STORIES ============ -->
+<section id="stories" class="section-divide">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Client Stories</span>
+      <h2>What our clients say</h2>
+    </div>
+    <div id="storiesContent">
+      <div class="stories-empty reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.8 7.8L3 21l1.7-6.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
+        <h4>Client stories are coming soon</h4>
+        <p>We're gathering references from recent buyers and sellers. Ask us directly and we'll happily connect you.</p>
+      </div>
+    </div>
+    <div class="review-form-wrap reveal">
+      <h4>Had a good experience with us? Leave a review.</h4>
+      <p class="hint">Approved reviews appear publicly above — we read every one.</p>
+      <form id="reviewForm">
+        <div class="star-input" id="starInput">
+          <button type="button" data-star="1" aria-label="1 star" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
+          <button type="button" data-star="2" aria-label="2 stars" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
+          <button type="button" data-star="3" aria-label="3 stars" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
+          <button type="button" data-star="4" aria-label="4 stars" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
+          <button type="button" data-star="5" aria-label="5 stars" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
+        </div>
+        <input type="hidden" name="rating" id="ratingValue" value="5"/>
+        <div class="form-row">
+          <div class="field"><label>Your name</label><input name="reviewer_name" required placeholder="e.g. Kwame Asante"/></div>
+        </div>
+        <div class="field"><label>Your experience</label><textarea name="comment" required placeholder="Tell us how it went..."></textarea></div>
+        <div class="field"><label>Your photo (optional)</label><input type="file" name="photo" id="reviewPhotoInput" accept="image/*"/>
+          <div class="hint">Shows next to your review so people can see it's a real person — totally optional.</div>
+        </div>
+        <button type="submit" class="btn btn-accent">Submit Review</button>
+        <p class="form-msg" id="reviewMsg"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REMOTE SALES / REFER & EARN ============ -->
+<section id="remote-sales" class="section-divide">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal">
+      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Refer &amp; Earn
+    </div>
+  </div>
+  <div class="wrap rs-grid">
+    <div class="rs-copy reveal">
+      <span class="eyebrow">Refer &amp; Earn</span>
+      <h2 style="margin:14px 0 18px;font-size:clamp(26px,4vw,36px)">Earn selling Royal Palm Enclave — from anywhere.</h2>
+      <div class="rs-amount-wrap" id="referralAmountWrap" style="display:none">
+        <div class="big-num" id="referralAmountNum"></div>
+        <div class="big-num-lbl">paid per successful referral, one week after the month your sale completes.</div>
+      </div>
+      <p class="rs-amount-fallback" id="referralAmountFallback">Join our referral program — fill the form below and our team will confirm exactly how much you earn per successful referral.</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> No office, no fixed hours — refer from wherever you are.</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> We handle the site visit, verification, and paperwork.</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Fill the form below and our team will call to onboard you.</li>
+      </ul>
+    </div>
+    <div class="rs-form-card reveal">
+      <form id="remoteSalesForm">
+        <div class="form-row">
+          <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Abena Osei"/></div>
+          <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+          <div class="field"><label>Where are you based?</label><input type="text" name="location" placeholder="e.g. Kumasi, or Diaspora - UK"/></div>
+        </div>
+        <div class="field"><label>Any sales experience? (optional)</label><input type="text" name="experience" placeholder="e.g. Real estate, insurance, none — that's fine too"/></div>
+        <div class="field"><label>Anything else? (optional)</label><textarea name="message" placeholder="Tell us a bit about yourself..."></textarea></div>
+        <button type="submit" class="btn btn-accent btn-block">Join the Referral Program</button>
+        <p class="form-msg" id="remoteSalesMsg"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+
+
+
+
 
 <!-- ============ PLOT DETAIL MODAL ============ -->
 <div class="modal-overlay" id="plotModalOverlay">
@@ -1328,82 +1492,9 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </div>
 </div>
 
-<!-- ============ ABOUT ============ -->
-<section id="about" class="section-divide">
-  <div class="wrap">
-    <div class="page-breadcrumb reveal">
-      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / About Us
-    </div>
-  </div>
-  <div class="wrap about-grid">
-    <div class="about-card reveal" id="aboutCard">
-      <img class="about-photo" id="aboutPhotoImg" src="assets/photos/about.jpg" alt="A Trulander JSF Limited team member"/>
-      <div class="about-overlay"></div>
-      <div class="about-card-content">
-        <button type="button" class="about-quotes" id="aboutQuotes" aria-label="Quote slideshow — click to pause and read"></button>
-        <div class="about-quotes-meta">
-          <div class="about-quotes-dots" id="aboutQuotesDots"></div>
-          <span class="about-quotes-status" id="aboutQuotesStatus"></span>
-        </div>
-      </div>
-    </div>
-    <div class="reveal">
-      <span class="eyebrow" id="aboutEyebrow">About Us — Who Are We?</span>
-      <h2 style="margin-top:14px;font-size:clamp(26px,4vw,38px)" id="aboutHeading">We are the land experts.</h2>
-      <p style="margin-top:16px;color:var(--muted);font-size:16px;" id="aboutBody">Trulander JSF Limited is a registered real estate company, and a GREDA (Ghana Real Estate Developers Association) member. At Trulander, we aim to provide genuine land offerings, accessible and available for all. Every property we market and sell goes through rigorous due diligence to ensure it's void of any foreseeable risk — so you can acquire land for your dream home or project in peace.</p>
-      <div class="values-grid">
-        <div class="value"><h4>Our Mission</h4><p id="aboutMission">To help humanity prosper by providing property void of risk, at your convenience.</p></div>
-        <div class="value"><h4>Our Vision</h4><p id="aboutVision">Property as risk-free and available as air — everywhere, for everyone.</p></div>
-        <div class="value"><h4>GREDA Registered</h4><p id="aboutGreda">Every headlease and sub-lease we sell is certified and registered with the Lands Commission.</p></div>
-        <div class="value"><h4>People-First</h4><p id="aboutPeopleFirst">Real people guide your transaction — not a listing you're left to figure out alone.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ============ STATS ============ -->
-<section id="stats" class="section-divide">
-  <div class="wrap">
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat"><div class="val">7+</div><div class="lbl">Years of Experience</div></div>
-      <div class="stat"><div class="val">100%</div><div class="lbl">Litigation-Free Transfers</div></div>
-      <div class="stat"><div class="val">1,200+</div><div class="lbl">Acres Secured</div></div>
-      <div class="stat"><div class="val">500+</div><div class="lbl">Happy Clients</div></div>
-    </div>
-  </div>
-</section>
 
-<!-- ============ PROCESS ============ -->
-<section id="process">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">Our Process</span>
-      <h2>The Trulander Transaction Process.</h2>
-      <p>The exact steps every buyer goes through with us — nothing skipped, nothing rushed.</p>
-    </div>
-    <div class="timeline">
-      <div class="tstep reveal"><h4>Talk To Our Team</h4><p>An initial conversation with our sales team, then we schedule your free site visit to Royal Palm Enclave.</p></div>
-      <div class="tstep reveal"><h4>Independent Land Search</h4><p>We hand you everything you need to verify the land yourself at the Lands Commission — no pressure, no rush.</p></div>
-      <div class="tstep reveal"><h4>Quotation &amp; Contract</h4><p>Once you're satisfied and accept your quotation, formal registration forms and the contract for sale are signed.</p></div>
-      <div class="tstep reveal"><h4>Secure Payment</h4><p>Payment goes directly to Trulander's accounts only — never cash — with a receipt issued for every payment made.</p></div>
-      <div class="tstep reveal"><h4>Indenture Prepared</h4><p>Indenture preparation begins once your 50% deposit is in, and is ready within 1–10 days.</p></div>
-      <div class="tstep reveal"><h4>Land Allocated</h4><p>Your plot is allocated at 50% payment — you can start your project right after the initial deposit.</p></div>
-    </div>
-    <div class="process-photo reveal" id="processPhoto"><img id="processPhotoImg" alt="Trulander JSF Limited team on site"/></div>
-    <div class="seller-note reveal"><b>Selling instead?</b> The same team verifies your title, prepares your documents, and matches your land with buyers who are ready to move — safely and on your terms.</div>
-  </div>
-</section>
 
-<!-- ============ GALLERY (auto-populated, hidden until admin adds photos) ============ -->
-<section id="gallery" class="section-divide" style="display:none">
-  <div class="wrap">
-    <div class="sec-head center reveal">
-      <span class="eyebrow">Gallery</span>
-      <h2>More from Trulander JSF Limited</h2>
-    </div>
-    <div class="gallery-bento reveal" id="galleryBento"></div>
-  </div>
-</section>
 
 <!-- ============ PROMO BANNER LIGHTBOX (click a banner to read it in full) ============ -->
 <div class="gallery-lightbox" id="promoLightbox">
@@ -1441,86 +1532,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </div>
 </div>
 
-<!-- ============ STORIES ============ -->
-<section id="stories" class="section-divide">
-  <div class="wrap">
-    <div class="sec-head center reveal">
-      <span class="eyebrow">Client Stories</span>
-      <h2>What our clients say</h2>
-    </div>
-    <div id="storiesContent">
-      <div class="stories-empty reveal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.8 7.8L3 21l1.7-6.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
-        <h4>Client stories are coming soon</h4>
-        <p>We're gathering references from recent buyers and sellers. Ask us directly and we'll happily connect you.</p>
-      </div>
-    </div>
-    <div class="review-form-wrap reveal">
-      <h4>Had a good experience with us? Leave a review.</h4>
-      <p class="hint">Approved reviews appear publicly above — we read every one.</p>
-      <form id="reviewForm">
-        <div class="star-input" id="starInput">
-          <button type="button" data-star="1" aria-label="1 star" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
-          <button type="button" data-star="2" aria-label="2 stars" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
-          <button type="button" data-star="3" aria-label="3 stars" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
-          <button type="button" data-star="4" aria-label="4 stars" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
-          <button type="button" data-star="5" aria-label="5 stars" class="filled"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.8 1.4 6.8L12 17.3 5.9 20.7l1.4-6.8-5.1-4.8 6.9-.8z"/></svg></button>
-        </div>
-        <input type="hidden" name="rating" id="ratingValue" value="5"/>
-        <div class="form-row">
-          <div class="field"><label>Your name</label><input name="reviewer_name" required placeholder="e.g. Kwame Asante"/></div>
-        </div>
-        <div class="field"><label>Your experience</label><textarea name="comment" required placeholder="Tell us how it went..."></textarea></div>
-        <div class="field"><label>Your photo (optional)</label><input type="file" name="photo" id="reviewPhotoInput" accept="image/*"/>
-          <div class="hint">Shows next to your review so people can see it's a real person — totally optional.</div>
-        </div>
-        <button type="submit" class="btn btn-accent">Submit Review</button>
-        <p class="form-msg" id="reviewMsg"></p>
-      </form>
-    </div>
-  </div>
-</section>
 
-<!-- ============ REMOTE SALES / REFER & EARN ============ -->
-<section id="remote-sales" class="section-divide">
-  <div class="wrap">
-    <div class="page-breadcrumb reveal">
-      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Refer &amp; Earn
-    </div>
-  </div>
-  <div class="wrap rs-grid">
-    <div class="rs-copy reveal">
-      <span class="eyebrow">Refer &amp; Earn</span>
-      <h2 style="margin:14px 0 18px;font-size:clamp(26px,4vw,36px)">Earn selling Royal Palm Enclave — from anywhere.</h2>
-      <div class="rs-amount-wrap" id="referralAmountWrap" style="display:none">
-        <div class="big-num" id="referralAmountNum"></div>
-        <div class="big-num-lbl">paid per successful referral, one week after the month your sale completes.</div>
-      </div>
-      <p class="rs-amount-fallback" id="referralAmountFallback">Join our referral program — fill the form below and our team will confirm exactly how much you earn per successful referral.</p>
-      <ul>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> No office, no fixed hours — refer from wherever you are.</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> We handle the site visit, verification, and paperwork.</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Fill the form below and our team will call to onboard you.</li>
-      </ul>
-    </div>
-    <div class="rs-form-card reveal">
-      <form id="remoteSalesForm">
-        <div class="form-row">
-          <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Abena Osei"/></div>
-          <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
-        </div>
-        <div class="form-row">
-          <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
-          <div class="field"><label>Where are you based?</label><input type="text" name="location" placeholder="e.g. Kumasi, or Diaspora - UK"/></div>
-        </div>
-        <div class="field"><label>Any sales experience? (optional)</label><input type="text" name="experience" placeholder="e.g. Real estate, insurance, none — that's fine too"/></div>
-        <div class="field"><label>Anything else? (optional)</label><textarea name="message" placeholder="Tell us a bit about yourself..."></textarea></div>
-        <button type="submit" class="btn btn-accent btn-block">Join the Referral Program</button>
-        <p class="form-msg" id="remoteSalesMsg"></p>
-      </form>
-    </div>
-  </div>
-</section>
 
 <!-- ============ SERVICES HUB ============ -->
 <section id="services">
@@ -1964,7 +1976,7 @@ let plotsFilteredCache = [];
    single-file site — sections never move in the DOM, the router just shows
    exactly one "page" (a group of sections for Home, or a single section for
    everything else) and hides the rest. --- */
-const DESKTOP_HOME_SECTIONS = ['home','promo','royal-palm','help','qualify','plots-preview','process','stats','about','gallery','stories','remote-sales','contact','clients'];
+const DESKTOP_HOME_SECTIONS = ['home','promo','qualify','about','royal-palm','plots-preview','help','process','stats','gallery','stories','remote-sales','contact','clients'];
 // Phones get a lean Home (just the hero + conversion points) — everything
 // else lives one tap away in the mobile menu instead of one long scroll.
 const MOBILE_HOME_SECTIONS = ['home','promo','qualify','plots-preview','contact'];
