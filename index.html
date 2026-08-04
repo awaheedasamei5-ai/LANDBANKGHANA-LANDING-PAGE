@@ -107,7 +107,7 @@ section{position:relative;}
 .hero-badge{position:absolute;z-index:4;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 16px 34px -14px rgba(8,25,16,.35),0 0 0 1px rgba(34,165,76,.14);display:flex;flex-direction:column;gap:2px;min-width:120px;}
 .hero-badge .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--ink);white-space:nowrap;}
 .hero-badge .lbl{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;}
-.hero-badge.b1{top:20%;right:2%;}
+.hero-badge.b1{top:20%;right:8%;}
 .hero-badge.b2{bottom:12%;right:0%;}
 .hero-badge.b3{top:20%;left:2%;background:var(--ink);color:#fff;}
 .hero-badge.b3 .num{color:#fff;}
@@ -119,18 +119,17 @@ section{position:relative;}
 .hero-badge.b2{animation-delay:1.6s,1.6s;}
 .hero-badge.b3{animation-delay:.2s,0s;}
 
-/* ---- hero flow: stat badges appear to stream out of the laptop screen ----
-   Back layer (lines/particles) sits BEHIND the photo so it's hidden by opaque
-   pixels like the helmet; only the source glow sits in front, at her hand. */
-.hero-flow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
-.hero-flow-back{z-index:1;}
-.hero-flow-front{z-index:3;}
-.hero-flow .flow-path{fill:none;stroke:url(#heroFlowGradient);stroke-width:.55;stroke-linecap:round;stroke-dasharray:3.2 2.6;filter:drop-shadow(0 0 2.5px rgba(34,165,76,.65));opacity:0;animation:heroFlowFadeIn .6s ease-out .5s forwards, heroFlowDash 1.4s linear .5s infinite;}
-@keyframes heroFlowFadeIn{to{opacity:.85;}}
-@keyframes heroFlowDash{to{stroke-dashoffset:-11.6;}}
-.hero-flow .flow-source{fill:url(#heroSourceGlow);transform-box:fill-box;transform-origin:center;animation:heroSourcePulse 2.1s ease-in-out infinite;}
-@keyframes heroSourcePulse{0%,100%{opacity:.55;transform:scale(1);}50%{opacity:1;transform:scale(1.22);}}
-.hero-flow .flow-dot{fill:#fff;filter:drop-shadow(0 0 4px #22A54C) drop-shadow(0 0 7px rgba(34,165,76,.8));}
+/* ---- hero flow: stat badges appear to stream out of a single point at her
+   fingertip on the laptop — a small pulsing point, thin lines, visible in front. */
+.hero-flow{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible;}
+.hero-flow .flow-path{fill:none;stroke:url(#heroFlowGradient);stroke-width:.4;stroke-linecap:round;stroke-dasharray:2.4 2;filter:drop-shadow(0 0 1.5px rgba(34,165,76,.5));opacity:0;animation:heroFlowFadeIn .6s ease-out .5s forwards, heroFlowDash 1.3s linear .5s infinite;}
+@keyframes heroFlowFadeIn{to{opacity:.8;}}
+@keyframes heroFlowDash{to{stroke-dashoffset:-8.8;}}
+.hero-flow .flow-source{fill:#22A54C;transform-box:fill-box;transform-origin:center;filter:drop-shadow(0 0 2.5px rgba(34,165,76,.9));animation:heroSourcePulse 2s ease-in-out infinite;}
+@keyframes heroSourcePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.35);}}
+.hero-flow .flow-ping{fill:none;stroke:#22A54C;stroke-width:.3;transform-box:fill-box;transform-origin:center;opacity:.6;animation:heroPing 2s ease-out infinite;}
+@keyframes heroPing{0%{transform:scale(1);opacity:.55;}100%{transform:scale(5);opacity:0;}}
+.hero-flow .flow-dot{fill:#fff;filter:drop-shadow(0 0 2.5px #22A54C) drop-shadow(0 0 4px rgba(34,165,76,.8));}
 @media (prefers-reduced-motion: reduce){
   .hero-flow{display:none;}
   .hero-badge{animation:none;}
@@ -148,7 +147,7 @@ section{position:relative;}
   .hero-badge{padding:10px 13px;min-width:0;border-radius:13px;gap:0;}
   .hero-badge .num{font-size:17px;}
   .hero-badge .lbl{font-size:9.5px;white-space:nowrap;}
-  .hero-badge.b1{top:22%;right:2px;}
+  .hero-badge.b1{top:22%;right:14px;}
   .hero-badge.b2{bottom:14%;right:0;}
   .hero-badge.b3{top:22%;left:2px;}
 }
@@ -818,36 +817,29 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       </div>
     </div>
     <div class="hero-visual reveal">
-      <svg class="hero-flow hero-flow-back" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.png" alt="Trulander JSF Limited helps you own land safely"/>
+      <svg class="hero-flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <linearGradient id="heroFlowGradient" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stop-color="#22A54C" stop-opacity="0"/>
-            <stop offset="50%" stop-color="#22A54C" stop-opacity=".9"/>
+            <stop offset="50%" stop-color="#22A54C" stop-opacity=".95"/>
             <stop offset="100%" stop-color="#22A54C" stop-opacity="0"/>
           </linearGradient>
         </defs>
-        <path id="heroFlowPathLeft" class="flow-path" d="M56,85 Q15,62 6,29"/>
-        <path id="heroFlowPathRight" class="flow-path" d="M56,85 Q75,56 87,31"/>
-        <path id="heroFlowPathDown" class="flow-path" d="M56,85 Q75,82 88,77"/>
-        <circle class="flow-dot" r="1.1">
+        <path id="heroFlowPathLeft" class="flow-path" d="M56,84 C40,75 20,60 8,27"/>
+        <path id="heroFlowPathRight" class="flow-path" d="M56,84 C75,70 85,48 87,27"/>
+        <path id="heroFlowPathDown" class="flow-path" d="M56,84 Q74,80 87,76"/>
+        <circle class="flow-dot" r=".9">
           <animateMotion dur="2.1s" repeatCount="indefinite" begin="0s"><mpath href="#heroFlowPathLeft"/></animateMotion>
         </circle>
-        <circle class="flow-dot" r="1.1">
+        <circle class="flow-dot" r=".9">
           <animateMotion dur="2.1s" repeatCount="indefinite" begin=".7s"><mpath href="#heroFlowPathRight"/></animateMotion>
         </circle>
-        <circle class="flow-dot" r="1.1">
+        <circle class="flow-dot" r=".9">
           <animateMotion dur="1.5s" repeatCount="indefinite" begin="1.4s"><mpath href="#heroFlowPathDown"/></animateMotion>
         </circle>
-      </svg>
-      <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.png" alt="Trulander JSF Limited helps you own land safely"/>
-      <svg class="hero-flow hero-flow-front" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <radialGradient id="heroSourceGlow">
-            <stop offset="0%" stop-color="#22A54C" stop-opacity=".85"/>
-            <stop offset="100%" stop-color="#22A54C" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <circle class="flow-source" cx="56" cy="85" r="6"/>
+        <circle class="flow-ping" cx="56" cy="84" r="1.3"/>
+        <circle class="flow-source" cx="56" cy="84" r="1"/>
       </svg>
       <div class="hero-badge b1"><span class="num" id="statYears">7+</span><span class="lbl">Years Experience</span></div>
       <div class="hero-badge b2"><span class="num" id="statAcres">1,200+</span><span class="lbl">Acres Secured</span></div>
