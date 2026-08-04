@@ -232,31 +232,49 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
           <div id="namedSlots"></div>
         </div>
         <div class="panel-card">
-          <h3>Add a gallery photo</h3>
-          <p class="desc">These appear automatically in the "More from Trulander JSF Limited" section on the homepage — add as many as you like, in any order. This is the easiest way to drop in new photos without touching any other setting.</p>
+          <h3>Add gallery media</h3>
+          <p class="desc">These appear automatically in the "More from Trulander JSF Limited" section on the homepage — add as many as you like, in any order. Photos or videos both work; videos play right on the site instead of sending visitors away to another app.</p>
           <form id="galleryForm">
             <input type="hidden" name="key"/>
             <div class="form-grid">
               <div class="field"><label>Caption (optional)</label><input name="label" placeholder="Site visit, Kumasi"/></div>
-              <div class="field"><label>Alt text (for accessibility)</label><input name="alt_text" placeholder="Describe the photo"/></div>
+              <div class="field"><label>Alt text (for accessibility)</label><input name="alt_text" placeholder="Describe the photo or video"/></div>
             </div>
-            <div class="form-grid">
-              <div class="field"><label>Image URL</label><input name="image_url" placeholder="https://..."/></div>
-              <div class="field"><label>Or upload image</label><input type="file" accept="image/*" id="galleryImgFile"/></div>
+            <div class="field">
+              <label>Media type</label>
+              <select name="media_type" id="galleryMediaType">
+                <option value="image">Photo</option>
+                <option value="video">Video</option>
+              </select>
+            </div>
+            <div id="galleryImageFields">
+              <div class="form-grid">
+                <div class="field"><label>Image URL</label><input name="image_url" id="galleryImageUrl" placeholder="https://..."/></div>
+                <div class="field"><label>Or upload image</label><input type="file" accept="image/*" id="galleryImgFile"/></div>
+              </div>
+            </div>
+            <div id="galleryVideoFields" style="display:none">
+              <div class="field">
+                <label>Video link (YouTube, Facebook, Instagram, TikTok, or a direct .mp4 URL)</label>
+                <input name="video_url" id="galleryVideoUrl" placeholder="https://www.tiktok.com/@trulander/video/..."/>
+                <div class="hint">Paste the link to a specific post/video from any of your pages — not just the profile link. It'll play inline on the site instead of redirecting visitors away.</div>
+              </div>
+              <div class="field"><label>Or upload a video file (under 50MB)</label><input type="file" accept="video/*" id="galleryVideoFile"/></div>
+              <div class="field"><label>Thumbnail image (optional, shown before play)</label><input type="file" accept="image/*" id="galleryVideoThumbFile"/></div>
             </div>
             <div class="form-grid">
               <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="1"/></div>
               <label style="font-size:13px;display:flex;gap:8px;align-items:center;margin-top:28px"><input type="checkbox" name="active" checked/> Active</label>
             </div>
             <div style="display:flex;gap:10px">
-              <button class="btn btn-accent" type="submit">Save photo</button>
+              <button class="btn btn-accent" type="submit">Save media</button>
               <button class="btn" type="button" id="galleryCancelEdit" style="display:none">Cancel edit</button>
             </div>
           </form>
         </div>
         <div class="panel-card">
-          <h3>Gallery photos</h3>
-          <table><thead><tr><th>Photo</th><th>Caption</th><th>Status</th><th></th></tr></thead><tbody id="galleryTable"></tbody></table>
+          <h3>Gallery media</h3>
+          <table><thead><tr><th>Media</th><th>Caption</th><th>Status</th><th></th></tr></thead><tbody id="galleryTable"></tbody></table>
         </div>
       </div>
 
@@ -889,6 +907,20 @@ async function uploadImagePlain(file, maxDim, prefix){
   if (!blob) return null;
   return uploadBlobToStorage(blob, prefix);
 }
+async function uploadVideoFile(file, prefix){
+  if (!sb) { toast('Could not connect to the server — check your internet connection and try again.'); return null; }
+  try {
+    const ext = (file.name.split('.').pop() || 'mp4').toLowerCase();
+    const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error } = await sb.storage.from('media').upload(path, file, { contentType: file.type || 'video/mp4' });
+    if (error) { toast('Upload error: ' + error.message); return null; }
+    const { data } = sb.storage.from('media').getPublicUrl(path);
+    return data.publicUrl;
+  } catch (err) {
+    toast('Upload failed: ' + (err.message || 'unknown error'));
+    return null;
+  }
+}
 
 /* ---- media viewer + document download (used by Seller Submissions) ---- */
 function viewMedia(url){
@@ -1107,41 +1139,79 @@ async function clearNamedSlot(key){
 }
 
 const galleryForm = document.getElementById('galleryForm');
+function detectVideoProvider(url){
+  const u = (url||'').toLowerCase();
+  if (!u) return null;
+  if (u.includes('youtube.com') || u.includes('youtu.be')) return 'youtube';
+  if (u.includes('tiktok.com')) return 'tiktok';
+  if (u.includes('instagram.com')) return 'instagram';
+  if (u.includes('facebook.com') || u.includes('fb.watch')) return 'facebook';
+  return 'file';
+}
+function toggleGalleryMediaFields(){
+  const isVideo = document.getElementById('galleryMediaType').value === 'video';
+  document.getElementById('galleryImageFields').style.display = isVideo ? 'none' : 'block';
+  document.getElementById('galleryVideoFields').style.display = isVideo ? 'block' : 'none';
+}
+document.getElementById('galleryMediaType').addEventListener('change', toggleGalleryMediaFields);
 document.getElementById('galleryImgFile').addEventListener('change', async (e) => {
+  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1400, 'photos/gallery'); if (url) galleryForm.image_url.value = url; }
+  e.target.value = '';
+});
+document.getElementById('galleryVideoFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    if (file.size > 50 * 1024 * 1024) { toast('Video is too large — please keep uploads under 50MB.'); e.target.value = ''; return; }
+    const url = await uploadVideoFile(file, 'videos/gallery');
+    if (url) { document.getElementById('galleryVideoUrl').value = url; toast('Video uploaded'); }
+  }
+  e.target.value = '';
+});
+document.getElementById('galleryVideoThumbFile').addEventListener('change', async (e) => {
   if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1400, 'photos/gallery'); if (url) galleryForm.image_url.value = url; }
   e.target.value = '';
 });
 galleryForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const d = Object.fromEntries(new FormData(galleryForm).entries());
-  if (!d.image_url) return toast('Add an image URL or upload a photo first');
   d.active = !!galleryForm.active.checked;
   d.sort_order = parseInt(d.sort_order||'1',10);
   d.slot = 'gallery';
+  if (d.media_type === 'video') {
+    if (!d.video_url) return toast('Paste a video link or upload a video file first');
+    d.video_provider = detectVideoProvider(d.video_url);
+  } else {
+    if (!d.image_url) return toast('Add an image URL or upload a photo first');
+    d.video_url = null;
+    d.video_provider = null;
+  }
   const key = d.key || ('gallery_' + Date.now() + '_' + Math.random().toString(36).slice(2,8));
   d.key = key;
   const { error } = await sb.from('content_blocks').upsert(d);
   if (error) return toast('Error: ' + error.message);
-  toast('Gallery photo saved'); galleryForm.reset(); document.getElementById('galleryCancelEdit').style.display='none';
+  toast('Gallery media saved'); galleryForm.reset(); toggleGalleryMediaFields(); document.getElementById('galleryCancelEdit').style.display='none';
   loadPhotos();
 });
-document.getElementById('galleryCancelEdit').addEventListener('click', () => { galleryForm.reset(); document.getElementById('galleryCancelEdit').style.display='none'; });
+document.getElementById('galleryCancelEdit').addEventListener('click', () => { galleryForm.reset(); toggleGalleryMediaFields(); document.getElementById('galleryCancelEdit').style.display='none'; });
 function renderGalleryTable(){
   const items = contentBlocksCache.filter(c => c.slot === 'gallery');
   document.getElementById('galleryTable').innerHTML = items.map(g => `
     <tr>
-      <td>${g.image_url?`<img class="thumb" src="${esc(g.image_url)}"/>`:'—'}</td>
-      <td>${esc(g.label||'')}</td>
+      <td>${g.image_url?`<img class="thumb" src="${esc(g.image_url)}"/>`:(g.media_type==='video'?'🎬 Video':'—')}</td>
+      <td>${esc(g.label||'')}${g.media_type==='video'?` <span class="pill on" style="margin-left:6px">Video · ${esc(g.video_provider||'')}</span>`:''}</td>
       <td><span class="pill ${g.active?'on':'off'}">${g.active?'Active':'Hidden'}</span></td>
       <td class="row-actions">
         <button class="btn" onclick='editGalleryItem(${JSON.stringify(g)})'>Edit</button>
         <button class="btn btn-danger" onclick="deleteRow('content_blocks','${g.key}',loadPhotos,'key')">Delete</button>
       </td>
-    </tr>`).join('') || '<tr><td colspan="4">No gallery photos yet.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="4">No gallery media yet.</td></tr>';
 }
 function editGalleryItem(g){
   galleryForm.key.value = g.key; galleryForm.label.value = g.label||''; galleryForm.alt_text.value = g.alt_text||'';
   galleryForm.image_url.value = g.image_url||''; galleryForm.sort_order.value = g.sort_order; galleryForm.active.checked = g.active;
+  document.getElementById('galleryMediaType').value = g.media_type || 'image';
+  document.getElementById('galleryVideoUrl').value = g.video_url || '';
+  toggleGalleryMediaFields();
   document.getElementById('galleryCancelEdit').style.display='inline-flex';
   window.scrollTo({top:0,behavior:'smooth'});
 }

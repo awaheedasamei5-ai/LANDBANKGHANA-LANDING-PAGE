@@ -420,6 +420,15 @@ section{position:relative;}
 .gt-zoom-ic{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.8);transition:.2s;z-index:1;}
 .gallery-tile:hover .gt-zoom-ic{opacity:1;transform:scale(1);}
 .gt-zoom-ic svg{width:14px;height:14px;color:var(--ink);}
+.gt-video-fallback{width:100%;height:100%;background:linear-gradient(135deg,var(--ink),#0B2417);}
+.gt-play-ic{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;color:var(--brand-dark);z-index:1;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);transition:transform .2s;}
+.gallery-tile:hover .gt-play-ic{transform:translate(-50%,-50%) scale(1.08);}
+.gt-play-ic svg{width:20px;height:20px;margin-left:3px;}
+#galleryLightboxVideoWrap{max-width:100%;max-height:78vh;display:none;align-items:center;justify-content:center;}
+#galleryLightboxVideoWrap video{max-width:100%;max-height:78vh;border-radius:14px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);}
+#galleryLightboxVideoWrap iframe{border:0;border-radius:14px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);background:#000;}
+#galleryLightboxVideoWrap iframe.embed-vertical{width:min(360px,86vw);height:min(640px,78vh);}
+#galleryLightboxVideoWrap iframe.embed-horizontal{width:min(880px,90vw);height:min(495px,70vh);}
 @media (max-width:900px){.gallery-bento{grid-template-columns:repeat(3,1fr);grid-auto-rows:110px;}}
 @media (max-width:560px){.gallery-bento{grid-template-columns:repeat(2,1fr);grid-auto-rows:130px;gap:10px;}.gallery-tile.large{grid-column:span 2;grid-row:span 1;aspect-ratio:16/10;}}
 
@@ -1349,6 +1358,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </button>
   <div class="gallery-lightbox-stage">
     <img id="galleryLightboxImg" alt=""/>
+    <div id="galleryLightboxVideoWrap"></div>
     <div class="gallery-lightbox-caption" id="galleryLightboxCaption"></div>
   </div>
 </div>
@@ -2644,7 +2654,7 @@ async function loadContent(){
         document.getElementById('processPhoto').style.display = 'block';
       }
 
-      const galleryItems = images.filter(i => i.slot === 'gallery' && i.image_url);
+      const galleryItems = images.filter(i => i.slot === 'gallery' && (i.image_url || (i.media_type === 'video' && i.video_url)));
       if (galleryItems.length) {
         initGalleryCarousel(galleryItems);
         document.getElementById('gallery').style.display = 'block';
@@ -3048,6 +3058,24 @@ document.getElementById('promoLightbox').addEventListener('click', (e) => { if (
 document.getElementById('promoLightboxCta').addEventListener('click', closePromoLightbox);
 
 let galleryItemsCache = [];
+function buildVideoEmbedUrl(provider, url){
+  if (provider === 'youtube') {
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+    return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0` : null;
+  }
+  if (provider === 'tiktok') {
+    const m = url.match(/\/video\/(\d+)/);
+    return m ? `https://www.tiktok.com/embed/v2/${m[1]}` : null;
+  }
+  if (provider === 'facebook') {
+    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`;
+  }
+  if (provider === 'instagram') {
+    const base = url.split('?')[0].replace(/\/$/, '');
+    return `${base}/embed`;
+  }
+  return null;
+}
 function initGalleryCarousel(items){
   galleryItemsCache = items;
   const bento = document.getElementById('galleryBento');
@@ -3055,13 +3083,17 @@ function initGalleryCarousel(items){
   const visible = items.slice(0, MAX_TILES);
   const extraCount = items.length - MAX_TILES;
   const zoomIcon = `<span class="gt-zoom-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M11 8v6M8 11h6"/></svg></span>`;
-  bento.innerHTML = visible.map((g, i) => `
+  const playIcon = `<span class="gt-play-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>`;
+  bento.innerHTML = visible.map((g, i) => {
+    const isVideo = g.media_type === 'video';
+    return `
     <button type="button" class="gallery-tile${i===0?' large':''}" onclick="openGalleryLightbox(${i})">
-      <img src="${esc(g.image_url)}" alt="${esc(g.alt_text || g.label || '')}" loading="lazy"/>
-      ${zoomIcon}
+      ${g.image_url ? `<img src="${esc(g.image_url)}" alt="${esc(g.alt_text || g.label || '')}" loading="lazy"/>` : `<div class="gt-video-fallback"></div>`}
+      ${isVideo ? playIcon : zoomIcon}
       ${g.label ? `<span class="gt-caption">${esc(g.label)}</span>` : ''}
       ${(i === visible.length - 1 && extraCount > 0) ? `<span class="gt-more">+${extraCount} more</span>` : ''}
-    </button>`).join('');
+    </button>`;
+  }).join('');
 }
 
 let galleryLightboxIndex = 0;
@@ -3075,12 +3107,31 @@ function renderGalleryLightbox(){
   const g = galleryItemsCache[galleryLightboxIndex];
   if (!g) return;
   const img = document.getElementById('galleryLightboxImg');
-  img.src = g.image_url;
-  img.alt = g.alt_text || g.label || '';
+  const videoWrap = document.getElementById('galleryLightboxVideoWrap');
+  if (g.media_type === 'video' && g.video_url) {
+    img.style.display = 'none';
+    videoWrap.style.display = 'flex';
+    if (g.video_provider === 'file') {
+      videoWrap.innerHTML = `<video src="${esc(g.video_url)}" controls autoplay playsinline></video>`;
+    } else {
+      const embedUrl = buildVideoEmbedUrl(g.video_provider, g.video_url);
+      const vertical = g.video_provider === 'tiktok' || g.video_provider === 'instagram';
+      videoWrap.innerHTML = embedUrl
+        ? `<iframe src="${esc(embedUrl)}" class="${vertical?'embed-vertical':'embed-horizontal'}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen scrolling="no"></iframe>`
+        : `<a href="${esc(g.video_url)}" target="_blank" rel="noopener" class="btn btn-accent">Watch on original page</a>`;
+    }
+  } else {
+    videoWrap.style.display = 'none';
+    videoWrap.innerHTML = '';
+    img.style.display = 'block';
+    img.src = g.image_url;
+    img.alt = g.alt_text || g.label || '';
+  }
   document.getElementById('galleryLightboxCaption').textContent = g.label || '';
 }
 function closeGalleryLightbox(){
   document.getElementById('galleryLightbox').classList.remove('open');
+  document.getElementById('galleryLightboxVideoWrap').innerHTML = '';
   document.body.style.overflow = '';
 }
 function galleryLightboxStep(delta){
