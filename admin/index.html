@@ -185,6 +185,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="submissions">Seller Submissions</button>
       <button class="nav-item" data-panel="buyers">Buyer Inquiries</button>
       <button class="nav-item" data-panel="remotesales">Remote Sales Force</button>
+      <button class="nav-item" data-panel="servicerequests">Service Requests</button>
       <button class="nav-item" data-panel="reviews">Reviews</button>
       <button class="nav-item" data-panel="leads">Leads</button>
     </div>
@@ -374,6 +375,12 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
                 <div class="hint">Used by the "Need to talk to a staff urgently?" button on the site — tapping it dials this number directly on mobile. Can be the same as your WhatsApp number or different.</div>
               </div>
             </div>
+            <div class="form-grid">
+              <div class="field"><label>Referral bonus amount</label><input name="referral_bonus_amount" type="number" step="0.01" min="0" placeholder="e.g. 1500"/>
+                <div class="hint">Shown on the "Refer &amp; Earn" section once set. Leave blank to hide the amount and show a generic message instead.</div>
+              </div>
+              <div class="field"><label>Referral bonus currency</label><input name="referral_bonus_currency" placeholder="GHS"/></div>
+            </div>
             <button class="btn btn-accent" type="submit">Save contact info</button>
           </form>
         </div>
@@ -505,6 +512,28 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
           <div class="inbox">
             <div class="inbox-list" id="remoteSalesList"></div>
             <div class="inbox-detail" id="remoteSalesDetail"><div class="inbox-empty">Select an application to view its details.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERVICE REQUESTS -->
+      <div class="panel" id="panel-servicerequests">
+        <div class="panel-card">
+          <h3>Service requests</h3>
+          <p class="desc">Surveyor, land issue, legal, and documentation requests from the Services hub on the homepage.</p>
+          <div class="field" style="max-width:280px;margin-bottom:16px">
+            <label>Filter by type</label>
+            <select id="serviceRequestTypeFilter">
+              <option value="">All types</option>
+              <option value="surveyor">Surveyor</option>
+              <option value="land_issue">Land Issue</option>
+              <option value="legal">Legal</option>
+              <option value="documentation">Documentation</option>
+            </select>
+          </div>
+          <div class="inbox">
+            <div class="inbox-list" id="serviceRequestsList"></div>
+            <div class="inbox-detail" id="serviceRequestsDetail"><div class="inbox-empty">Select a request to view its details.</div></div>
           </div>
         </div>
       </div>
@@ -901,7 +930,7 @@ document.querySelectorAll('.side .nav-item').forEach(btn => {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests();
 }
 
 /* ---- BANNERS ---- */
@@ -1157,6 +1186,8 @@ settingsForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const d = Object.fromEntries(new FormData(settingsForm).entries());
   d.id = 1;
+  d.referral_bonus_amount = d.referral_bonus_amount ? Number(d.referral_bonus_amount) : null;
+  d.referral_bonus_currency = d.referral_bonus_currency || 'GHS';
   const { error } = await sb.from('site_settings').upsert(d);
   if (error) return toast('Error: ' + error.message);
   toast('Contact info saved');
@@ -1167,6 +1198,8 @@ async function loadSettings(){
   settingsForm.phone.value = data.phone||''; settingsForm.whatsapp.value = data.whatsapp||'';
   settingsForm.email.value = data.email||''; settingsForm.address.value = data.address||'';
   settingsForm.urgent_phone.value = data.urgent_phone||'';
+  settingsForm.referral_bonus_amount.value = data.referral_bonus_amount ?? '';
+  settingsForm.referral_bonus_currency.value = data.referral_bonus_currency || 'GHS';
 }
 
 /* ---- NEWS ---- */
@@ -1659,6 +1692,67 @@ async function updateRemoteSalesStatus(id, status, silent){
   if (error) return toast('Error: ' + error.message);
   const r = remoteSalesCache.find(x => x.id === id); if (r) r.status = status;
   renderRemoteSalesList();
+  if (!silent) toast('Status updated');
+}
+
+/* ---- SERVICE REQUESTS ---- */
+let serviceRequestsCache = [];
+let activeServiceRequestId = null;
+const SERVICE_TYPE_LABEL = { surveyor: 'Surveyor Help', land_issue: 'Land Issue Help', legal: 'Legal Help', documentation: 'Land Documentation' };
+async function loadServiceRequests(){
+  const { data, error } = await sb.from('service_requests').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  serviceRequestsCache = data || [];
+  renderServiceRequestsList();
+  if (activeServiceRequestId && serviceRequestsCache.find(r => r.id === activeServiceRequestId)) openServiceRequest(activeServiceRequestId);
+}
+function renderServiceRequestsList(){
+  const list = document.getElementById('serviceRequestsList');
+  const typeFilter = document.getElementById('serviceRequestTypeFilter').value;
+  const rows = typeFilter ? serviceRequestsCache.filter(r => r.service_type === typeFilter) : serviceRequestsCache;
+  if (!rows.length) { list.innerHTML = '<div class="inbox-empty">No requests yet.</div>'; return; }
+  list.innerHTML = rows.map(r => `
+    <div class="inbox-row ${r.id===activeServiceRequestId?'active':''}" onclick="openServiceRequest('${r.id}')">
+      <div class="ir-top"><span>${esc(r.name)}${r.status==='new'?' <span class="pill on" style="padding:1px 6px;font-size:10px">New</span>':''}</span><span class="ir-date">${new Date(r.created_at).toLocaleDateString()}</span></div>
+      <div class="ir-sub">${esc(SERVICE_TYPE_LABEL[r.service_type] || r.service_type)} · ${esc(r.location || 'Location not given')}</div>
+    </div>`).join('');
+}
+document.getElementById('serviceRequestTypeFilter').addEventListener('change', renderServiceRequestsList);
+function openServiceRequest(id){
+  activeServiceRequestId = id;
+  renderServiceRequestsList();
+  const r = serviceRequestsCache.find(x => x.id === id);
+  const detail = document.getElementById('serviceRequestsDetail');
+  if (!r) return;
+  detail.innerHTML = `
+    <h3>${esc(r.name)}</h3>
+    <p class="hint">${esc(SERVICE_TYPE_LABEL[r.service_type] || r.service_type)} · Requested ${new Date(r.created_at).toLocaleString()}</p>
+    <div class="detail-grid">
+      <div><b>Phone</b><span>${esc(r.phone)}</span></div>
+      <div><b>Email</b><span>${esc(r.email||'—')}</span></div>
+      <div><b>Location</b><span>${esc(r.location||'—')}</span></div>
+    </div>
+    ${r.details?`<b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:6px">Details</b><div class="detail-desc">${esc(r.details)}</div>`:''}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <a class="btn btn-ghost" href="tel:+${esc((r.phone||'').replace(/[^0-9]/g,''))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc((r.phone||'').replace(/[^0-9]/g,''))}" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+      <label class="hint" style="margin:0">Status</label>
+      <select onchange="updateServiceRequestStatus('${r.id}',this.value)">
+        <option value="new" ${r.status==='new'?'selected':''}>New</option>
+        <option value="read" ${r.status==='read'?'selected':''}>Read</option>
+        <option value="contacted" ${r.status==='contacted'?'selected':''}>Contacted</option>
+        <option value="closed" ${r.status==='closed'?'selected':''}>Closed</option>
+      </select>
+    </div>`;
+  if (r.status === 'new') updateServiceRequestStatus(r.id, 'read', true);
+}
+async function updateServiceRequestStatus(id, status, silent){
+  const { error } = await sb.from('service_requests').update({ status }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  const r = serviceRequestsCache.find(x => x.id === id); if (r) r.status = status;
+  renderServiceRequestsList();
   if (!silent) toast('Status updated');
 }
 

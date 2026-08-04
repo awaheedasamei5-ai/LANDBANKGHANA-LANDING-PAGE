@@ -502,12 +502,56 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 #remote-sales{background:linear-gradient(150deg,var(--brand-light),var(--bg));}
 .rs-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;}
 .rs-copy .big-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(40px,6vw,58px);color:var(--brand-dark);line-height:1;margin-bottom:6px;}
-.rs-copy .big-num-lbl{font-size:14px;color:var(--muted);margin-bottom:22px;}
+.rs-copy .big-num-lbl{font-size:14px;color:var(--muted);margin-bottom:22px;line-height:1.5;max-width:340px;}
+.rs-copy .rs-amount-fallback{font-size:15px;color:var(--ink-soft);line-height:1.6;margin:0 0 22px;max-width:400px;}
 .rs-copy ul{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:12px;}
 .rs-copy li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink-soft);}
 .rs-copy li svg{width:18px;height:18px;color:var(--brand);flex:none;margin-top:2px;}
 .rs-form-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:32px;}
 @media (max-width:900px){.rs-grid{grid-template-columns:1fr;}.rs-form-card{padding:24px;}}
+
+/* ---------- ROUTER / SUBPAGES ---------- */
+.route-hidden{display:none !important;}
+.page-breadcrumb{display:flex;align-items:center;gap:8px;padding:18px 0 0;margin-bottom:16px;font-size:13.5px;color:var(--muted);}
+.page-breadcrumb a{color:var(--brand-dark);font-weight:600;display:inline-flex;align-items:center;gap:6px;}
+.page-breadcrumb a:hover{text-decoration:underline;}
+.page-breadcrumb svg{width:14px;height:14px;}
+body:not(.is-subpage) .page-breadcrumb{display:none;}
+#royal-palm .page-breadcrumb{color:rgba(255,255,255,.55);}
+#royal-palm .page-breadcrumb a{color:var(--brand);}
+body.is-subpage section#about,body.is-subpage section#contact,body.is-subpage section#plots{padding-top:120px;}
+body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
+
+.plots-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.plots-preview-empty{text-align:center;padding:50px 20px;color:var(--muted);}
+.plots-preview-empty svg{width:48px;height:48px;color:var(--line);margin-bottom:14px;}
+.plots-preview-empty h4{color:var(--ink);margin-bottom:6px;}
+.plots-preview-cta{text-align:center;margin-top:30px;}
+@media (max-width:900px){.plots-preview-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:640px){.plots-preview-grid{grid-template-columns:1fr;}}
+
+/* ---------- SERVICES HUB ---------- */
+#services{padding:120px 0 70px;}
+.services-hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;}
+.service-hub-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:30px;transition:transform .22s,box-shadow .22s,border-color .22s;display:flex;flex-direction:column;}
+.service-hub-card:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:var(--brand);}
+.service-hub-card .shc-ic{width:52px;height:52px;border-radius:14px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
+.service-hub-card .shc-ic svg{width:26px;height:26px;color:var(--brand-dark);}
+.service-hub-card h3{font-size:18px;margin-bottom:10px;}
+.service-hub-card p{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:20px;flex:1;}
+.service-hub-card .btn{align-self:flex-start;}
+@media (max-width:800px){.services-hub-grid{grid-template-columns:1fr;}#services{padding:100px 0 50px;}}
+
+/* ---------- SERVICE REQUEST PAGES ---------- */
+.service-page{padding:120px 0 70px;}
+.service-page-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+.service-page-copy .sp-ic{width:58px;height:58px;border-radius:16px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.service-page-copy .sp-ic svg{width:28px;height:28px;color:var(--brand-dark);}
+.service-page-copy ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:12px;}
+.service-page-copy li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink-soft);}
+.service-page-copy li svg{width:18px;height:18px;color:var(--brand);flex:none;margin-top:2px;}
+.service-page-copy .sp-contact-row{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap;}
+@media (max-width:900px){.service-page-grid{grid-template-columns:1fr;}.service-page{padding:100px 0 50px;}}
 
 /* ---------- WHATSAPP FLOAT ---------- */
 #wa-float{position:fixed;right:22px;bottom:22px;z-index:80;width:58px;height:58px;border-radius:50%;background:var(--brand);display:none;align-items:center;justify-content:center;box-shadow:0 14px 30px -10px rgba(34,165,76,.6);}
@@ -554,32 +598,32 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 <!-- ============ NAV ============ -->
 <header id="nav">
   <div class="wrap navbar">
-    <a href="#home" class="brand"><img src="assets/trulander-logo.png" alt="Trulander JSF Limited logo"/> Trulander <span style="color:var(--brand)">JSF</span></a>
+    <a href="#/" class="brand"><img src="assets/trulander-logo.png" alt="Trulander JSF Limited logo"/> Trulander <span style="color:var(--brand)">JSF</span></a>
     <nav class="nav-links">
-      <a href="#home" class="active" data-nav>
+      <a href="#/" class="active" data-nav data-route-link="home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
         Home
       </a>
-      <a href="#royal-palm" data-nav>
+      <a href="#/royal-palm" data-nav data-route-link="royal-palm">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12M12 12c-4-1-6-4-6-8 4 0 7 2 8 6"/><path d="M12 12c4-1 6-4 6-8-4 0-7 2-8 6"/></svg>
         Royal Palm
       </a>
-      <a href="#about" data-nav>
+      <a href="#/about" data-nav data-route-link="about">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
         About
       </a>
-      <a href="#help" data-nav>
+      <a href="#/services" data-nav data-route-link="services">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-9a2 2 0 0 0-2 2v9"/><path d="M4 17h9a2 2 0 0 0 2-2V6"/></svg>
         Services
       </a>
-      <a href="#contact" data-nav>
+      <a href="#/contact" data-nav data-route-link="contact">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
         Contact
       </a>
     </nav>
     <div class="nav-cta">
-      <a href="#royal-palm" class="btn btn-ghost">Free Site Visit</a>
-      <a href="#contact" class="btn btn-primary">Get Started</a>
+      <a href="#/royal-palm" class="btn btn-ghost">Free Site Visit</a>
+      <a href="#/contact" class="btn btn-primary">Get Started</a>
       <button class="view-toggle" id="viewToggleBtn" type="button" aria-label="Switch between mobile and desktop view" title="Switch between mobile and desktop view">
         <svg id="viewToggleIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
       </button>
@@ -591,27 +635,27 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 </header>
 
 <div class="mobile-panel" id="mobilePanel">
-  <a href="#home" data-nav-mobile>
+  <a href="#/" data-nav-mobile>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
     Home
   </a>
-  <a href="#royal-palm" data-nav-mobile>
+  <a href="#/royal-palm" data-nav-mobile>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12M12 12c-4-1-6-4-6-8 4 0 7 2 8 6"/><path d="M12 12c4-1 6-4 6-8-4 0-7 2-8 6"/></svg>
     Royal Palm Enclave
   </a>
-  <a href="#about" data-nav-mobile>
+  <a href="#/about" data-nav-mobile>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
     About Us
   </a>
-  <a href="#help" data-nav-mobile>
+  <a href="#/services" data-nav-mobile>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
     Services
   </a>
-  <a href="#contact" data-nav-mobile>
+  <a href="#/contact" data-nav-mobile>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
     Contact
   </a>
-  <a href="#contact" class="btn btn-accent btn-block" data-nav-mobile>Get Started</a>
+  <a href="#/contact" class="btn btn-accent btn-block" data-nav-mobile>Get Started</a>
 </div>
 
 <!-- ============ HERO ============ -->
@@ -662,6 +706,9 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 <section id="royal-palm">
   <div class="rp-hero">
     <div class="wrap">
+      <div class="page-breadcrumb reveal">
+        <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Royal Palm Enclave
+      </div>
       <div class="sec-head reveal">
         <span class="eyebrow">Now Selling · GREDA Registered</span>
         <h2>Royal Palm Enclave, Tsopoli</h2>
@@ -712,7 +759,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
       </div>
       <div class="rp-cta reveal">
         <button type="button" class="btn btn-accent" id="rpSiteVisitBtn">Book a Free Site Visit</button>
-        <a href="#plots" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Browse Available Plots</a>
+        <a href="#/plots" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Browse Available Plots</a>
       </div>
     </div>
   </div>
@@ -781,9 +828,32 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   </div>
 </section>
 
-<!-- ============ HOT PLOTS (marketplace) ============ -->
+<!-- ============ PLOTS PREVIEW (home teaser → links to full Plots page) ============ -->
+<section id="plots-preview">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Hot Plots</span>
+      <h2>Selling fast — available now.</h2>
+      <p>A live, limited selection of verified plots from trusted sellers. Once they're gone, they're gone.</p>
+    </div>
+    <div class="plots-preview-grid" id="plotsPreviewGrid"></div>
+    <div class="plots-preview-empty" id="plotsPreviewEmpty" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+      <h4>New verified plots are being added</h4>
+      <p>Check back soon, or tell us what you're looking for and we'll notify you first.</p>
+    </div>
+    <div class="plots-preview-cta reveal">
+      <a href="#/plots" class="btn btn-primary">View All Plots</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOT PLOTS (marketplace, full page) ============ -->
 <section id="plots">
   <div class="wrap">
+    <div class="page-breadcrumb reveal">
+      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Hot Plots
+    </div>
     <div class="sec-head center reveal">
       <span class="eyebrow">Hot Plots</span>
       <h2>Selling fast — available now.</h2>
@@ -1046,6 +1116,11 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 
 <!-- ============ ABOUT ============ -->
 <section id="about">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal">
+      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / About Us
+    </div>
+  </div>
   <div class="wrap about-grid">
     <div class="about-card reveal" id="aboutCard">
       <img class="about-photo" id="aboutPhotoImg" src="assets/photos/about.jpg" alt="A Trulander JSF Limited team member"/>
@@ -1158,8 +1233,11 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
     <div class="rs-copy reveal">
       <span class="eyebrow">Refer &amp; Earn</span>
       <h2 style="margin:14px 0 18px;font-size:clamp(26px,4vw,36px)">Earn selling Royal Palm Enclave — from anywhere.</h2>
-      <div class="big-num">GHS 1,500</div>
-      <div class="big-num-lbl">paid per successful referral, one week after the month your sale completes.</div>
+      <div class="rs-amount-wrap" id="referralAmountWrap" style="display:none">
+        <div class="big-num" id="referralAmountNum"></div>
+        <div class="big-num-lbl">paid per successful referral, one week after the month your sale completes.</div>
+      </div>
+      <p class="rs-amount-fallback" id="referralAmountFallback">Join our referral program — fill the form below and our team will confirm exactly how much you earn per successful referral.</p>
       <ul>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> No office, no fixed hours — refer from wherever you are.</li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> We handle the site visit, verification, and paperwork.</li>
@@ -1185,8 +1263,206 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   </div>
 </section>
 
+<!-- ============ SERVICES HUB ============ -->
+<section id="services">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal">
+      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Services
+    </div>
+    <div class="sec-head center reveal">
+      <span class="eyebrow">We're Here To Help</span>
+      <h2>Whatever stage you're at, start with us.</h2>
+      <p>Land in Ghana comes with real questions — surveying, disputes, legal steps, paperwork. Tell us what you need and our team takes it from there.</p>
+    </div>
+    <div class="services-hub-grid">
+      <div class="service-hub-card reveal">
+        <div class="shc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16.2 7.8l-2 6.4-6.4 2 2-6.4z"/></svg></div>
+        <h3>Surveyor Help</h3>
+        <p>Need land measured, boundaries pinned, or a site plan produced? Request a licensed surveyor and we'll coordinate the visit.</p>
+        <a href="#/services/surveyor" class="btn btn-primary">Request Surveyor Help</a>
+      </div>
+      <div class="service-hub-card reveal">
+        <div class="shc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Land Issue Help</h3>
+        <p>Encroachment, boundary dispute, double-sale, or any other land-related problem — describe it and we'll advise on next steps.</p>
+        <a href="#/services/help" class="btn btn-primary">Get Land Issue Help</a>
+      </div>
+      <div class="service-hub-card reveal">
+        <div class="shc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M5 21h14M5 8h14M5 8l-3 6a3.5 3.5 0 0 0 7 0zM19 8l-3 6a3.5 3.5 0 0 0 7 0z"/></svg></div>
+        <h3>Lawyer / Legal Help</h3>
+        <p>Contracts to review, legal opinions, or representation on a land matter — get connected with a lawyer experienced in Ghanaian land law.</p>
+        <a href="#/services/legal" class="btn btn-primary">Request Legal Help</a>
+      </div>
+      <div class="service-hub-card reveal">
+        <div class="shc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg></div>
+        <h3>Land Documentation</h3>
+        <p>Indenture, site plan, title registration, or search reports — we help prepare and process the documents your land needs.</p>
+        <a href="#/services/documentation" class="btn btn-primary">Request Documentation Help</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICE REQUEST PAGES ============ -->
+<section id="service-surveyor" class="service-page">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal"><a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / <a href="#/services">Services</a> / Surveyor Help</div>
+    <div class="service-page-grid">
+      <div class="service-page-copy reveal">
+        <div class="sp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16.2 7.8l-2 6.4-6.4 2 2-6.4z"/></svg></div>
+        <span class="eyebrow">Surveyor Help</span>
+        <h2>Get a licensed surveyor on your land.</h2>
+        <p>Whether it's a fresh measurement, boundary pinning, or a site plan for registration, tell us the details and we'll coordinate a surveyor to visit.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Licensed, experienced surveyors</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> We coordinate scheduling for you</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Site plan handed to you when done</li>
+        </ul>
+        <div class="sp-contact-row">
+          <a href="tel:" class="btn btn-ghost sp-call-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg> Call Us</a>
+          <a href="https://wa.me/" target="_blank" rel="noopener" class="btn btn-ghost sp-wa-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.7 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.2-3.5-.7-2.9-1.1-4.8-4-5-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.3.6-.6.9-.9 1.3-.1.2-.3.3-.1.6.6 1 1.3 1.8 2.1 2.4.9.7 1.4.9 1.7 1 .2.1.4.1.6-.1.2-.3.8-1 1-1.3.2-.3.4-.3.7-.2.3.1 1.6.8 1.9.9.3.2.5.2.6.3.1.2.1.9-.1 1.6z"/></svg> WhatsApp</a>
+        </div>
+      </div>
+      <div class="rs-form-card reveal">
+        <form class="service-request-form" data-service-type="surveyor">
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Kwame Mensah"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+            <div class="field"><label>Land location</label><input type="text" name="location" placeholder="e.g. Tsopoli, Ningo-Prampram"/></div>
+          </div>
+          <div class="field"><label>Tell us what you need surveyed</label><textarea name="details" placeholder="Boundary pinning, fresh measurement, site plan for registration..."></textarea></div>
+          <button type="submit" class="btn btn-accent btn-block">Request Surveyor Help</button>
+          <p class="form-msg service-request-msg"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="service-help" class="service-page">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal"><a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / <a href="#/services">Services</a> / Land Issue Help</div>
+    <div class="service-page-grid">
+      <div class="service-page-copy reveal">
+        <div class="sp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <span class="eyebrow">Land Issue Help</span>
+        <h2>Have a land problem? Start here.</h2>
+        <p>Encroachment, a double-sale, an unclear boundary, a dispute with a neighbour — describe what's going on and our team will advise the right next step.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Free initial assessment</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> We point you to the right resolution path</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Referred to our legal team if needed</li>
+        </ul>
+        <div class="sp-contact-row">
+          <a href="tel:" class="btn btn-ghost sp-call-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg> Call Us</a>
+          <a href="https://wa.me/" target="_blank" rel="noopener" class="btn btn-ghost sp-wa-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.7 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.2-3.5-.7-2.9-1.1-4.8-4-5-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.3.6-.6.9-.9 1.3-.1.2-.3.3-.1.6.6 1 1.3 1.8 2.1 2.4.9.7 1.4.9 1.7 1 .2.1.4.1.6-.1.2-.3.8-1 1-1.3.2-.3.4-.3.7-.2.3.1 1.6.8 1.9.9.3.2.5.2.6.3.1.2.1.9-.1 1.6z"/></svg> WhatsApp</a>
+        </div>
+      </div>
+      <div class="rs-form-card reveal">
+        <form class="service-request-form" data-service-type="land_issue">
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Abena Osei"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+            <div class="field"><label>Land location</label><input type="text" name="location" placeholder="Where is the land?"/></div>
+          </div>
+          <div class="field"><label>Describe the issue</label><textarea name="details" placeholder="What's happening with your land?"></textarea></div>
+          <button type="submit" class="btn btn-accent btn-block">Get Land Issue Help</button>
+          <p class="form-msg service-request-msg"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="service-legal" class="service-page">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal"><a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / <a href="#/services">Services</a> / Legal Help</div>
+    <div class="service-page-grid">
+      <div class="service-page-copy reveal">
+        <div class="sp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M5 21h14M5 8h14M5 8l-3 6a3.5 3.5 0 0 0 7 0zM19 8l-3 6a3.5 3.5 0 0 0 7 0z"/></svg></div>
+        <span class="eyebrow">Lawyer / Legal Help</span>
+        <h2>Talk to a lawyer who knows land.</h2>
+        <p>Contract review, legal opinions, or representation on a land matter — get connected with a lawyer experienced in Ghanaian land law.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Experienced in Ghanaian land law</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Confidential consultation</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Clear guidance, no jargon</li>
+        </ul>
+        <div class="sp-contact-row">
+          <a href="tel:" class="btn btn-ghost sp-call-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg> Call Us</a>
+          <a href="https://wa.me/" target="_blank" rel="noopener" class="btn btn-ghost sp-wa-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.7 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.2-3.5-.7-2.9-1.1-4.8-4-5-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.3.6-.6.9-.9 1.3-.1.2-.3.3-.1.6.6 1 1.3 1.8 2.1 2.4.9.7 1.4.9 1.7 1 .2.1.4.1.6-.1.2-.3.8-1 1-1.3.2-.3.4-.3.7-.2.3.1 1.6.8 1.9.9.3.2.5.2.6.3.1.2.1.9-.1 1.6z"/></svg> WhatsApp</a>
+        </div>
+      </div>
+      <div class="rs-form-card reveal">
+        <form class="service-request-form" data-service-type="legal">
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Yaw Boateng"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+            <div class="field"><label>Land location (if applicable)</label><input type="text" name="location" placeholder="Where is the land?"/></div>
+          </div>
+          <div class="field"><label>What do you need legal help with?</label><textarea name="details" placeholder="Contract review, legal opinion, representation..."></textarea></div>
+          <button type="submit" class="btn btn-accent btn-block">Request Legal Help</button>
+          <p class="form-msg service-request-msg"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="service-documentation" class="service-page">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal"><a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / <a href="#/services">Services</a> / Land Documentation</div>
+    <div class="service-page-grid">
+      <div class="service-page-copy reveal">
+        <div class="sp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg></div>
+        <span class="eyebrow">Land Documentation</span>
+        <h2>Get your paperwork in order.</h2>
+        <p>Indenture, site plan, title registration, search reports — we help prepare and process the documents your land needs, start to finish.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Indenture &amp; site plan preparation</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Title registration support</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Lands Commission search reports</li>
+        </ul>
+        <div class="sp-contact-row">
+          <a href="tel:" class="btn btn-ghost sp-call-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg> Call Us</a>
+          <a href="https://wa.me/" target="_blank" rel="noopener" class="btn btn-ghost sp-wa-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.7 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.2-3.5-.7-2.9-1.1-4.8-4-5-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.3.6-.6.9-.9 1.3-.1.2-.3.3-.1.6.6 1 1.3 1.8 2.1 2.4.9.7 1.4.9 1.7 1 .2.1.4.1.6-.1.2-.3.8-1 1-1.3.2-.3.4-.3.7-.2.3.1 1.6.8 1.9.9.3.2.5.2.6.3.1.2.1.9-.1 1.6z"/></svg> WhatsApp</a>
+        </div>
+      </div>
+      <div class="rs-form-card reveal">
+        <form class="service-request-form" data-service-type="documentation">
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Efua Asante"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+            <div class="field"><label>Land location</label><input type="text" name="location" placeholder="Where is the land?"/></div>
+          </div>
+          <div class="field"><label>Which documents do you need?</label><textarea name="details" placeholder="Indenture, site plan, title registration, search report..."></textarea></div>
+          <button type="submit" class="btn btn-accent btn-block">Request Documentation Help</button>
+          <p class="form-msg service-request-msg"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ CONTACT ============ -->
 <section id="contact">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal">
+      <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Contact
+    </div>
+  </div>
   <div class="wrap contact-grid">
     <div class="contact-info reveal">
       <h3>Let's talk about your land.</h3>
@@ -1242,16 +1518,17 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="#home" class="brand"><img src="assets/trulander-logo.png" alt="Trulander JSF Limited logo"/> Trulander JSF Limited</a>
+        <a href="#/" class="brand"><img src="assets/trulander-logo.png" alt="Trulander JSF Limited logo"/> Trulander JSF Limited</a>
         <p>We are the land people — making genuine land offerings accessible and available for all, home of Royal Palm Enclave, Tsopoli.</p>
       </div>
       <div>
         <h5>Explore</h5>
         <ul>
-          <li><a href="#home">Home</a></li>
-          <li><a href="#royal-palm">Royal Palm Enclave</a></li>
-          <li><a href="#about">About Us</a></li>
-          <li><a href="#contact">Contact</a></li>
+          <li><a href="#/">Home</a></li>
+          <li><a href="#/royal-palm">Royal Palm Enclave</a></li>
+          <li><a href="#/about">About Us</a></li>
+          <li><a href="#/services">Services</a></li>
+          <li><a href="#/contact">Contact</a></li>
         </ul>
       </div>
       <div>
@@ -1308,15 +1585,81 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 const navEl = document.getElementById('nav');
 window.addEventListener('scroll', () => {
   navEl.classList.toggle('scrolled', window.scrollY > 20);
-  const secs = ['home','royal-palm','about','help','contact'];
+  if (document.body.classList.contains('is-subpage')) return; // router owns nav highlighting on subpages
+  const secs = ['home','royal-palm','about','contact'];
   let current = secs[0];
   for (const id of secs) {
     const el = document.getElementById(id);
     if (el && el.getBoundingClientRect().top < 140) current = id;
   }
-  document.querySelectorAll('[data-nav]').forEach(a => {
-    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  document.querySelectorAll('[data-route-link]').forEach(a => {
+    a.classList.toggle('active', a.dataset.routeLink === current);
   });
+});
+
+/* --- router: gives each nav destination a real "page" feel while staying a
+   single-file site — sections never move in the DOM, the router just shows
+   exactly one "page" (a group of sections for Home, or a single section for
+   everything else) and hides the rest. --- */
+const HOME_SECTIONS = ['home','promo','royal-palm','help','qualify','plots-preview','process','stats','about','gallery','stories','remote-sales','contact','clients'];
+const ROUTABLE_SECTIONS = HOME_SECTIONS.concat(['plots','services','service-surveyor','service-legal','service-documentation','service-help']);
+const ROUTE_SECTION = {
+  'royal-palm': 'royal-palm',
+  'about': 'about',
+  'services': 'services',
+  'services/surveyor': 'service-surveyor',
+  'services/legal': 'service-legal',
+  'services/documentation': 'service-documentation',
+  'services/help': 'service-help',
+  'plots': 'plots',
+  'contact': 'contact'
+};
+function applyRoute(){
+  const hash = location.hash.replace(/^#\/?/, '').replace(/\/$/, '');
+  const isHome = hash === '';
+  document.body.classList.toggle('is-subpage', !isHome);
+
+  if (isHome) {
+    ROUTABLE_SECTIONS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('route-hidden', !HOME_SECTIONS.includes(id));
+    });
+  } else {
+    const target = ROUTE_SECTION[hash];
+    if (!target || !document.getElementById(target)) { location.hash = '#/'; return; }
+    ROUTABLE_SECTIONS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('route-hidden', id !== target);
+    });
+    if (target === 'plots' && typeof applyPlotsFilters === 'function') { try { applyPlotsFilters(); } catch(e){} }
+  }
+
+  document.querySelectorAll('[data-route-link]').forEach(a => {
+    const r = a.dataset.routeLink;
+    const active = isHome ? r === 'home' : (r === 'services' ? (hash === 'services' || hash.indexOf('services/') === 0) : r === hash);
+    a.classList.toggle('active', active);
+  });
+
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', applyRoute);
+applyRoute();
+
+/* legacy same-page anchors (e.g. #qualify, #help, #process, #remote-sales)
+   still work from anywhere: if we're on a subpage, go home first, then
+   smooth-scroll to the target once Home's sections are visible again. */
+document.addEventListener('click', function(e){
+  const a = e.target.closest('a[href^="#"]');
+  if (!a) return;
+  const href = a.getAttribute('href');
+  if (!href || href === '#' || href.charAt(1) === '/') return;
+  const id = href.slice(1);
+  const target = document.getElementById(id);
+  if (!target) return;
+  e.preventDefault();
+  const goingHomeFirst = document.body.classList.contains('is-subpage');
+  if (goingHomeFirst) location.hash = '#/';
+  setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), goingHomeFirst ? 60 : 0);
 });
 
 /* --- mobile menu --- */
@@ -1595,6 +1938,36 @@ document.getElementById('remoteSalesForm')?.addEventListener('submit', async (e)
   }
 });
 
+/* --- services hub: surveyor / land issue / legal / documentation requests --- */
+document.querySelectorAll('.service-request-form').forEach(form => {
+  const submitLabel = form.querySelector('button[type=submit]').textContent;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = form.querySelector('.service-request-msg');
+    const btn = form.querySelector('button[type=submit]');
+    const data = Object.fromEntries(new FormData(form).entries());
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    msg.className = 'form-msg service-request-msg';
+    try {
+      if (!sb) throw new Error('offline');
+      const { error } = await sb.from('service_requests').insert({
+        service_type: form.dataset.serviceType,
+        name: data.name, phone: data.phone, email: data.email || null,
+        location: data.location || null, details: data.details || null
+      });
+      if (error) throw error;
+      msg.textContent = "Request received! Our team will reach out shortly.";
+      msg.className = 'form-msg service-request-msg ok';
+      form.reset();
+    } catch (err) {
+      msg.textContent = 'Something went wrong submitting your request. Please try again, or reach us directly via WhatsApp.';
+      msg.className = 'form-msg service-request-msg err';
+    } finally {
+      btn.disabled = false; btn.textContent = submitLabel;
+    }
+  });
+});
+
 /* --- news bell: draggable floating button + slide-in panel (independent of Supabase) --- */
 (function setupNewsBell(){
   const bell = document.getElementById('newsBell');
@@ -1764,6 +2137,16 @@ async function loadContent(){
         call.href = 'tel:+' + urgentNumber.replace(/[^0-9]/g,'');
         call.classList.add('show');
       }
+      const callDigits = (settings.phone || settings.whatsapp || '').replace(/[^0-9]/g,'');
+      const waDigits = (settings.whatsapp || settings.phone || '').replace(/[^0-9]/g,'');
+      if (callDigits) document.querySelectorAll('.sp-call-btn').forEach(a => a.href = 'tel:+' + callDigits);
+      if (waDigits) document.querySelectorAll('.sp-wa-btn').forEach(a => a.href = 'https://wa.me/' + waDigits);
+
+      if (settings.referral_bonus_amount != null) {
+        document.getElementById('referralAmountNum').textContent = `${settings.referral_bonus_currency || 'GHS'} ${Number(settings.referral_bonus_amount).toLocaleString()}`;
+        document.getElementById('referralAmountWrap').style.display = 'block';
+        document.getElementById('referralAmountFallback').style.display = 'none';
+      }
     }
 
     if (newsItems && newsItems.length && window.__renderNews) window.__renderNews(newsItems);
@@ -1830,6 +2213,7 @@ function toggleFavoritePlot(id, btn){
 function renderPlots(plots, sellers){
   plotsCache = plots;
   sellersCache = Object.fromEntries(sellers.map(s => [s.id, s]));
+  renderPlotsPreview(plots);
   const toolbar = document.getElementById('plotsToolbar');
   if (!plots.length){
     document.getElementById('plotsEmpty').style.display = 'block';
@@ -1840,6 +2224,36 @@ function renderPlots(plots, sellers){
   document.getElementById('plotsEmpty').style.display = 'none';
   toolbar.style.display = 'flex';
   applyPlotsFilters();
+}
+
+/* --- Home "Hot Plots" teaser: featured/newest plots only, links to the full Plots page --- */
+function renderPlotsPreview(plots){
+  const grid = document.getElementById('plotsPreviewGrid');
+  const empty = document.getElementById('plotsPreviewEmpty');
+  if (!grid || !empty) return;
+  if (!plots.length){
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  const list = plots.slice().sort((a,b) => (b.featured === true) - (a.featured === true) || new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
+  grid.innerHTML = list.map(p => `
+    <div class="plot-card reveal in" onclick="location.hash='#/plots'">
+      <div class="img-wrap">
+        <img src="${esc(p.image_url || '')}" alt="${esc(p.title)}"/>
+        <div class="plot-badges">
+          <span class="plot-status ${esc(p.status)}">${p.status === 'available' ? 'Available' : p.status}</span>
+          ${p.featured ? '<span class="plot-featured">Hot</span>' : ''}
+          ${p.listing_type === 'company' ? '<span class="plot-company-badge">Trulander</span>' : ''}
+        </div>
+      </div>
+      <div class="plot-body">
+        <h4>${esc(p.title)}</h4>
+        <div class="plot-meta"><span>${esc(p.size)}</span><span>${esc(p.location)}</span></div>
+        <div class="plot-price">${formatPrice(p)}</div>
+      </div>
+    </div>`).join('');
 }
 
 function applyPlotsFilters(){
@@ -1982,7 +2396,7 @@ function updateModalFavIcon(id){
   icon.setAttribute('stroke', on ? '#ff5a6e' : 'currentColor');
 }
 async function sharePlot(title){
-  const url = location.href.split('#')[0] + '#plots';
+  const url = location.href.split('#')[0] + '#/plots';
   const shareData = { title: title + ' — Trulander JSF Limited', text: `Check out this plot: ${title}`, url };
   try {
     if (navigator.share) { await navigator.share(shareData); return; }
