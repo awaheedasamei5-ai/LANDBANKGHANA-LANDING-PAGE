@@ -553,6 +553,22 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 .service-page-copy .sp-contact-row{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap;}
 @media (max-width:900px){.service-page-grid{grid-template-columns:1fr;}.service-page{padding:100px 0 50px;}}
 
+/* ---------- SITE VISIT REQUEST ---------- */
+.site-visit-page{padding:120px 0 70px;}
+.sv-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:start;}
+.sv-copy ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:12px;}
+.sv-copy li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink-soft);}
+.sv-copy li svg{width:18px;height:18px;color:var(--brand);flex:none;margin-top:2px;}
+.sv-success{text-align:left;}
+.sv-success-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.sv-success-head .sv-check{width:44px;height:44px;border-radius:50%;background:var(--brand-light);display:flex;align-items:center;justify-content:center;flex:none;}
+.sv-success-head .sv-check svg{width:22px;height:22px;color:var(--brand-dark);}
+.sv-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;margin:18px 0 22px;padding:18px;background:var(--bg);border-radius:14px;}
+.sv-summary-grid div b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:3px;}
+.sv-summary-grid div span{font-size:14px;color:var(--ink);}
+.sv-actions{display:flex;flex-wrap:wrap;gap:10px;}
+@media (max-width:900px){.sv-grid{grid-template-columns:1fr;}.site-visit-page{padding:100px 0 50px;}.sv-summary-grid{grid-template-columns:1fr;}}
+
 /* ---------- WHATSAPP FLOAT ---------- */
 #wa-float{position:fixed;right:22px;bottom:22px;z-index:80;width:58px;height:58px;border-radius:50%;background:var(--brand);display:none;align-items:center;justify-content:center;box-shadow:0 14px 30px -10px rgba(34,165,76,.6);}
 #wa-float svg{width:28px;height:28px;color:#fff;}
@@ -622,7 +638,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       </a>
     </nav>
     <div class="nav-cta">
-      <a href="#/royal-palm" class="btn btn-ghost">Free Site Visit</a>
+      <a href="#/site-visit" class="btn btn-ghost">Free Site Visit</a>
       <a href="#/contact" class="btn btn-primary">Get Started</a>
       <button class="view-toggle" id="viewToggleBtn" type="button" aria-label="Switch between mobile and desktop view" title="Switch between mobile and desktop view">
         <svg id="viewToggleIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
@@ -1456,6 +1472,65 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </div>
 </section>
 
+<!-- ============ SITE VISIT REQUEST ============ -->
+<section id="site-visit" class="site-visit-page">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal"><a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Book a Site Visit</div>
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Royal Palm Enclave, Tsopoli</span>
+      <h2>Book your free site visit.</h2>
+      <p>Tell us a few details and we'll confirm your pickup and schedule — no cost, no obligation.</p>
+    </div>
+    <div class="sv-grid">
+      <div class="sv-copy reveal">
+        <h3 style="margin-bottom:6px">What to expect</h3>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Free pickup from an agreed location</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> A guided walk-through of Royal Palm Enclave, Tsopoli</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> All your questions answered on the spot, no pressure</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> We'll confirm your exact pickup time by phone or WhatsApp</li>
+        </ul>
+      </div>
+      <div class="rs-form-card reveal">
+        <form id="siteVisitForm">
+          <input type="hidden" name="id"/>
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="full_name" required placeholder="e.g. Kojo Antwi"/></div>
+            <div class="field"><label>Phone / contact *</label><input type="tel" name="contact" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Nationality</label><input type="text" name="nationality" placeholder="e.g. Ghanaian"/></div>
+            <div class="field"><label>Preferred visit date</label><input type="date" name="visit_day"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Place of work</label><input type="text" name="place_of_work" placeholder="Company / employer"/></div>
+            <div class="field"><label>Position</label><input type="text" name="position" placeholder="Job title"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Preferred pickup location</label><input type="text" name="pickup_location" placeholder="e.g. Accra Mall"/></div>
+            <div class="field"><label>How will you get there?</label>
+              <select name="transport_mode">
+                <option value="">Select one</option>
+                <option value="Company Pickup">Company Pickup</option>
+                <option value="Own Vehicle">Own Vehicle</option>
+                <option value="Public Transport">Public Transport</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Plot size / interest</label><input type="text" name="plot_interest" placeholder="e.g. 1 plot, 60x100 ft"/></div>
+            <div class="field"><label>Number accompanying you</label><input type="number" name="accompaniment_count" min="0" value="0"/></div>
+          </div>
+          <div class="field"><label>Purpose of visit</label><textarea name="visit_purpose" placeholder="e.g. Considering purchase, verifying land before payment..."></textarea></div>
+          <button type="submit" class="btn btn-accent btn-block">Submit Site Visit Request</button>
+          <p class="form-msg" id="siteVisitMsg"></p>
+        </form>
+        <div class="sv-success" id="siteVisitSuccess" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ CONTACT ============ -->
 <section id="contact">
   <div class="wrap">
@@ -1575,6 +1650,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 
 <script src="assets/supabase-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
 /* Core page UI (nav, menu, scroll-reveal, form) must keep working even if the
    Supabase CDN script above fails to load (slow network, ad-blocker, firewall) —
@@ -1602,7 +1678,7 @@ window.addEventListener('scroll', () => {
    exactly one "page" (a group of sections for Home, or a single section for
    everything else) and hides the rest. --- */
 const HOME_SECTIONS = ['home','promo','royal-palm','help','qualify','plots-preview','process','stats','about','gallery','stories','remote-sales','contact','clients'];
-const ROUTABLE_SECTIONS = HOME_SECTIONS.concat(['plots','services','service-surveyor','service-legal','service-documentation','service-help']);
+const ROUTABLE_SECTIONS = HOME_SECTIONS.concat(['plots','services','service-surveyor','service-legal','service-documentation','service-help','site-visit']);
 const ROUTE_SECTION = {
   'royal-palm': 'royal-palm',
   'about': 'about',
@@ -1612,6 +1688,7 @@ const ROUTE_SECTION = {
   'services/documentation': 'service-documentation',
   'services/help': 'service-help',
   'plots': 'plots',
+  'site-visit': 'site-visit',
   'contact': 'contact'
 };
 function applyRoute(){
@@ -1901,13 +1978,9 @@ document.getElementById('year').textContent = new Date().getFullYear();
 })();
 
 /* --- "Book a free site visit" on the Royal Palm Enclave section opens the
-   buyer inquiry modal with the location already filled in --- */
+   dedicated Site Visit Request page --- */
 document.getElementById('rpSiteVisitBtn')?.addEventListener('click', () => {
-  const overlay = document.getElementById('buyerModalOverlay');
-  const locationField = document.querySelector('#buyerForm [name="interested_location"]');
-  if (locationField) locationField.value = 'Royal Palm Enclave, Tsopoli';
-  overlay?.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  location.hash = '#/site-visit';
 });
 
 /* --- remote sales / referral program application --- */
@@ -1967,6 +2040,137 @@ document.querySelectorAll('.service-request-form').forEach(form => {
     }
   });
 });
+
+/* --- Site Visit Request: submit/edit + client-side PDF download + WhatsApp share --- */
+const SITE_VISIT_FIELDS = [
+  ['full_name', 'Full Name'], ['contact', 'Phone / Contact'], ['nationality', 'Nationality'],
+  ['visit_day', 'Preferred Visit Date'], ['place_of_work', 'Place of Work'], ['position', 'Position'],
+  ['pickup_location', 'Pickup Location'], ['transport_mode', 'Transport'],
+  ['plot_interest', 'Plot Size / Interest'], ['accompaniment_count', 'Accompanying'], ['visit_purpose', 'Purpose of Visit']
+];
+let siteVisitLastRecord = null;
+const siteVisitForm = document.getElementById('siteVisitForm');
+siteVisitForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('siteVisitMsg');
+  const btn = siteVisitForm.querySelector('button[type=submit]');
+  const data = Object.fromEntries(new FormData(siteVisitForm).entries());
+  const editingId = data.id || null;
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.textContent = editingId ? 'Saving...' : 'Submitting...';
+  msg.className = 'form-msg';
+  try {
+    if (!sb) throw new Error('offline');
+    const payload = {
+      full_name: data.full_name, contact: data.contact,
+      nationality: data.nationality || null, visit_day: data.visit_day || null,
+      place_of_work: data.place_of_work || null, position: data.position || null,
+      pickup_location: data.pickup_location || null, transport_mode: data.transport_mode || null,
+      plot_interest: data.plot_interest || null,
+      accompaniment_count: data.accompaniment_count ? Number(data.accompaniment_count) : 0,
+      visit_purpose: data.visit_purpose || null
+    };
+    // Public visitors can only INSERT/UPDATE their own row (not SELECT it back —
+    // that's admin-only), so we build the record we render/download from the
+    // form data itself rather than depending on a returned row.
+    let record;
+    if (editingId) {
+      const { error } = await sb.from('site_visit_requests').update(payload).eq('id', editingId);
+      if (error) throw error;
+      record = { ...siteVisitLastRecord, ...payload, id: editingId };
+    } else {
+      const id = crypto.randomUUID();
+      const { error } = await sb.from('site_visit_requests').insert({ ...payload, id });
+      if (error) throw error;
+      record = { ...payload, id, status: 'pending', created_at: new Date().toISOString() };
+    }
+    siteVisitLastRecord = record;
+    renderSiteVisitSuccess(record);
+  } catch (err) {
+    msg.textContent = 'Something went wrong submitting your request. Please try again, or reach us directly via WhatsApp.';
+    msg.className = 'form-msg err';
+  } finally {
+    btn.disabled = false; btn.textContent = originalLabel;
+  }
+});
+
+function renderSiteVisitSuccess(r){
+  siteVisitForm.style.display = 'none';
+  const box = document.getElementById('siteVisitSuccess');
+  box.style.display = 'block';
+  box.innerHTML = `
+    <div class="sv-success-head">
+      <div class="sv-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg></div>
+      <div><h3 style="margin-bottom:2px">Request received!</h3><p class="hint" style="margin:0">We'll confirm your pickup time by phone or WhatsApp.</p></div>
+    </div>
+    <div class="sv-summary-grid">
+      ${SITE_VISIT_FIELDS.map(([key,label]) => `<div><b>${esc(label)}</b><span>${esc(r[key] || '—')}</span></div>`).join('')}
+    </div>
+    <div class="sv-actions">
+      <button type="button" class="btn btn-accent" id="svDownloadBtn">Download PDF</button>
+      <button type="button" class="btn btn-ghost" id="svShareBtn">Share via WhatsApp</button>
+      <button type="button" class="btn btn-ghost" id="svEditBtn">Edit Details</button>
+    </div>
+    <p class="form-msg" id="svActionMsg"></p>`;
+  document.getElementById('svDownloadBtn').addEventListener('click', () => downloadSiteVisitPDF(r));
+  document.getElementById('svShareBtn').addEventListener('click', () => shareSiteVisitRequest(r));
+  document.getElementById('svEditBtn').addEventListener('click', () => editSiteVisit(r));
+}
+
+function editSiteVisit(r){
+  document.getElementById('siteVisitSuccess').style.display = 'none';
+  siteVisitForm.style.display = 'block';
+  siteVisitForm.id.value = r.id;
+  SITE_VISIT_FIELDS.forEach(([key]) => { if (siteVisitForm[key]) siteVisitForm[key].value = r[key] || ''; });
+  siteVisitForm.querySelector('button[type=submit]').textContent = 'Save Changes';
+  siteVisitForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildSiteVisitPDF(r){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16); doc.setTextColor(20, 60, 30);
+  doc.text('Trulander JSF Limited — Site Visit Request', 14, 20);
+  doc.setFontSize(11); doc.setTextColor(90, 90, 90);
+  doc.text('Royal Palm Enclave, Tsopoli', 14, 27);
+  doc.setDrawColor(200, 200, 200);
+  doc.line(14, 32, 196, 32);
+  doc.setFontSize(12); doc.setTextColor(20, 20, 20);
+  let y = 44;
+  SITE_VISIT_FIELDS.forEach(([key, label]) => {
+    doc.setFont(undefined, 'bold'); doc.text(label + ':', 14, y);
+    doc.setFont(undefined, 'normal'); doc.text(String(r[key] || '—'), 80, y);
+    y += 10;
+  });
+  doc.setFontSize(9); doc.setTextColor(140, 140, 140);
+  doc.text(`Submitted ${new Date(r.created_at || Date.now()).toLocaleString()}`, 14, y + 6);
+  return doc;
+}
+function downloadSiteVisitPDF(r){
+  try {
+    const doc = buildSiteVisitPDF(r);
+    doc.save(`Site-Visit-Request-${(r.full_name||'request').replace(/[^a-z0-9]+/gi,'-')}.pdf`);
+  } catch (err) {
+    const msg = document.getElementById('svActionMsg');
+    if (msg) { msg.textContent = 'Could not generate the PDF — please try again.'; msg.className = 'form-msg err'; }
+  }
+}
+async function shareSiteVisitRequest(r){
+  const summaryText = `Site Visit Request — Trulander JSF Limited\n` + SITE_VISIT_FIELDS.map(([key,label]) => `${label}: ${r[key] || '—'}`).join('\n');
+  const msg = document.getElementById('svActionMsg');
+  try {
+    const doc = buildSiteVisitPDF(r);
+    const blob = doc.output('blob');
+    const file = new File([blob], 'Site-Visit-Request.pdf', { type: 'application/pdf' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Site Visit Request', text: summaryText });
+      return;
+    }
+  } catch (err) { /* fall through to text share below */ }
+  const waUrl = 'https://wa.me/?text=' + encodeURIComponent(summaryText);
+  window.open(waUrl, '_blank', 'noopener');
+  if (msg) { msg.textContent = 'Opened WhatsApp with your details ready to send.'; msg.className = 'form-msg ok'; }
+}
 
 /* --- news bell: draggable floating button + slide-in panel (independent of Supabase) --- */
 (function setupNewsBell(){

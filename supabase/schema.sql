@@ -551,3 +551,66 @@ update public.clients set
 where name = 'Trulander Jsf Limited';
 
 insert into public.clients (name, sort_order) values ('Hollard Insurance', 2) on conflict do nothing;
+
+-- ============================================================
+-- Router/Services phase: Services hub, Site Visit requests, and
+-- an admin-editable Refer & Earn bonus amount.
+-- ============================================================
+
+-- Refer & Earn bonus amount is now set in admin rather than hardcoded
+-- on the homepage; the front end hides the amount until this is set.
+alter table public.site_settings add column if not exists referral_bonus_amount numeric;
+alter table public.site_settings add column if not exists referral_bonus_currency text default 'GHS';
+
+-- Requests from the four Services hub forms (Surveyor, Land Issue, Legal,
+-- Land Documentation) on the homepage.
+create table if not exists public.service_requests (
+  id uuid primary key default gen_random_uuid(),
+  service_type text not null check (service_type in ('surveyor','land_issue','legal','documentation')),
+  name text not null,
+  phone text not null,
+  email text,
+  location text,
+  details text,
+  status text not null default 'new' check (status in ('new','read','contacted','closed')),
+  created_at timestamptz not null default now()
+);
+alter table public.service_requests enable row level security;
+create policy "service_requests public insert" on public.service_requests for insert to public with check (true);
+create policy "service_requests admin read" on public.service_requests for select to public using (is_admin());
+create policy "service_requests admin update" on public.service_requests for update to public using (is_admin());
+create policy "service_requests admin delete" on public.service_requests for delete to public using (is_admin());
+
+-- "Book a Free Site Visit" requests (Royal Palm Enclave, Tsopoli), fields
+-- matching Trulander's real printed Site Visit Request Form.
+create table if not exists public.site_visit_requests (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  contact text not null,
+  pickup_location text,
+  place_of_work text,
+  position text,
+  nationality text,
+  plot_interest text,
+  transport_mode text,
+  visit_purpose text,
+  visit_day text,
+  accompaniment_count integer default 0,
+  status text not null default 'pending' check (status in ('pending','confirmed','completed','cancelled')),
+  discussion_notes text,
+  key_understanding text,
+  feedback_after_visit text,
+  next_steps text,
+  created_at timestamptz not null default now()
+);
+alter table public.site_visit_requests enable row level security;
+create policy "site_visit_requests public insert" on public.site_visit_requests for insert to public with check (true);
+create policy "site_visit_requests admin read" on public.site_visit_requests for select to public using (is_admin());
+create policy "site_visit_requests admin update" on public.site_visit_requests for update to public using (is_admin());
+create policy "site_visit_requests admin delete" on public.site_visit_requests for delete to public using (is_admin());
+
+-- Visitors can edit their own just-submitted request (e.g. via the "Edit
+-- Details" button on the confirmation page) as long as it's still pending —
+-- once an admin starts processing it (status changes), it locks.
+create policy "site_visit_requests public edit own pending" on public.site_visit_requests
+  for update to public using (status = 'pending') with check (status = 'pending');

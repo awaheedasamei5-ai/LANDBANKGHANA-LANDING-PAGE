@@ -68,8 +68,17 @@ It holds:
 - `seller_submission_files` — the land photos and supporting documents
   attached to a seller submission.
 - `remote_sales_applications` — the "Refer & Earn" remote sales force
-  applications (GHS 1,500 per successful referral, Trulander's real Tsopoli
-  Referral Program terms). Reviewed in **Remote Sales Force** in admin.
+  applications. Reviewed in **Remote Sales Force** in admin. The referral
+  bonus amount itself is admin-editable under **Contact Info** and hidden
+  on the site until you set it.
+- `service_requests` — requests from the **Services** hub (Surveyor, Land
+  Issue, Legal, Land Documentation). Reviewed in **Service Requests**
+  in admin.
+- `site_visit_requests` — "Book a Free Site Visit" submissions for Royal
+  Palm Enclave, matching Trulander's real printed Site Visit Request Form.
+  Reviewed in **Site Visit Requests** in admin, grouped by date, with a
+  CSV export and a one-tap WhatsApp button (booking confirmation or a
+  visit reminder that auto-calculates days-away) per request.
 - `plots.listing_type` — `'company'` (Trulander's own Royal Palm Enclave
   listings, shown with a "Trulander" badge) or `'third_party'` (verified
   seller submissions — the default).
@@ -84,6 +93,17 @@ Anyone can **read** public content and anyone can **submit** the contact
 form or a review. Only signed-in admins can add/edit/delete content, approve
 reviews, or view leads — enforced by Postgres Row Level Security, not just
 the frontend.
+
+## Navigation
+
+Clicking Home/Royal Palm/About/Services/Contact in the nav (or the Hot Plots
+"View All Plots" / Refer & Earn "Free Site Visit" CTAs) opens that section as
+its own standalone page — everything else fades out — instead of scrolling
+the shared homepage. It's all still one file with client-side routing
+(`#/royal-palm`, `#/services/legal`, `#/plots`, `#/site-visit`, etc.), so
+there's no separate page to deploy or keep in sync. Home itself keeps its
+normal single-scroll layout; Hot Plots shows a lightweight preview there
+that links through to the full `/plots` page with search/filter/sort.
 
 ## What's on the homepage now
 
@@ -108,6 +128,13 @@ the frontend.
 - **"Yes, help me buy" / "Yes, help me sell"** on the qualifier cards open
   detailed forms instead of just jumping to the contact section — see
   "Buyer & seller forms" below.
+- **Services hub** (`/services`) — four dedicated request pages (Surveyor
+  Help, Land Issue Help, Legal Help, Land Documentation), each with its own
+  form and call/WhatsApp shortcuts, landing in **Service Requests** in admin.
+- **Book a Free Site Visit** (`/site-visit`) — a form matching Trulander's
+  real printed Site Visit Request Form. After submitting, the visitor can
+  download a PDF copy, edit and resend it, or share it straight to WhatsApp
+  — all from their own device, no login needed.
 - **Refer & Earn** — a remote sales force section built around Trulander's
   real referral program (GHS 1,500 per successful referral). Anyone can
   apply with their contact info; every application lands in **Remote Sales

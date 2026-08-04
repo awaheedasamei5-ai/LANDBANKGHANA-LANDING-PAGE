@@ -94,6 +94,15 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
 .inbox-row .ir-sub{font-size:12px;color:var(--muted);margin-top:3px;}
 .inbox-row .ir-date{font-size:11px;color:var(--muted);white-space:nowrap;}
 .inbox-empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13.5px;}
+.inbox-date-header{padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;}
+.ir-wa-btn{width:26px;height:26px;border-radius:50%;background:#22c35e;display:inline-flex;align-items:center;justify-content:center;flex:none;border:none;cursor:pointer;}
+.ir-wa-btn svg{width:14px;height:14px;color:#fff;}
+.wa-template-picker{margin-top:14px;padding:14px;background:var(--bg);border-radius:12px;}
+.wa-template-picker h5{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:10px;}
+.wa-template-btn{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;margin-bottom:8px;color:var(--ink);}
+.wa-template-btn:hover{border-color:var(--brand);}
+.wa-template-btn b{display:block;margin-bottom:3px;}
+.wa-template-btn span{color:var(--muted);font-size:12px;}
 .inbox-detail{padding:22px 24px;overflow-y:auto;max-height:640px;}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
 .detail-grid div{background:var(--bg);border-radius:10px;padding:10px 12px;}
@@ -186,6 +195,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="buyers">Buyer Inquiries</button>
       <button class="nav-item" data-panel="remotesales">Remote Sales Force</button>
       <button class="nav-item" data-panel="servicerequests">Service Requests</button>
+      <button class="nav-item" data-panel="sitevisits">Site Visit Requests</button>
       <button class="nav-item" data-panel="reviews">Reviews</button>
       <button class="nav-item" data-panel="leads">Leads</button>
     </div>
@@ -534,6 +544,31 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
           <div class="inbox">
             <div class="inbox-list" id="serviceRequestsList"></div>
             <div class="inbox-detail" id="serviceRequestsDetail"><div class="inbox-empty">Select a request to view its details.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SITE VISIT REQUESTS -->
+      <div class="panel" id="panel-sitevisits">
+        <div class="panel-card">
+          <h3>Site visit requests</h3>
+          <p class="desc">Every "Book a Free Site Visit" submission from the homepage, organized by date. Tap the WhatsApp icon on any row for a ready-to-send confirmation or reminder message.</p>
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+            <div class="field" style="max-width:220px;margin:0">
+              <label>Filter by status</label>
+              <select id="siteVisitStatusFilter">
+                <option value="">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-ghost" id="siteVisitExportBtn" style="margin-top:19px">Download All (CSV)</button>
+          </div>
+          <div class="inbox">
+            <div class="inbox-list" id="siteVisitsList"></div>
+            <div class="inbox-detail" id="siteVisitsDetail"><div class="inbox-empty">Select a request to view its details.</div></div>
           </div>
         </div>
       </div>
@@ -930,7 +965,7 @@ document.querySelectorAll('.side .nav-item').forEach(btn => {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits();
 }
 
 /* ---- BANNERS ---- */
@@ -1755,6 +1790,137 @@ async function updateServiceRequestStatus(id, status, silent){
   renderServiceRequestsList();
   if (!silent) toast('Status updated');
 }
+
+/* ---- SITE VISIT REQUESTS ---- */
+let siteVisitsCache = [];
+let activeSiteVisitId = null;
+const SITE_VISIT_FIELDS_ADMIN = [
+  ['contact', 'Phone / Contact'], ['nationality', 'Nationality'], ['visit_day', 'Preferred Visit Date'],
+  ['place_of_work', 'Place of Work'], ['position', 'Position'], ['pickup_location', 'Pickup Location'],
+  ['transport_mode', 'Transport'], ['plot_interest', 'Plot Size / Interest'],
+  ['accompaniment_count', 'Accompanying'], ['visit_purpose', 'Purpose of Visit']
+];
+async function loadSiteVisits(){
+  const { data, error } = await sb.from('site_visit_requests').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  siteVisitsCache = data || [];
+  renderSiteVisitsList();
+  if (activeSiteVisitId && siteVisitsCache.find(r => r.id === activeSiteVisitId)) openSiteVisit(activeSiteVisitId);
+}
+function renderSiteVisitsList(){
+  const list = document.getElementById('siteVisitsList');
+  const statusFilter = document.getElementById('siteVisitStatusFilter').value;
+  const rows = statusFilter ? siteVisitsCache.filter(r => r.status === statusFilter) : siteVisitsCache;
+  if (!rows.length) { list.innerHTML = '<div class="inbox-empty">No site visit requests yet.</div>'; return; }
+  let html = '';
+  let lastDateLabel = null;
+  rows.forEach(r => {
+    const dateLabel = new Date(r.created_at).toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    if (dateLabel !== lastDateLabel) { html += `<div class="inbox-date-header">${esc(dateLabel)}</div>`; lastDateLabel = dateLabel; }
+    html += `
+      <div class="inbox-row ${r.id===activeSiteVisitId?'active':''}" onclick="openSiteVisit('${r.id}')">
+        <div class="ir-top">
+          <span>${esc(r.full_name)}${r.status==='pending'?' <span class="pill on" style="padding:1px 6px;font-size:10px">Pending</span>':''}</span>
+          <button type="button" class="ir-wa-btn" title="WhatsApp" onclick="event.stopPropagation(); openSiteVisit('${r.id}'); document.getElementById('svWaSection')?.scrollIntoView({behavior:'smooth'})">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.7 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.2-3.5-.7-2.9-1.1-4.8-4-5-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.3.6-.6.9-.9 1.3-.1.2-.3.3-.1.6.6 1 1.3 1.8 2.1 2.4.9.7 1.4.9 1.7 1 .2.1.4.1.6-.1.2-.3.8-1 1-1.3.2-.3.4-.3.7-.2.3.1 1.6.8 1.9.9.3.2.5.2.6.3.1.2.1.9-.1 1.6z"/></svg>
+          </button>
+        </div>
+        <div class="ir-sub">${esc(r.contact||'')} · ${r.visit_day ? 'Visit: '+esc(r.visit_day) : 'No date set'}</div>
+      </div>`;
+  });
+  list.innerHTML = html;
+}
+document.getElementById('siteVisitStatusFilter').addEventListener('change', renderSiteVisitsList);
+
+function daysUntil(dateStr){
+  if (!dateStr) return null;
+  const target = new Date(dateStr + 'T00:00:00');
+  if (isNaN(target)) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.round((target - today) / 86400000);
+}
+
+function openSiteVisit(id){
+  activeSiteVisitId = id;
+  renderSiteVisitsList();
+  const r = siteVisitsCache.find(x => x.id === id);
+  const detail = document.getElementById('siteVisitsDetail');
+  if (!r) return;
+  const daysAway = daysUntil(r.visit_day);
+  const daysAwayLabel = daysAway == null ? null : (daysAway === 0 ? 'today' : daysAway === 1 ? 'in 1 day' : daysAway > 1 ? `in ${daysAway} days` : `${Math.abs(daysAway)} day(s) ago`);
+  detail.innerHTML = `
+    <h3>${esc(r.full_name)}</h3>
+    <p class="hint">Requested ${new Date(r.created_at).toLocaleString()}${daysAwayLabel ? ' · Visit ' + esc(daysAwayLabel) : ''}</p>
+    <div class="detail-grid">
+      ${SITE_VISIT_FIELDS_ADMIN.map(([key,label]) => `<div><b>${esc(label)}</b><span>${esc(r[key] ?? '—')}</span></div>`).join('')}
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin:14px 0">
+      <label class="hint" style="margin:0">Status</label>
+      <select onchange="updateSiteVisitStatus('${r.id}',this.value)">
+        <option value="pending" ${r.status==='pending'?'selected':''}>Pending</option>
+        <option value="confirmed" ${r.status==='confirmed'?'selected':''}>Confirmed</option>
+        <option value="completed" ${r.status==='completed'?'selected':''}>Completed</option>
+        <option value="cancelled" ${r.status==='cancelled'?'selected':''}>Cancelled</option>
+      </select>
+    </div>
+    <form id="siteVisitNotesForm">
+      <div class="field"><label>Discussion notes</label><textarea name="discussion_notes" rows="2">${esc(r.discussion_notes||'')}</textarea></div>
+      <div class="field"><label>Key understanding</label><textarea name="key_understanding" rows="2">${esc(r.key_understanding||'')}</textarea></div>
+      <div class="field"><label>Feedback after visit</label><textarea name="feedback_after_visit" rows="2">${esc(r.feedback_after_visit||'')}</textarea></div>
+      <div class="field"><label>Next steps</label><textarea name="next_steps" rows="2">${esc(r.next_steps||'')}</textarea></div>
+      <button type="submit" class="btn btn-accent">Save Notes</button>
+    </form>
+    <div class="wa-template-picker" id="svWaSection">
+      <h5>Send WhatsApp Message</h5>
+      <button type="button" class="wa-template-btn" onclick="sendSiteVisitWhatsApp('${r.id}','confirmation')">
+        <b>Booking Confirmation</b><span>Thank them for booking and confirm we've received their request.</span>
+      </button>
+      <button type="button" class="wa-template-btn" onclick="sendSiteVisitWhatsApp('${r.id}','reminder')" ${r.visit_day ? '' : 'disabled title="No visit date set yet"'}>
+        <b>Visit Reminder</b><span>${r.visit_day ? `Reminds them the visit is ${esc(daysAwayLabel || '')} and reconfirms pickup.` : 'Set a visit date first to enable this.'}</span>
+      </button>
+    </div>`;
+  document.getElementById('siteVisitNotesForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target).entries());
+    const { error } = await sb.from('site_visit_requests').update(d).eq('id', r.id);
+    if (error) return toast('Error: ' + error.message);
+    Object.assign(r, d);
+    toast('Notes saved');
+  });
+}
+async function updateSiteVisitStatus(id, status){
+  const { error } = await sb.from('site_visit_requests').update({ status }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  const r = siteVisitsCache.find(x => x.id === id); if (r) r.status = status;
+  renderSiteVisitsList();
+  toast('Status updated');
+}
+function sendSiteVisitWhatsApp(id, kind){
+  const r = siteVisitsCache.find(x => x.id === id);
+  if (!r || !r.contact) return toast('No phone number on this request');
+  let text;
+  if (kind === 'confirmation') {
+    text = `Hi ${r.full_name}, thank you for booking a free site visit to Royal Palm Enclave, Tsopoli with Trulander JSF Limited! We've received your request${r.visit_day ? ' for ' + r.visit_day : ''}. Our team will confirm your exact pickup time and location shortly. Looking forward to seeing you!`;
+  } else {
+    const daysAway = daysUntil(r.visit_day);
+    const daysAwayLabel = daysAway === 0 ? 'today' : daysAway === 1 ? 'in 1 day' : daysAway > 1 ? `in ${daysAway} days` : 'coming up';
+    text = `Hi ${r.full_name}, this is a reminder that your free site visit to Royal Palm Enclave, Tsopoli with Trulander JSF Limited is ${daysAwayLabel} (${r.visit_day}). Your pickup location is ${r.pickup_location || 'to be confirmed'}. Please let us know if anything changes. See you soon!`;
+  }
+  const digits = r.contact.replace(/[^0-9]/g,'');
+  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+}
+document.getElementById('siteVisitExportBtn').addEventListener('click', () => {
+  if (!siteVisitsCache.length) return toast('No site visit requests to export');
+  const cols = ['full_name','contact','nationality','visit_day','place_of_work','position','pickup_location','transport_mode','plot_interest','accompaniment_count','visit_purpose','status','created_at'];
+  const csvEsc = (v) => `"${String(v ?? '').replace(/"/g,'""')}"`;
+  const csv = [cols.join(',')].concat(siteVisitsCache.map(r => cols.map(c => csvEsc(r[c])).join(','))).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `site-visit-requests-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
 
 /* ---- shared delete ---- */
 async function deleteRow(table, id, reload, col){
