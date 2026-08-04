@@ -1418,6 +1418,7 @@ settingsForm.addEventListener('submit', async (e) => {
   const { error } = await sb.from('site_settings').upsert(d);
   if (error) return toast('Error: ' + error.message);
   toast('Contact info saved');
+  loadSettings();
 });
 async function loadSettings(){
   const { data } = await sb.from('site_settings').select('*').eq('id',1).maybeSingle();
@@ -1471,8 +1472,9 @@ function renderCopyForms(){
       const rows = Object.entries(d).map(([key,value]) => ({ key, value: value || null }));
       const { error } = await sb.from('site_copy').upsert(rows);
       if (error) { msg.textContent = 'Error: ' + error.message; msg.className = 'form-msg copy-form-msg err'; return; }
-      Object.assign(siteCopyCache, d);
-      msg.textContent = 'Saved'; msg.className = 'form-msg copy-form-msg ok';
+      await loadSiteCopy();
+      const refreshedMsg = document.querySelector(`.copy-form[data-group="${form.dataset.group}"] .copy-form-msg`);
+      if (refreshedMsg) { refreshedMsg.textContent = 'Saved'; refreshedMsg.className = 'form-msg copy-form-msg ok'; }
       toast('Content saved');
     };
   });
