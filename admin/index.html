@@ -117,20 +117,22 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
   .inbox-list{border-right:none;border-bottom:1px solid var(--line);max-height:260px;}
   .inbox-detail{max-height:none;}
 }
+.mobile-nav-select{display:none;}
 @media(max-width:800px){
   .shell{grid-template-columns:minmax(0,1fr);padding:16px 12px 60px;}
-  .side{position:static;display:flex;overflow-x:auto;gap:6px;padding:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-  .side::-webkit-scrollbar{display:none;}
-  .side button.nav-item{white-space:nowrap;flex:none;font-size:13px;padding:9px 14px;}
+  .side{position:static;padding:8px;}
+  .side button.nav-item{display:none;}
+  .mobile-nav-select{display:block;width:100%;padding:13px 16px;border-radius:12px;border:1px solid var(--line);background:var(--brand-light);color:var(--brand-dark);font-family:inherit;font-weight:700;font-size:14px;}
   .form-grid{grid-template-columns:1fr;}
   .panel-card{padding:18px;}
   table{font-size:12.5px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   th,td{padding:8px 6px;}
 }
 @media(max-width:480px){
-  .topbar .row{padding:0 14px;}
+  .topbar .row{padding:0 14px;flex-wrap:wrap;row-gap:10px;}
   .brand{font-size:14px;}
   .brand img{width:30px;}
+  .topbar .row > div:last-child{width:100%;justify-content:flex-end;}
   .topbar .btn{padding:9px 12px;font-size:13px;}
 }
 </style>
@@ -185,6 +187,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
 
   <div class="shell">
     <div class="side">
+      <select class="mobile-nav-select" id="mobileNavSelect" aria-label="Choose admin section"></select>
       <button class="nav-item active" data-panel="banners">Hero &amp; Banners</button>
       <button class="nav-item" data-panel="photos">Photos &amp; Gallery</button>
       <button class="nav-item" data-panel="stats">Stats</button>
@@ -1069,14 +1072,34 @@ async function checkSession(){
 checkSession();
 
 /* ============ NAV PANELS ============ */
+function goToPanel(panelName){
+  const btn = document.querySelector(`.side .nav-item[data-panel="${panelName}"]`);
+  if (!btn) return;
+  document.querySelectorAll('.side .nav-item').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+panelName).classList.add('active');
+  const sel = document.getElementById('mobileNavSelect');
+  if (sel) sel.value = panelName;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 document.querySelectorAll('.side .nav-item').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.side .nav-item').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panel-'+btn.dataset.panel).classList.add('active');
-  });
+  btn.addEventListener('click', () => goToPanel(btn.dataset.panel));
 });
+// Mobile falls back to a native <select> instead of the desktop pill row —
+// a horizontally-scrolling strip of 18 tabs has no visible affordance on a
+// phone screen, so most panels were effectively undiscoverable.
+const mobileNavSelect = document.getElementById('mobileNavSelect');
+if (mobileNavSelect) {
+  document.querySelectorAll('.side .nav-item').forEach(btn => {
+    const opt = document.createElement('option');
+    opt.value = btn.dataset.panel;
+    opt.textContent = btn.textContent;
+    if (btn.classList.contains('active')) opt.selected = true;
+    mobileNavSelect.appendChild(opt);
+  });
+  mobileNavSelect.addEventListener('change', () => goToPanel(mobileNavSelect.value));
+}
 
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
