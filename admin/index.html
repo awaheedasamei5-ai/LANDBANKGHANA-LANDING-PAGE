@@ -607,17 +607,31 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
           <p class="desc">Shows up in the "Hot Plots" section on the homepage.</p>
           <form id="plotForm">
             <input type="hidden" name="id"/>
-            <div class="field"><label>Listing type</label>
-              <select name="listing_type">
-                <option value="third_party">Third-party — from a seller submission</option>
-                <option value="company">Company — Trulander's own listing</option>
-              </select>
-              <div class="hint">"Company" shows a "Trulander" badge on the site.</div>
+            <div class="form-grid">
+              <div class="field"><label>Listing type</label>
+                <select name="listing_type">
+                  <option value="third_party">Third-party — from a seller submission</option>
+                  <option value="company">Company — Trulander's own listing</option>
+                </select>
+                <div class="hint">"Company" shows a "Trulander" badge on the site.</div>
+              </div>
+              <div class="field"><label>Plot type</label>
+                <select name="plot_type">
+                  <option value="residential">Residential</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="farm_land">Farm Land</option>
+                  <option value="industrial">Industrial</option>
+                </select>
+              </div>
             </div>
             <div class="field"><label>Title</label><input name="title" required placeholder="e.g. Royal Palm Enclave — Plot 12"/></div>
             <div class="form-grid">
               <div class="field"><label>Size</label><input name="size" required placeholder="e.g. 100ft x 100ft"/></div>
-              <div class="field"><label>Location</label><input name="location" required placeholder="e.g. East Legon Hills, Accra"/></div>
+              <div class="field"><label>Location</label><input name="location" id="plotLocationInput" required placeholder="e.g. East Legon Hills, Accra"/></div>
+            </div>
+            <div class="field" id="plotMapPreviewWrap" style="display:none">
+              <label>Map preview</label>
+              <iframe id="plotMapPreview" style="width:100%;height:220px;border:0;border-radius:12px" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
             <div class="form-grid">
               <div class="field"><label>Price amount (optional)</label><input name="price_amount" type="number" step="0.01" placeholder="e.g. 45000"/></div>
@@ -1541,7 +1555,20 @@ function editSeller(s){
 }
 
 /* ---- PLOTS ---- */
+const PLOT_TYPE_LABEL = { residential: 'Residential', commercial: 'Commercial', farm_land: 'Farm Land', industrial: 'Industrial' };
 const plotForm = document.getElementById('plotForm');
+function updatePlotMapPreview(location){
+  const wrap = document.getElementById('plotMapPreviewWrap');
+  const frame = document.getElementById('plotMapPreview');
+  if (!location || !location.trim()) { wrap.style.display = 'none'; frame.src = ''; return; }
+  frame.src = `https://www.google.com/maps?q=${encodeURIComponent(location)}&output=embed`;
+  wrap.style.display = 'block';
+}
+let plotMapDebounce;
+document.getElementById('plotLocationInput').addEventListener('input', (e) => {
+  clearTimeout(plotMapDebounce);
+  plotMapDebounce = setTimeout(() => updatePlotMapPreview(e.target.value), 600);
+});
 document.getElementById('plotImgFile1').addEventListener('change', async (e) => {
   if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1200, 'plots'); if (url) plotForm.image_url.value = url; }
   e.target.value = '';
@@ -1565,17 +1592,17 @@ plotForm.addEventListener('submit', async (e) => {
   const id = d.id; delete d.id;
   const { error } = id ? await sb.from('plots').update(d).eq('id', id) : await sb.from('plots').insert(d);
   if (error) return toast('Error: ' + error.message);
-  toast('Plot saved'); plotForm.reset(); document.getElementById('plotCancelEdit').style.display='none';
+  toast('Plot saved'); plotForm.reset(); document.getElementById('plotCancelEdit').style.display='none'; updatePlotMapPreview('');
   loadPlots();
 });
-document.getElementById('plotCancelEdit').addEventListener('click', () => { plotForm.reset(); document.getElementById('plotCancelEdit').style.display='none'; });
+document.getElementById('plotCancelEdit').addEventListener('click', () => { plotForm.reset(); document.getElementById('plotCancelEdit').style.display='none'; updatePlotMapPreview(''); });
 async function loadPlots(){
   const { data, error } = await sb.from('plots').select('*').order('sort_order');
   if (error) return;
   document.getElementById('plotsTable').innerHTML = (data||[]).map(p => `
     <tr>
       <td>${p.image_url?`<img class="thumb" src="${esc(p.image_url)}"/>`:'—'}</td>
-      <td>${esc(p.title)}<br><span class="pill ${p.listing_type==='company'?'on':'off'}" style="margin-top:4px">${p.listing_type==='company'?'Trulander':'Third-party'}</span></td>
+      <td>${esc(p.title)}<br><span class="pill ${p.listing_type==='company'?'on':'off'}" style="margin-top:4px">${p.listing_type==='company'?'Trulander':'Third-party'}</span> <span class="pill" style="margin-top:4px">${esc(PLOT_TYPE_LABEL[p.plot_type] || p.plot_type || 'Residential')}</span></td>
       <td>${p.price_amount!=null?esc(p.currency||'GHS')+' '+Number(p.price_amount).toLocaleString():'—'}</td>
       <td><span class="pill ${p.status==='available'?'on':'off'}">${esc(p.status)}</span></td>
       <td class="row-actions">
@@ -1585,12 +1612,13 @@ async function loadPlots(){
     </tr>`).join('') || '<tr><td colspan="5">No plots yet.</td></tr>';
 }
 function editPlot(p){
-  plotForm.id.value = p.id; plotForm.listing_type.value = p.listing_type || 'third_party'; plotForm.title.value = p.title; plotForm.size.value = p.size; plotForm.location.value = p.location;
+  plotForm.id.value = p.id; plotForm.listing_type.value = p.listing_type || 'third_party'; plotForm.plot_type.value = p.plot_type || 'residential'; plotForm.title.value = p.title; plotForm.size.value = p.size; plotForm.location.value = p.location;
   plotForm.price_amount.value = p.price_amount!=null?p.price_amount:''; plotForm.currency.value = p.currency||'GHS';
   plotForm.nearest_landmark.value = p.nearest_landmark||''; plotForm.description.value = p.description||'';
   plotForm.image_url.value = p.image_url||''; plotForm.image_url_2.value = p.image_url_2||''; plotForm.image_url_3.value = p.image_url_3||'';
   plotForm.seller_id.value = p.seller_id||''; plotForm.status.value = p.status; plotForm.sort_order.value = p.sort_order;
   plotForm.featured.checked = p.featured; plotForm.active.checked = p.active;
+  updatePlotMapPreview(p.location);
   document.getElementById('plotCancelEdit').style.display='inline-flex';
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1982,10 +2010,9 @@ async function updateServiceRequestStatus(id, status, silent){
 let siteVisitsCache = [];
 let activeSiteVisitId = null;
 const SITE_VISIT_FIELDS_ADMIN = [
-  ['contact', 'Phone / Contact'], ['nationality', 'Nationality'], ['visit_day', 'Preferred Visit Date'],
-  ['place_of_work', 'Place of Work'], ['position', 'Position'], ['pickup_location', 'Pickup Location'],
-  ['transport_mode', 'Transport'], ['plot_interest', 'Plot Size / Interest'],
-  ['accompaniment_count', 'Accompanying'], ['visit_purpose', 'Purpose of Visit']
+  ['contact', 'Phone Number'], ['residential_address', 'Residential Address / Location'],
+  ['plot_interest', 'Plot Size'], ['visit_day', 'Requested Slot'], ['pickup_location', 'Pick-up Location'],
+  ['accompaniment_count', 'Accompanying'], ['visit_purpose', 'Questions / Comments']
 ];
 async function loadSiteVisits(){
   const { data, error } = await sb.from('site_visit_requests').select('*').order('created_at', { ascending: false });
@@ -2012,7 +2039,7 @@ function renderSiteVisitsList(){
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.7 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.2-3.5-.7-2.9-1.1-4.8-4-5-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.3.6-.6.9-.9 1.3-.1.2-.3.3-.1.6.6 1 1.3 1.8 2.1 2.4.9.7 1.4.9 1.7 1 .2.1.4.1.6-.1.2-.3.8-1 1-1.3.2-.3.4-.3.7-.2.3.1 1.6.8 1.9.9.3.2.5.2.6.3.1.2.1.9-.1 1.6z"/></svg>
           </button>
         </div>
-        <div class="ir-sub">${esc(r.contact||'')} · ${r.visit_day ? 'Visit: '+esc(r.visit_day) : 'No date set'}</div>
+        <div class="ir-sub">${esc(r.contact||'')} · ${r.visit_day ? 'Slot: '+esc(r.visit_day) : 'No slot chosen'}${r.confirmed_visit_date ? ' · Confirmed: '+esc(r.confirmed_visit_date) : ''}</div>
       </div>`;
   });
   list.innerHTML = html;
@@ -2033,11 +2060,11 @@ function openSiteVisit(id){
   const r = siteVisitsCache.find(x => x.id === id);
   const detail = document.getElementById('siteVisitsDetail');
   if (!r) return;
-  const daysAway = daysUntil(r.visit_day);
+  const daysAway = daysUntil(r.confirmed_visit_date);
   const daysAwayLabel = daysAway == null ? null : (daysAway === 0 ? 'today' : daysAway === 1 ? 'in 1 day' : daysAway > 1 ? `in ${daysAway} days` : `${Math.abs(daysAway)} day(s) ago`);
   detail.innerHTML = `
     <h3>${esc(r.full_name)}</h3>
-    <p class="hint">Requested ${new Date(r.created_at).toLocaleString()}${daysAwayLabel ? ' · Visit ' + esc(daysAwayLabel) : ''}</p>
+    <p class="hint">Requested ${new Date(r.created_at).toLocaleString()}${daysAwayLabel ? ' · Confirmed visit ' + esc(daysAwayLabel) : ''}</p>
     <div class="detail-grid">
       ${SITE_VISIT_FIELDS_ADMIN.map(([key,label]) => `<div><b>${esc(label)}</b><span>${esc(r[key] ?? '—')}</span></div>`).join('')}
     </div>
@@ -2051,6 +2078,9 @@ function openSiteVisit(id){
       </select>
     </div>
     <form id="siteVisitNotesForm">
+      <div class="field"><label>Confirmed visit date</label><input type="date" name="confirmed_visit_date" value="${esc(r.confirmed_visit_date||'')}"/>
+        <div class="hint">Set this once you've agreed an exact date by phone/WhatsApp — powers the reminder below.</div>
+      </div>
       <div class="field"><label>Discussion notes</label><textarea name="discussion_notes" rows="2">${esc(r.discussion_notes||'')}</textarea></div>
       <div class="field"><label>Key understanding</label><textarea name="key_understanding" rows="2">${esc(r.key_understanding||'')}</textarea></div>
       <div class="field"><label>Feedback after visit</label><textarea name="feedback_after_visit" rows="2">${esc(r.feedback_after_visit||'')}</textarea></div>
@@ -2062,16 +2092,19 @@ function openSiteVisit(id){
       <button type="button" class="wa-template-btn" onclick="sendSiteVisitWhatsApp('${r.id}','confirmation')">
         <b>Booking Confirmation</b><span>Thank them for booking and confirm we've received their request.</span>
       </button>
-      <button type="button" class="wa-template-btn" onclick="sendSiteVisitWhatsApp('${r.id}','reminder')" ${r.visit_day ? '' : 'disabled title="No visit date set yet"'}>
-        <b>Visit Reminder</b><span>${r.visit_day ? `Reminds them the visit is ${esc(daysAwayLabel || '')} and reconfirms pickup.` : 'Set a visit date first to enable this.'}</span>
+      <button type="button" class="wa-template-btn" onclick="sendSiteVisitWhatsApp('${r.id}','reminder')" ${r.confirmed_visit_date ? '' : 'disabled title="Set a confirmed visit date first"'}>
+        <b>Visit Reminder</b><span>${r.confirmed_visit_date ? `Reminds them the visit is ${esc(daysAwayLabel || '')} and reconfirms pickup.` : 'Set a confirmed visit date above first to enable this.'}</span>
       </button>
     </div>`;
   document.getElementById('siteVisitNotesForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target).entries());
+    d.confirmed_visit_date = d.confirmed_visit_date || null;
     const { error } = await sb.from('site_visit_requests').update(d).eq('id', r.id);
     if (error) return toast('Error: ' + error.message);
     Object.assign(r, d);
+    renderSiteVisitsList();
+    openSiteVisit(r.id);
     toast('Notes saved');
   });
 }
@@ -2089,15 +2122,15 @@ function sendSiteVisitWhatsApp(id, kind){
   if (kind === 'confirmation') {
     text = `Hi ${r.full_name}, thank you for booking a free site visit to Royal Palm Enclave, Tsopoli with Trulander JSF Limited! We've received your request${r.visit_day ? ' for ' + r.visit_day : ''}. Our team will confirm your exact pickup time and location shortly. Looking forward to seeing you!`;
   } else {
-    const daysAway = daysUntil(r.visit_day);
+    const daysAway = daysUntil(r.confirmed_visit_date);
     const daysAwayLabel = daysAway === 0 ? 'today' : daysAway === 1 ? 'in 1 day' : daysAway > 1 ? `in ${daysAway} days` : 'coming up';
-    text = `Hi ${r.full_name}, this is a reminder that your free site visit to Royal Palm Enclave, Tsopoli with Trulander JSF Limited is ${daysAwayLabel} (${r.visit_day}). Your pickup location is ${r.pickup_location || 'to be confirmed'}. Please let us know if anything changes. See you soon!`;
+    text = `Hi ${r.full_name}, this is a reminder that your free site visit to Royal Palm Enclave, Tsopoli with Trulander JSF Limited is ${daysAwayLabel} (${r.confirmed_visit_date}). Your pickup location is ${r.pickup_location || 'to be confirmed'}. Please let us know if anything changes. See you soon!`;
   }
   const digits = r.contact.replace(/[^0-9]/g,'');
   window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
 }
 document.getElementById('siteVisitExportBtn').addEventListener('click', () => {
-  const cols = ['full_name','contact','nationality','visit_day','place_of_work','position','pickup_location','transport_mode','plot_interest','accompaniment_count','visit_purpose','status','created_at'];
+  const cols = ['full_name','contact','residential_address','plot_interest','visit_day','pickup_location','accompaniment_count','visit_purpose','confirmed_visit_date','status','created_at'];
   exportCSV(siteVisitsCache, cols, `site-visit-requests-${new Date().toISOString().slice(0,10)}.csv`);
 });
 

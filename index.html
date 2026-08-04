@@ -215,6 +215,9 @@ section{position:relative;}
 .plot-status.sold{background:#6b6b6b;}
 .plot-featured{background:var(--ink);color:var(--brand);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;}
 .plot-company-badge{background:#fff;color:var(--brand-dark);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em;}
+.plot-type-badge{display:inline-block;background:var(--brand-light);color:var(--brand-dark);font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;margin-bottom:8px;}
+.plot-map-wrap{border-radius:16px;overflow:hidden;margin-bottom:18px;border:1px solid var(--line);}
+.plot-map-frame{width:100%;height:220px;border:0;display:block;}
 .plot-fav-btn{position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;border-radius:50%;background:rgba(8,25,16,.5);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;backdrop-filter:blur(4px);}
 .plot-fav-btn svg{width:17px;height:17px;transition:transform .15s;}
 .plot-fav-btn.active{color:#ff5a6e;}
@@ -891,6 +894,13 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <option value="company">Trulander Listings</option>
         <option value="third_party">Third-Party Listings</option>
       </select>
+      <select id="plotsPropertyTypeFilter">
+        <option value="">All plot types</option>
+        <option value="residential">Residential</option>
+        <option value="commercial">Commercial</option>
+        <option value="farm_land">Farm Land</option>
+        <option value="industrial">Industrial</option>
+      </select>
       <select id="plotsSortSelect">
         <option value="default">Sort: Featured first</option>
         <option value="price_asc">Price: Low to High</option>
@@ -1496,32 +1506,36 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
           <input type="hidden" name="id"/>
           <div class="form-row">
             <div class="field"><label>Full name *</label><input type="text" name="full_name" required placeholder="e.g. Kojo Antwi"/></div>
-            <div class="field"><label>Phone / contact *</label><input type="tel" name="contact" required placeholder="e.g. 024 000 0000"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="contact" required placeholder="e.g. 024 000 0000"/></div>
           </div>
+          <div class="field"><label>Residential address / your location *</label><input type="text" name="residential_address" required placeholder="e.g. Ashaiman"/></div>
           <div class="form-row">
-            <div class="field"><label>Nationality</label><input type="text" name="nationality" placeholder="e.g. Ghanaian"/></div>
-            <div class="field"><label>Preferred visit date</label><input type="date" name="visit_day"/></div>
-          </div>
-          <div class="form-row">
-            <div class="field"><label>Place of work</label><input type="text" name="place_of_work" placeholder="Company / employer"/></div>
-            <div class="field"><label>Position</label><input type="text" name="position" placeholder="Job title"/></div>
-          </div>
-          <div class="form-row">
-            <div class="field"><label>Preferred pickup location</label><input type="text" name="pickup_location" placeholder="e.g. Accra Mall"/></div>
-            <div class="field"><label>How will you get there?</label>
-              <select name="transport_mode">
+            <div class="field"><label>Plot size *</label>
+              <select name="plot_interest" required>
                 <option value="">Select one</option>
-                <option value="Company Pickup">Company Pickup</option>
-                <option value="Own Vehicle">Own Vehicle</option>
-                <option value="Public Transport">Public Transport</option>
+                <option value="Full Plot">Full Plot</option>
+                <option value="Half Plot">Half Plot</option>
               </select>
             </div>
-          </div>
-          <div class="form-row">
-            <div class="field"><label>Plot size / interest</label><input type="text" name="plot_interest" placeholder="e.g. 1 plot, 60x100 ft"/></div>
             <div class="field"><label>Number accompanying you</label><input type="number" name="accompaniment_count" min="0" value="0"/></div>
           </div>
-          <div class="field"><label>Purpose of visit</label><textarea name="visit_purpose" placeholder="e.g. Considering purchase, verifying land before payment..."></textarea></div>
+          <div class="field"><label>When would you like to join our site visit? *</label>
+            <select name="visit_day" required>
+              <option value="">Select one</option>
+              <option value="Yes">Yes, any time works for me</option>
+              <option value="Sunday 11:30 AM">Sunday, 11:30 AM</option>
+              <option value="Other">Other — I'll specify below</option>
+            </select>
+          </div>
+          <div class="field"><label>If yes, preferred pick-up location</label>
+            <select name="pickup_location">
+              <option value="">Select one</option>
+              <option value="Spintex 18 Junction">Spintex 18 Junction</option>
+              <option value="Nungua Graceland">Nungua Graceland</option>
+              <option value="Other">Other — I'll specify below</option>
+            </select>
+          </div>
+          <div class="field"><label>Any questions or comments for our team?</label><textarea name="visit_purpose" placeholder="Anything else we should know..."></textarea></div>
           <button type="submit" class="btn btn-accent btn-block">Submit Site Visit Request</button>
           <p class="form-msg" id="siteVisitMsg"></p>
         </form>
@@ -2043,10 +2057,9 @@ document.querySelectorAll('.service-request-form').forEach(form => {
 
 /* --- Site Visit Request: submit/edit + client-side PDF download + WhatsApp share --- */
 const SITE_VISIT_FIELDS = [
-  ['full_name', 'Full Name'], ['contact', 'Phone / Contact'], ['nationality', 'Nationality'],
-  ['visit_day', 'Preferred Visit Date'], ['place_of_work', 'Place of Work'], ['position', 'Position'],
-  ['pickup_location', 'Pickup Location'], ['transport_mode', 'Transport'],
-  ['plot_interest', 'Plot Size / Interest'], ['accompaniment_count', 'Accompanying'], ['visit_purpose', 'Purpose of Visit']
+  ['full_name', 'Full Name'], ['contact', 'Phone Number'], ['residential_address', 'Residential Address / Your Location'],
+  ['plot_interest', 'Plot Size'], ['visit_day', 'When Would You Like To Join?'],
+  ['pickup_location', 'Pick-up Location'], ['accompaniment_count', 'Accompanying'], ['visit_purpose', 'Questions / Comments']
 ];
 let siteVisitLastRecord = null;
 const siteVisitForm = document.getElementById('siteVisitForm');
@@ -2063,9 +2076,9 @@ siteVisitForm?.addEventListener('submit', async (e) => {
     if (!sb) throw new Error('offline');
     const payload = {
       full_name: data.full_name, contact: data.contact,
-      nationality: data.nationality || null, visit_day: data.visit_day || null,
-      place_of_work: data.place_of_work || null, position: data.position || null,
-      pickup_location: data.pickup_location || null, transport_mode: data.transport_mode || null,
+      residential_address: data.residential_address || null,
+      visit_day: data.visit_day || null,
+      pickup_location: data.pickup_location || null,
       plot_interest: data.plot_interest || null,
       accompaniment_count: data.accompaniment_count ? Number(data.accompaniment_count) : 0,
       visit_purpose: data.visit_purpose || null
@@ -2409,6 +2422,7 @@ let siteSettingsCache = null;
 function formatPrice(p){
   return p.price_amount != null ? `${esc(p.currency||'GHS')} ${Number(p.price_amount).toLocaleString()}` : 'Price on request';
 }
+const PLOT_TYPE_LABEL = { residential: 'Residential', commercial: 'Commercial', farm_land: 'Farm Land', industrial: 'Industrial' };
 
 /* --- saved/favorite plots (localStorage, no login needed) --- */
 function getFavoritePlots(){
@@ -2475,6 +2489,7 @@ function applyPlotsFilters(){
   const q = (document.getElementById('plotsSearchInput').value || '').trim().toLowerCase();
   const status = document.getElementById('plotsStatusFilter').value;
   const type = document.getElementById('plotsTypeFilter').value;
+  const propertyType = document.getElementById('plotsPropertyTypeFilter').value;
   const sort = document.getElementById('plotsSortSelect').value;
   const favOnly = document.getElementById('plotsFavToggle').classList.contains('active');
   const favs = getFavoritePlots();
@@ -2483,6 +2498,7 @@ function applyPlotsFilters(){
     if (q && !(`${p.title} ${p.location}`.toLowerCase().includes(q))) return false;
     if (status && p.status !== status) return false;
     if (type && (p.listing_type || 'third_party') !== type) return false;
+    if (propertyType && (p.plot_type || 'residential') !== propertyType) return false;
     if (favOnly && !favs.includes(p.id)) return false;
     return true;
   });
@@ -2516,6 +2532,7 @@ function renderPlotsGrid(plots){
         </button>
       </div>
       <div class="plot-body">
+        <span class="plot-type-badge">${esc(PLOT_TYPE_LABEL[p.plot_type] || 'Residential')}</span>
         <h4>${esc(p.title)}</h4>
         <div class="plot-meta"><span>${esc(p.size)}</span><span>${esc(p.location)}</span></div>
         <div class="plot-price">${formatPrice(p)}</div>
@@ -2524,7 +2541,7 @@ function renderPlotsGrid(plots){
 }
 
 ['plotsSearchInput'].forEach(id => document.getElementById(id).addEventListener('input', applyPlotsFilters));
-['plotsStatusFilter','plotsTypeFilter','plotsSortSelect'].forEach(id => document.getElementById(id).addEventListener('change', applyPlotsFilters));
+['plotsStatusFilter','plotsTypeFilter','plotsPropertyTypeFilter','plotsSortSelect'].forEach(id => document.getElementById(id).addEventListener('change', applyPlotsFilters));
 document.getElementById('plotsFavToggle').addEventListener('click', function(){
   this.classList.toggle('active');
   applyPlotsFilters();
@@ -2601,6 +2618,7 @@ function openPlotModal(i){
           <span class="plot-status ${esc(p.status)}" style="position:static;display:inline-block">${esc(p.status)}</span>
           ${p.featured ? '<span class="plot-featured" style="position:static;display:inline-block;margin-left:8px">Hot</span>' : ''}
           ${p.listing_type === 'company' ? '<span class="plot-company-badge" style="position:static;display:inline-block;margin-left:8px;border:1px solid var(--line)">Trulander Listing</span>' : ''}
+          <span class="plot-type-badge" style="margin-left:8px;margin-bottom:0;vertical-align:middle">${esc(PLOT_TYPE_LABEL[p.plot_type] || 'Residential')}</span>
         </div>
         <div style="display:flex;gap:8px;flex:none;">
           <button type="button" class="modal-close" style="position:static;width:36px;height:36px;" aria-label="Save plot" onclick="toggleFavoritePlot('${p.id}'); updateModalFavIcon('${p.id}')">
@@ -2619,6 +2637,7 @@ function openPlotModal(i){
         ${p.nearest_landmark ? `<div><b>Nearest landmark</b><span>${esc(p.nearest_landmark)}</span></div>` : '<div><b>Nearest landmark</b><span>Ask us</span></div>'}
       </div>
       ${p.description ? `<p class="modal-desc">${esc(p.description)}</p>` : ''}
+      ${p.location ? `<div class="plot-map-wrap"><iframe class="plot-map-frame" src="https://www.google.com/maps?q=${encodeURIComponent(p.location)}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map showing ${esc(p.location)}"></iframe></div>` : ''}
       ${seller ? renderSellerCard(seller) : renderDirectContactCard(p)}
       <a href="#contact" class="btn btn-accent btn-block" onclick="closePlotModal()">Enquire About This Plot</a>
       <p class="form-msg" id="shareMsg" style="text-align:center"></p>
