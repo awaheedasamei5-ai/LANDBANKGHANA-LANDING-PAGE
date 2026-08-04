@@ -564,6 +564,12 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 .rs-form-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:32px;}
 @media (max-width:900px){.rs-grid{grid-template-columns:1fr;}.rs-form-card{padding:24px;}}
 
+/* ---------- SECTION DIVIDERS (subtle green baseline between white-on-white sections) ---------- */
+.section-divide{border-top:1px solid var(--line);position:relative;}
+.section-divide::before{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--brand),transparent);}
+body.is-subpage .section-divide{border-top:none;}
+body.is-subpage .section-divide::before{display:none;}
+
 /* ---------- ROUTER / SUBPAGES ---------- */
 .route-hidden{display:none !important;}
 .page-breadcrumb{display:flex;align-items:center;gap:8px;padding:18px 0 0;margin-bottom:16px;font-size:13.5px;color:var(--muted);}
@@ -781,7 +787,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </section>
 
 <!-- ============ PROMO CAROUSEL (auto-populated, hidden until admin adds promo banners) ============ -->
-<section id="promo" style="display:none">
+<section id="promo" class="section-divide" style="display:none">
   <div class="wrap">
     <div class="promo-carousel" id="promoCarousel">
       <div class="promo-track" id="promoTrack"></div>
@@ -868,7 +874,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </section>
 
 <!-- ============ HOW WE HELP ============ -->
-<section id="help">
+<section id="help" class="section-divide">
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow">How We Help</span>
@@ -901,7 +907,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </section>
 
 <!-- ============ QUALIFIER QUESTIONS ============ -->
-<section id="qualify">
+<section id="qualify" class="section-divide">
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow">Let's Get Specific</span>
@@ -931,7 +937,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </section>
 
 <!-- ============ PLOTS PREVIEW (home teaser → links to full Plots page) ============ -->
-<section id="plots-preview">
+<section id="plots-preview" class="section-divide">
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow">Hot Plots</span>
@@ -1216,7 +1222,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </div>
 
 <!-- ============ ABOUT ============ -->
-<section id="about">
+<section id="about" class="section-divide">
   <div class="wrap">
     <div class="page-breadcrumb reveal">
       <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / About Us
@@ -1249,7 +1255,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </section>
 
 <!-- ============ STATS ============ -->
-<section id="stats">
+<section id="stats" class="section-divide">
   <div class="wrap">
     <div class="stats-grid" id="statsGrid">
       <div class="stat"><div class="val">7+</div><div class="lbl">Years of Experience</div></div>
@@ -1282,7 +1288,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </section>
 
 <!-- ============ GALLERY (auto-populated, hidden until admin adds photos) ============ -->
-<section id="gallery" style="display:none">
+<section id="gallery" class="section-divide" style="display:none">
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow">Gallery</span>
@@ -1328,7 +1334,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </div>
 
 <!-- ============ STORIES ============ -->
-<section id="stories">
+<section id="stories" class="section-divide">
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow">Client Stories</span>
@@ -1365,7 +1371,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </section>
 
 <!-- ============ REMOTE SALES / REFER & EARN ============ -->
-<section id="remote-sales">
+<section id="remote-sales" class="section-divide">
   <div class="wrap">
     <div class="page-breadcrumb reveal">
       <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Refer &amp; Earn
@@ -1665,7 +1671,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 </section>
 
 <!-- ============ CONTACT ============ -->
-<section id="contact">
+<section id="contact" class="section-divide">
   <div class="wrap">
     <div class="page-breadcrumb reveal">
       <a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Contact
