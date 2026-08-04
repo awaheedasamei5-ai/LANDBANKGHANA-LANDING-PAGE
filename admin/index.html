@@ -177,7 +177,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="pagecontent">Page Content</button>
       <button class="nav-item" data-panel="news">News</button>
       <button class="nav-item" data-panel="team">Team</button>
-      <button class="nav-item" data-panel="plots">Hot Plots</button>
+      <button class="nav-item" data-panel="plots">Plots</button>
       <button class="nav-item" data-panel="sellers">Sellers</button>
       <button class="nav-item" data-panel="submissions">Seller Submissions</button>
       <button class="nav-item" data-panel="buyers">Buyer Inquiries</button>
@@ -560,7 +560,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
         <div class="panel-card">
           <h3>Site visit requests</h3>
           <p class="desc">Every "Book a Free Site Visit" submission from the homepage, organized by date. Tap the WhatsApp icon on any row for a ready-to-send confirmation or reminder message.</p>
-          <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
             <div class="field" style="max-width:220px;margin:0">
               <label>Filter by status</label>
               <select id="siteVisitStatusFilter">
@@ -571,8 +571,14 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
-            <button type="button" class="btn btn-ghost" id="siteVisitExportBtn" style="margin-top:19px">Download All (CSV)</button>
+            <div class="field" style="max-width:190px;margin:0">
+              <label>Filter by confirmed visit date</label>
+              <input type="date" id="siteVisitDateFilter"/>
+            </div>
+            <button type="button" class="btn btn-ghost" id="siteVisitDateClearBtn" style="margin-top:19px">Clear date</button>
+            <button type="button" class="btn btn-ghost" id="siteVisitExportBtn" style="margin-top:19px">Download shown (CSV)</button>
           </div>
+          <p class="hint" id="siteVisitFilterSummary" style="margin-bottom:16px"></p>
           <div class="inbox">
             <div class="inbox-list" id="siteVisitsList"></div>
             <div class="inbox-detail" id="siteVisitsDetail"><div class="inbox-empty">Select a request to view its details.</div></div>
@@ -584,7 +590,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <div class="panel" id="panel-plots">
         <div class="panel-card">
           <h3>Add / edit plot</h3>
-          <p class="desc">Shows up in the "Hot Plots" section on the homepage.</p>
+          <p class="desc">Shows up in the "Plots" section on the homepage — mark it Featured to also appear under "Hot Plots" there.</p>
           <form id="plotForm">
             <input type="hidden" name="id"/>
             <div class="form-grid">
@@ -1722,7 +1728,7 @@ async function approveSubmission(id){
   }).eq('id', id);
   if (uErr) return toast('Error updating submission: ' + uErr.message);
 
-  toast('Approved — now live in Hot Plots');
+  toast('Approved — now live in Plots');
   await loadSubmissions(); loadPlots(); loadSellers();
 }
 async function rejectSubmission(id){
@@ -1934,11 +1940,27 @@ async function loadSiteVisits(){
   renderSiteVisitsList();
   if (activeSiteVisitId && siteVisitsCache.find(r => r.id === activeSiteVisitId)) openSiteVisit(activeSiteVisitId);
 }
+function currentSiteVisitFilteredRows(){
+  const statusFilter = document.getElementById('siteVisitStatusFilter').value;
+  const dateFilter = document.getElementById('siteVisitDateFilter').value;
+  return siteVisitsCache.filter(r => {
+    if (statusFilter && r.status !== statusFilter) return false;
+    if (dateFilter && r.confirmed_visit_date !== dateFilter) return false;
+    return true;
+  });
+}
 function renderSiteVisitsList(){
   const list = document.getElementById('siteVisitsList');
-  const statusFilter = document.getElementById('siteVisitStatusFilter').value;
-  const rows = statusFilter ? siteVisitsCache.filter(r => r.status === statusFilter) : siteVisitsCache;
-  if (!rows.length) { list.innerHTML = '<div class="inbox-empty">No site visit requests yet.</div>'; return; }
+  const dateFilter = document.getElementById('siteVisitDateFilter').value;
+  const rows = currentSiteVisitFilteredRows();
+  const summary = document.getElementById('siteVisitFilterSummary');
+  if (dateFilter) {
+    const dateLabel = new Date(dateFilter + 'T00:00:00').toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    summary.textContent = `${rows.length} request${rows.length===1?'':'s'} confirmed for ${dateLabel}.`;
+  } else {
+    summary.textContent = '';
+  }
+  if (!rows.length) { list.innerHTML = `<div class="inbox-empty">${dateFilter ? 'No site visit requests confirmed for that date.' : 'No site visit requests yet.'}</div>`; return; }
   let html = '';
   let lastDateLabel = null;
   rows.forEach(r => {
@@ -1958,6 +1980,11 @@ function renderSiteVisitsList(){
   list.innerHTML = html;
 }
 document.getElementById('siteVisitStatusFilter').addEventListener('change', renderSiteVisitsList);
+document.getElementById('siteVisitDateFilter').addEventListener('change', renderSiteVisitsList);
+document.getElementById('siteVisitDateClearBtn').addEventListener('click', () => {
+  document.getElementById('siteVisitDateFilter').value = '';
+  renderSiteVisitsList();
+});
 
 function daysUntil(dateStr){
   if (!dateStr) return null;
@@ -2044,7 +2071,10 @@ function sendSiteVisitWhatsApp(id, kind){
 }
 document.getElementById('siteVisitExportBtn').addEventListener('click', () => {
   const cols = ['full_name','contact','residential_address','plot_interest','visit_day','pickup_location','accompaniment_count','visit_purpose','confirmed_visit_date','status','created_at'];
-  exportCSV(siteVisitsCache, cols, `site-visit-requests-${new Date().toISOString().slice(0,10)}.csv`);
+  const dateFilter = document.getElementById('siteVisitDateFilter').value;
+  const rows = currentSiteVisitFilteredRows();
+  const filenameSuffix = dateFilter || new Date().toISOString().slice(0,10);
+  exportCSV(rows, cols, `site-visit-requests-${filenameSuffix}.csv`);
 });
 
 /* ---- shared delete ---- */
