@@ -21,6 +21,10 @@ a{color:inherit;}
 .btn-accent{background:var(--brand);color:#fff;border-color:var(--brand);}
 .btn-danger{color:#B3261E;border-color:#f3d0cd;}
 .btn:disabled{opacity:.6;cursor:default;}
+.btn-loading{position:relative;padding-left:38px;}
+.btn-loading::before{content:'';position:absolute;left:14px;top:50%;width:15px;height:15px;margin-top:-7.5px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:btnSpin .7s linear infinite;}
+.btn:not(.btn-accent).btn-loading::before{border-color:rgba(8,25,16,.2);border-top-color:var(--ink);}
+@keyframes btnSpin{to{transform:rotate(360deg);}}
 
 /* ---- auth screen ---- */
 #authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
@@ -731,9 +735,7 @@ document.getElementById('cropApplyBtn').addEventListener('click', () => {
 });
 cropModalOverlay.addEventListener('click', (e) => { if (e.target === cropModalOverlay) closeCropTool(null); });
 
-async function uploadImage(file, aspectRatio, outputWidth, prefix){
-  const blob = await openCropTool(file, aspectRatio, outputWidth);
-  if (!blob) return null;
+async function uploadBlobToStorage(blob, prefix){
   if (!sb) { toast('Could not connect to the server — check your internet connection and try again.'); return null; }
   try {
     const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
@@ -745,6 +747,39 @@ async function uploadImage(file, aspectRatio, outputWidth, prefix){
     toast('Upload failed: ' + (err.message || 'unknown error'));
     return null;
   }
+}
+async function uploadImage(file, aspectRatio, outputWidth, prefix){
+  const blob = await openCropTool(file, aspectRatio, outputWidth);
+  if (!blob) return null;
+  return uploadBlobToStorage(blob, prefix);
+}
+/* Banners display with object-fit:contain (never cropped), so uploads just
+   need resizing, not a forced crop to a fixed aspect ratio. */
+function resizeToBlob(file, maxDim){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > maxDim) { height *= maxDim / width; width = maxDim; }
+        else if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob(resolve, 'image/jpeg', .88);
+      };
+      img.onerror = () => resolve(null);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+async function uploadImagePlain(file, maxDim, prefix){
+  const blob = await resizeToBlob(file, maxDim);
+  if (!blob) return null;
+  return uploadBlobToStorage(blob, prefix);
 }
 
 /* ---- media viewer + document download (used by Seller Submissions) ---- */
@@ -781,31 +816,53 @@ function requireSb(){
 signinForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!requireSb()) return;
-  const d = Object.fromEntries(new FormData(signinForm).entries());
-  const { error } = await sb.auth.signInWithPassword({ email: d.email, password: d.password });
-  if (error) return showAuthMsg(error.message);
-  // Idempotent: only actually claims the row if this email was invited and unclaimed.
-  await sb.rpc('claim_admin', { check_email: d.email }).catch(() => {});
-  checkSession();
+  const btn = signinForm.querySelector('button[type=submit]');
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.classList.add('btn-loading'); btn.textContent = 'Signing in...';
+  authMsg.classList.remove('show');
+  try {
+    const d = Object.fromEntries(new FormData(signinForm).entries());
+    const { error } = await sb.auth.signInWithPassword({ email: d.email, password: d.password });
+    if (error) { showAuthMsg(error.message); return; }
+    // Idempotent: only actually claims the row if this email was invited and unclaimed.
+    await sb.rpc('claim_admin', { check_email: d.email }).catch(() => {});
+    btn.textContent = 'Loading your dashboard...';
+    await checkSession();
+  } catch (err) {
+    showAuthMsg('Something went wrong signing in. Check your connection and try again.');
+  } finally {
+    btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = originalLabel;
+  }
 });
 
 activateForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!requireSb()) return;
-  const d = Object.fromEntries(new FormData(activateForm).entries());
-  const { data: invited, error: checkErr } = await sb.rpc('email_is_invited_admin', { check_email: d.email });
-  if (checkErr) return showAuthMsg(checkErr.message);
-  if (!invited) return showAuthMsg('That email has not been invited as an admin, or has already been activated.');
-  const { data: signUpData, error: signUpErr } = await sb.auth.signUp({ email: d.email, password: d.password });
-  if (signUpErr) return showAuthMsg(signUpErr.message);
-  if (!signUpData.session) {
-    showAuthMsg('Account created! If your project requires email confirmation, check your inbox, confirm, then use "Sign in" — your admin access activates automatically on first sign-in.', true);
-    return;
+  const btn = activateForm.querySelector('button[type=submit]');
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.classList.add('btn-loading'); btn.textContent = 'Activating...';
+  authMsg.classList.remove('show');
+  try {
+    const d = Object.fromEntries(new FormData(activateForm).entries());
+    const { data: invited, error: checkErr } = await sb.rpc('email_is_invited_admin', { check_email: d.email });
+    if (checkErr) { showAuthMsg(checkErr.message); return; }
+    if (!invited) { showAuthMsg('That email has not been invited as an admin, or has already been activated.'); return; }
+    const { data: signUpData, error: signUpErr } = await sb.auth.signUp({ email: d.email, password: d.password });
+    if (signUpErr) { showAuthMsg(signUpErr.message); return; }
+    if (!signUpData.session) {
+      showAuthMsg('Account created! If your project requires email confirmation, check your inbox, confirm, then use "Sign in" — your admin access activates automatically on first sign-in.', true);
+      return;
+    }
+    const { error: claimErr } = await sb.rpc('claim_admin', { check_email: d.email });
+    if (claimErr) { showAuthMsg(claimErr.message); return; }
+    showAuthMsg('Account activated — signing you in...', true);
+    btn.textContent = 'Loading your dashboard...';
+    await checkSession();
+  } catch (err) {
+    showAuthMsg('Something went wrong activating your account. Check your connection and try again.');
+  } finally {
+    btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = originalLabel;
   }
-  const { error: claimErr } = await sb.rpc('claim_admin', { check_email: d.email });
-  if (claimErr) return showAuthMsg(claimErr.message);
-  showAuthMsg('Account activated — signing you in...', true);
-  checkSession();
 });
 
 document.getElementById('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
@@ -850,7 +907,10 @@ async function loadAll(){
 /* ---- BANNERS ---- */
 const bannerForm = document.getElementById('bannerForm');
 document.getElementById('bannerImgFile').addEventListener('change', async (e) => {
-  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 16/9, 1400, 'banners'); if (url) bannerForm.image_url.value = url; }
+  // Banners display with object-fit:contain on the site (the full image is
+  // always shown, letterboxed on a blurred backdrop) — no crop step needed,
+  // so whatever you upload here is guaranteed to show in full, uncropped.
+  if (e.target.files[0]) { const url = await uploadImagePlain(e.target.files[0], 1600, 'banners'); if (url) bannerForm.image_url.value = url; }
   e.target.value = '';
 });
 bannerForm.addEventListener('submit', async (e) => {

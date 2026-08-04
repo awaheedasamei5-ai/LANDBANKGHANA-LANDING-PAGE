@@ -143,9 +143,10 @@ section{position:relative;}
   opacity:.7;pointer-events:none;}
 .promo-track{display:flex;position:relative;z-index:1;transition:transform .65s cubic-bezier(.65,0,.35,1);}
 .promo-slide{flex:0 0 100%;position:relative;aspect-ratio:2/1;max-height:420px;overflow:hidden;}
-.promo-slide img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.02);transition:transform 8s ease-out;}
-.promo-slide.active img{transform:scale(1.1);}
-.promo-slide a{position:absolute;inset:0;display:block;}
+.promo-slide-bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(30px) brightness(.55) saturate(1.2);transform:scale(1.15);}
+.promo-slide img{position:relative;width:100%;height:100%;object-fit:contain;display:block;transform:scale(.98);transition:transform 8s ease-out;filter:drop-shadow(0 20px 40px rgba(0,0,0,.35));}
+.promo-slide.active img{transform:scale(1.02);}
+.promo-slide button{position:absolute;inset:0;display:block;z-index:2;border:none;background:none;padding:0;cursor:pointer;}
 .promo-arrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.92);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px -8px rgba(0,0,0,.4);z-index:5;color:var(--ink);}
 .promo-arrow svg{width:20px;height:20px;}
 .promo-arrow.prev{left:16px;}
@@ -352,26 +353,37 @@ section{position:relative;}
 
 /* ---------- GALLERY ---------- */
 #gallery{padding:56px 0 16px;}
-.gallery-carousel{position:relative;border-radius:26px;overflow:hidden;aspect-ratio:16/8;max-height:520px;background:var(--ink);box-shadow:var(--shadow);}
-.gallery-stage{position:relative;width:100%;height:100%;}
-.gallery-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.1s ease;}
-.gallery-slide.active{opacity:1;z-index:1;}
-.gallery-slide img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.04);transition:transform 7s ease-out;}
-.gallery-slide.active img{transform:scale(1.15);}
-.gallery-caption{position:absolute;left:0;right:0;bottom:0;padding:28px 32px;background:linear-gradient(to top, rgba(8,25,16,.78), transparent);color:#fff;font-weight:600;font-size:15.5px;z-index:3;opacity:0;transition:opacity .5s;pointer-events:none;}
-.gallery-caption.show{opacity:1;}
-.gallery-arrow{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.94);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:4;box-shadow:0 8px 20px -8px rgba(0,0,0,.4);color:var(--ink);}
-.gallery-arrow:hover{background:#fff;}
+.gallery-bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:130px;gap:14px;}
+.gallery-tile{position:relative;border-radius:18px;overflow:hidden;cursor:pointer;background:var(--ink);border:none;padding:0;display:block;}
+.gallery-tile.large{grid-column:span 2;grid-row:span 2;}
+.gallery-tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.7,.3,1);}
+.gallery-tile:hover img{transform:scale(1.09);}
+.gallery-tile::after{content:'';position:absolute;inset:0;background:linear-gradient(to top, rgba(8,25,16,.65), transparent 55%);opacity:0;transition:opacity .25s;}
+.gallery-tile:hover::after,.gallery-tile:focus-visible::after{opacity:1;}
+.gt-caption{position:absolute;left:14px;right:14px;bottom:12px;color:#fff;font-size:13px;font-weight:600;opacity:0;transform:translateY(8px);transition:.25s;z-index:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gallery-tile:hover .gt-caption,.gallery-tile:focus-visible .gt-caption{opacity:1;transform:translateY(0);}
+.gt-more{position:absolute;inset:0;background:rgba(8,25,16,.72);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;z-index:2;}
+.gt-zoom-ic{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.8);transition:.2s;z-index:1;}
+.gallery-tile:hover .gt-zoom-ic{opacity:1;transform:scale(1);}
+.gt-zoom-ic svg{width:14px;height:14px;color:var(--ink);}
+@media (max-width:900px){.gallery-bento{grid-template-columns:repeat(3,1fr);grid-auto-rows:110px;}}
+@media (max-width:560px){.gallery-bento{grid-template-columns:repeat(2,1fr);grid-auto-rows:130px;gap:10px;}.gallery-tile.large{grid-column:span 2;grid-row:span 1;aspect-ratio:16/10;}}
+
+/* ---- gallery lightbox ---- */
+.gallery-lightbox{position:fixed;inset:0;background:rgba(4,12,8,.94);z-index:210;display:none;align-items:center;justify-content:center;padding:20px;}
+.gallery-lightbox.open{display:flex;}
+.gallery-lightbox-stage{position:relative;max-width:min(1000px,92vw);max-height:86vh;width:100%;display:flex;flex-direction:column;align-items:center;}
+.gallery-lightbox-stage img{max-width:100%;max-height:78vh;object-fit:contain;border-radius:14px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);}
+.gallery-lightbox-caption{color:#fff;margin-top:16px;font-size:14.5px;font-weight:600;text-align:center;}
+.gallery-lightbox-close{position:absolute;top:18px;right:18px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+.gallery-lightbox-close svg{width:18px;height:18px;}
+.gallery-lightbox .gallery-arrow{background:rgba(255,255,255,.12);color:#fff;}
+.gallery-lightbox .gallery-arrow:hover{background:rgba(255,255,255,.22);}
+.gallery-arrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.94);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:4;box-shadow:0 8px 20px -8px rgba(0,0,0,.4);color:var(--ink);}
 .gallery-arrow.prev{left:16px;}
 .gallery-arrow.next{right:16px;}
 .gallery-arrow svg{width:18px;height:18px;}
-.gallery-thumbs{display:flex;gap:10px;margin-top:16px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
-.gallery-thumbs::-webkit-scrollbar{display:none;}
-.gallery-thumbs button{flex:none;width:92px;height:66px;border-radius:12px;overflow:hidden;border:2px solid transparent;padding:0;cursor:pointer;opacity:.5;transition:opacity .2s,border-color .2s,transform .2s;background:none;}
-.gallery-thumbs button.active{opacity:1;border-color:var(--brand);transform:translateY(-2px);}
-.gallery-thumbs img{width:100%;height:100%;object-fit:cover;display:block;}
-@media (prefers-reduced-motion: reduce){.gallery-slide img,.gallery-slide.active img{transition:none;transform:none;}}
-@media (max-width:700px){.gallery-carousel{aspect-ratio:4/3;max-height:340px;border-radius:20px;}.gallery-arrow{width:36px;height:36px;}.gallery-caption{padding:20px 22px;font-size:14px;}.gallery-thumbs button{width:68px;height:50px;}}
+@media (prefers-reduced-motion: reduce){.gallery-tile img{transition:none;}.gallery-tile:hover img{transform:none;}}
 
 /* ---------- TESTIMONIALS (empty state) ---------- */
 #stories{padding:56px 0;}
@@ -444,26 +456,47 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 @media (max-width:800px){.footer-grid{grid-template-columns:1fr 1fr;}}
 
 /* ---------- ROYAL PALM ENCLAVE ---------- */
-#royal-palm{background:var(--ink);color:#fff;}
+#royal-palm{background:var(--ink);color:#fff;padding:0;position:relative;overflow:hidden;}
+.rp-hero{position:relative;padding:88px 0 56px;}
+.rp-hero::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 700px 500px at 15% 0%, rgba(34,165,76,.35), transparent 60%),
+  radial-gradient(ellipse 600px 500px at 100% 30%, rgba(34,165,76,.18), transparent 60%),
+  linear-gradient(180deg, #0B2417 0%, var(--ink) 60%);
+  z-index:0;}
+.rp-hero::after{content:'';position:absolute;inset:0;background-image:url('assets/photos/process.jpg');background-size:cover;background-position:center 30%;opacity:.16;mix-blend-mode:luminosity;z-index:0;}
+.rp-hero .wrap{position:relative;z-index:1;}
 #royal-palm .eyebrow{background:rgba(255,255,255,.1);color:var(--brand);}
 #royal-palm .sec-head p{color:rgba(255,255,255,.65);}
-.rp-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;margin-bottom:22px;}
-.rp-facts{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.rp-fact{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px 18px;}
-.rp-fact b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--brand);margin-bottom:6px;}
-.rp-fact span{font-size:14.5px;font-weight:600;line-height:1.4;}
-.rp-features{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.rp-feature{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;font-size:13.5px;font-weight:600;}
-.rp-feature svg{width:26px;height:26px;color:var(--brand);}
-.rp-growth{display:flex;align-items:center;gap:22px;background:linear-gradient(135deg,rgba(34,165,76,.18),rgba(34,165,76,.04));border:1px solid rgba(34,165,76,.3);border-radius:20px;padding:26px 28px;margin-bottom:22px;}
-.rp-growth-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(38px,6vw,54px);color:var(--brand);flex:none;}
-.rp-growth-txt{font-size:15px;color:rgba(255,255,255,.8);line-height:1.5;}
-.rp-nearby h4{font-size:16px;margin-bottom:14px;}
-.rp-nearby-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px;}
-.rp-nearby-grid div{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 15px;font-size:13.5px;color:rgba(255,255,255,.75);line-height:1.5;}
-.rp-cta{display:flex;gap:12px;flex-wrap:wrap;}
-@media (max-width:900px){.rp-grid{grid-template-columns:1fr;}.rp-nearby-grid{grid-template-columns:1fr 1fr;}}
-@media (max-width:560px){.rp-facts,.rp-features{grid-template-columns:1fr;}.rp-nearby-grid{grid-template-columns:1fr;}.rp-growth{flex-direction:column;text-align:center;gap:10px;}}
+.rp-body{position:relative;z-index:1;padding:0 0 64px;}
+.rp-section-gap{margin-top:52px;}
+.rp-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--brand);margin-bottom:16px;display:block;}
+.rp-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.rp-fact{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:22px 20px;transition:transform .25s,border-color .25s,background .25s;}
+.rp-fact:hover{transform:translateY(-4px);border-color:rgba(34,165,76,.45);background:rgba(255,255,255,.07);}
+.rp-fact .rp-fact-ic{width:38px;height:38px;border-radius:11px;background:rgba(34,165,76,.16);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.rp-fact .rp-fact-ic svg{width:19px;height:19px;color:var(--brand);}
+.rp-fact b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.5);margin-bottom:7px;font-weight:700;}
+.rp-fact span{font-size:14.5px;font-weight:600;line-height:1.45;}
+.rp-features{display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;}
+.rp-feature{flex:1 1 180px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:22px;display:flex;align-items:center;gap:14px;font-size:14.5px;font-weight:600;transition:transform .25s,border-color .25s;}
+.rp-feature:hover{transform:translateY(-4px);border-color:rgba(34,165,76,.45);}
+.rp-feature .rp-feature-ic{width:44px;height:44px;border-radius:12px;background:rgba(34,165,76,.16);display:flex;align-items:center;justify-content:center;flex:none;}
+.rp-feature svg{width:22px;height:22px;color:var(--brand);}
+.rp-growth{display:flex;align-items:center;gap:28px;background:linear-gradient(120deg,rgba(34,165,76,.2),rgba(34,165,76,.03) 70%);border:1px solid rgba(34,165,76,.35);border-radius:22px;padding:34px 36px;position:relative;overflow:hidden;}
+.rp-growth::before{content:'';position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle, rgba(34,165,76,.3), transparent 70%);}
+.rp-growth-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(44px,7vw,64px);color:var(--brand);flex:none;position:relative;}
+.rp-growth-txt{font-size:15.5px;color:rgba(255,255,255,.82);line-height:1.6;position:relative;max-width:520px;}
+.rp-nearby h4{font-size:19px;margin-bottom:20px;font-family:'Space Grotesk',sans-serif;}
+.rp-nearby-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.rp-nearby-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:20px;transition:transform .25s,border-color .25s,background .25s;}
+.rp-nearby-card:hover{transform:translateY(-4px);border-color:rgba(34,165,76,.4);background:rgba(255,255,255,.065);}
+.rp-nearby-card .rp-nc-ic{width:34px;height:34px;border-radius:10px;background:rgba(34,165,76,.16);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.rp-nearby-card .rp-nc-ic svg{width:17px;height:17px;color:var(--brand);}
+.rp-nearby-card b{display:block;font-size:14px;margin-bottom:5px;}
+.rp-nearby-card span{font-size:13.5px;color:rgba(255,255,255,.68);line-height:1.5;}
+.rp-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:48px;}
+@media (max-width:900px){.rp-facts{grid-template-columns:1fr 1fr;}.rp-nearby-grid{grid-template-columns:1fr 1fr;}.rp-hero{padding:64px 0 40px;}}
+@media (max-width:560px){.rp-facts{grid-template-columns:1fr;}.rp-nearby-grid{grid-template-columns:1fr;}.rp-feature{flex:1 1 100%;}.rp-growth{flex-direction:column;text-align:center;gap:14px;padding:28px 24px;}}
 
 /* ---------- REMOTE SALES / REFER & EARN ---------- */
 #remote-sales{background:linear-gradient(150deg,var(--brand-light),var(--bg));}
@@ -627,44 +660,60 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 
 <!-- ============ ROYAL PALM ENCLAVE ============ -->
 <section id="royal-palm">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">Now Selling · GREDA Registered</span>
-      <h2>Royal Palm Enclave, Tsopoli</h2>
-      <p>Your gateway to serene living — 200 acres of fully documented land in Ghana's fastest-growing corridor, roughly 44km from Ashaiman via Tema.</p>
-    </div>
-    <div class="rp-grid">
+  <div class="rp-hero">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Now Selling · GREDA Registered</span>
+        <h2>Royal Palm Enclave, Tsopoli</h2>
+        <p>Your gateway to serene living — 200 acres of fully documented land in Ghana's fastest-growing corridor, roughly 44km from Ashaiman via Tema.</p>
+      </div>
       <div class="rp-facts reveal">
-        <div class="rp-fact"><b>Total Land Size</b><span>200 acres — Phase One is 72 acres</span></div>
-        <div class="rp-fact"><b>Lease Period</b><span>85 years, sub-lease registered at the Lands Commission</span></div>
-        <div class="rp-fact"><b>Location</b><span>Tsopoli, Ningo-Prampram District — dubbed "the New Airport City"</span></div>
-        <div class="rp-fact"><b>Headlease Owner</b><span>Dorsi Animle Family, Shai Osudoku — fully certified headlease</span></div>
+        <div class="rp-fact">
+          <div class="rp-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg></div>
+          <b>Total Land Size</b><span>200 acres — Phase One is 72 acres</span>
+        </div>
+        <div class="rp-fact">
+          <div class="rp-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+          <b>Lease Period</b><span>85 years, sub-lease registered at the Lands Commission</span>
+        </div>
+        <div class="rp-fact">
+          <div class="rp-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+          <b>Location</b><span>Tsopoli, Ningo-Prampram District — dubbed "the New Airport City"</span>
+        </div>
+        <div class="rp-fact">
+          <div class="rp-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+          <b>Headlease Owner</b><span>Dorsi Animle Family, Shai Osudoku — fully certified headlease</span>
+        </div>
       </div>
       <div class="rp-features reveal">
-        <div class="rp-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>Electricity</div>
-        <div class="rp-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18c3-2 6 2 9 0s6 2 9 0"/><path d="M3 12c3-2 6 2 9 0s6 2 9 0"/></svg>Planned Roads</div>
-        <div class="rp-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M9 5h6"/><path d="M12 8c3 3.5 5 6.5 5 9a5 5 0 0 1-10 0c0-2.5 2-5.5 5-9z"/></svg>Running Water</div>
-        <div class="rp-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V10l8-6 8 6v12"/><path d="M9 22v-6h6v6"/><path d="M4 10h16"/></svg>Gated Community</div>
+        <div class="rp-feature"><div class="rp-feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></div>Electricity</div>
+        <div class="rp-feature"><div class="rp-feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18c3-2 6 2 9 0s6 2 9 0"/><path d="M3 12c3-2 6 2 9 0s6 2 9 0"/></svg></div>Planned Roads</div>
+        <div class="rp-feature"><div class="rp-feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M9 5h6"/><path d="M12 8c3 3.5 5 6.5 5 9a5 5 0 0 1-10 0c0-2.5 2-5.5 5-9z"/></svg></div>Running Water</div>
       </div>
     </div>
-    <div class="rp-growth reveal">
-      <div class="rp-growth-num">+638%</div>
-      <div class="rp-growth-txt">Tsopoli land value grew from roughly GHS 6,500 in 2019 to roughly GHS 48,000 by 2026 — averaging about 33% a year, outperforming Treasury Bill yields over the same period.</div>
-    </div>
-    <div class="rp-nearby reveal">
-      <h4>What's driving the growth around Tsopoli</h4>
-      <div class="rp-nearby-grid">
-        <div><b>New Airport City</b> — a 60,000-acre aerotropolis just off the Accra-Aflao highway.</div>
-        <div><b>Tema-Aflao Road Phase 1</b> — will make Tsopoli-to-Accra Mall faster than from Adenta.</div>
-        <div><b>Dawa Industrial Zone</b> — 2,000 acres of light &amp; heavy industry nearby.</div>
-        <div><b>Central University</b> — minutes away, driving housing demand in the area.</div>
-        <div><b>Saglemi Housing Project</b> — a $200M, 5,000-unit development 10 minutes away.</div>
-        <div><b>Devtraco Woodlands</b> — a 592-acre gated community 1 minute from Central University.</div>
+  </div>
+  <div class="rp-body">
+    <div class="wrap">
+      <div class="rp-growth reveal">
+        <div class="rp-growth-num">+638%</div>
+        <div class="rp-growth-txt">Tsopoli land value grew from roughly GHS 6,500 in 2019 to roughly GHS 48,000 by 2026 — averaging about 33% a year, outperforming Treasury Bill yields over the same period.</div>
       </div>
-    </div>
-    <div class="rp-cta reveal">
-      <button type="button" class="btn btn-accent" id="rpSiteVisitBtn">Book a Free Site Visit</button>
-      <a href="#plots" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Browse Available Plots</a>
+      <div class="rp-nearby reveal rp-section-gap">
+        <span class="rp-label">Why Tsopoli, Why Now</span>
+        <h4>What's driving the growth around Tsopoli</h4>
+        <div class="rp-nearby-grid">
+          <div class="rp-nearby-card"><div class="rp-nc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7-7-7M3 12h16"/></svg></div><b>New Airport City</b><span>A 60,000-acre aerotropolis just off the Accra-Aflao highway.</span></div>
+          <div class="rp-nearby-card"><div class="rp-nc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18c3-2 6 2 9 0s6 2 9 0"/><path d="M3 12c3-2 6 2 9 0s6 2 9 0"/></svg></div><b>Tema-Aflao Road Phase 1</b><span>Will make Tsopoli-to-Accra Mall faster than from Adenta.</span></div>
+          <div class="rp-nearby-card"><div class="rp-nc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V9l6-4 6 4v12M15 21V13l6-3v11"/></svg></div><b>Dawa Industrial Zone</b><span>2,000 acres of light &amp; heavy industry nearby.</span></div>
+          <div class="rp-nearby-card"><div class="rp-nc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></div><b>Central University</b><span>Minutes away, driving housing demand in the area.</span></div>
+          <div class="rp-nearby-card"><div class="rp-nc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M14 9h1M14 13h1"/></svg></div><b>Saglemi Housing Project</b><span>A $200M, 5,000-unit development 10 minutes away.</span></div>
+          <div class="rp-nearby-card"><div class="rp-nc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V10l8-6 8 6v12"/><path d="M9 22v-6h6v6"/></svg></div><b>Devtraco Woodlands</b><span>A 592-acre gated community 1 minute from Central University.</span></div>
+        </div>
+      </div>
+      <div class="rp-cta reveal">
+        <button type="button" class="btn btn-accent" id="rpSiteVisitBtn">Book a Free Site Visit</button>
+        <a href="#plots" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Browse Available Plots</a>
+      </div>
     </div>
   </div>
 </section>
@@ -1027,19 +1076,44 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
       <span class="eyebrow">Gallery</span>
       <h2>More from Trulander JSF Limited</h2>
     </div>
-    <div class="gallery-carousel reveal" id="galleryCarousel">
-      <div class="gallery-stage" id="galleryStage"></div>
-      <div class="gallery-caption" id="galleryCaption"></div>
-      <button class="gallery-arrow prev" id="galleryPrev" aria-label="Previous photo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <button class="gallery-arrow next" id="galleryNext" aria-label="Next photo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-    </div>
-    <div class="gallery-thumbs" id="galleryThumbs"></div>
+    <div class="gallery-bento reveal" id="galleryBento"></div>
   </div>
 </section>
+
+<!-- ============ PROMO BANNER LIGHTBOX (click a banner to read it in full) ============ -->
+<div class="gallery-lightbox" id="promoLightbox">
+  <button class="gallery-lightbox-close" id="promoLightboxClose" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <button class="gallery-arrow prev" id="promoLightboxPrev" aria-label="Previous banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="gallery-arrow next" id="promoLightboxNext" aria-label="Next banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+  <div class="gallery-lightbox-stage">
+    <img id="promoLightboxImg" alt=""/>
+    <div class="gallery-lightbox-caption" id="promoLightboxCaption"></div>
+    <a href="#" class="btn btn-accent" id="promoLightboxCta" style="margin-top:14px;display:none;"></a>
+  </div>
+</div>
+
+<!-- ============ GALLERY LIGHTBOX ============ -->
+<div class="gallery-lightbox" id="galleryLightbox">
+  <button class="gallery-lightbox-close" id="galleryLightboxClose" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <button class="gallery-arrow prev" id="galleryLightboxPrev" aria-label="Previous photo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="gallery-arrow next" id="galleryLightboxNext" aria-label="Next photo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+  <div class="gallery-lightbox-stage">
+    <img id="galleryLightboxImg" alt=""/>
+    <div class="gallery-lightbox-caption" id="galleryLightboxCaption"></div>
+  </div>
+</div>
 
 <!-- ============ STORIES ============ -->
 <section id="stories">
@@ -1938,12 +2012,15 @@ function renderTestimonials(reviews){
 }
 
 /* --- promo banner carousel --- */
+let promoSlidesCache = [];
 function initPromoCarousel(slides){
+  promoSlidesCache = slides;
   const track = document.getElementById('promoTrack');
   const dotsWrap = document.getElementById('promoDots');
   track.innerHTML = slides.map((s, i) => {
-    const img = `<img src="${esc(s.image_url)}" alt="${esc(s.headline || 'LandBank Ghana')}"/>`;
-    return `<div class="promo-slide${i===0?' active':''}">${s.cta_href ? `<a href="${esc(s.cta_href)}" aria-label="${esc(s.headline||'Learn more')}">${img}</a>` : img}</div>`;
+    const bg = `<div class="promo-slide-bg" style="background-image:url('${esc(s.image_url)}')"></div>`;
+    const img = `<img src="${esc(s.image_url)}" alt="${esc(s.headline || 'Trulander JSF Limited')}"/>`;
+    return `<div class="promo-slide${i===0?' active':''}"><button type="button" onclick="openPromoLightbox(${i})" aria-label="View banner: ${esc(s.headline||'Read more')}">${bg}${img}</button></div>`;
   }).join('');
   dotsWrap.innerHTML = slides.map((_, i) => `<button aria-label="Go to slide ${i+1}" class="${i===0?'active':''}"></button>`).join('');
 
@@ -1973,52 +2050,98 @@ function initPromoCarousel(slides){
   document.getElementById('promo').style.display = 'block';
 }
 
-function initGalleryCarousel(items){
-  const stage = document.getElementById('galleryStage');
-  const caption = document.getElementById('galleryCaption');
-  const thumbs = document.getElementById('galleryThumbs');
-  stage.innerHTML = items.map((g, i) => `
-    <div class="gallery-slide${i===0?' active':''}">
-      <img src="${esc(g.image_url)}" alt="${esc(g.alt_text || g.label || '')}"/>
-    </div>`).join('');
-  thumbs.innerHTML = items.map((g, i) => `
-    <button aria-label="View photo ${i+1}" class="${i===0?'active':''}">
-      <img src="${esc(g.image_url)}" alt=""/>
-    </button>`).join('');
-
-  let current = 0;
-  const slideEls = stage.querySelectorAll('.gallery-slide');
-  const thumbEls = thumbs.querySelectorAll('button');
-  function show(i){
-    current = (i + items.length) % items.length;
-    slideEls.forEach((el, idx) => el.classList.toggle('active', idx === current));
-    thumbEls.forEach((el, idx) => el.classList.toggle('active', idx === current));
-    const activeThumb = thumbEls[current];
-    if (activeThumb) {
-      // Scroll only the horizontal thumbnail strip — never scrollIntoView here,
-      // its 'nearest' block option can still nudge the whole page vertically.
-      const target = activeThumb.offsetLeft - (thumbs.clientWidth - activeThumb.clientWidth) / 2;
-      thumbs.scrollTo({ left: target, behavior: 'smooth' });
-    }
-    const label = items[current].label;
-    caption.textContent = label || '';
-    caption.classList.toggle('show', !!label);
-  }
-  document.getElementById('galleryPrev').addEventListener('click', () => { show(current - 1); resetGalleryAutoplay(); });
-  document.getElementById('galleryNext').addEventListener('click', () => { show(current + 1); resetGalleryAutoplay(); });
-  thumbEls.forEach((el, idx) => el.addEventListener('click', () => { show(idx); resetGalleryAutoplay(); }));
-
-  let timer = null;
-  function resetGalleryAutoplay(){
-    if (timer) clearInterval(timer);
-    if (items.length > 1) timer = setInterval(() => show(current + 1), 4500);
-  }
-  const carousel = document.getElementById('galleryCarousel');
-  carousel.addEventListener('mouseenter', () => { if (timer) clearInterval(timer); });
-  carousel.addEventListener('mouseleave', resetGalleryAutoplay);
-  show(0);
-  resetGalleryAutoplay();
+let promoLightboxIndex = 0;
+function openPromoLightbox(i){
+  promoLightboxIndex = i;
+  renderPromoLightbox();
+  document.getElementById('promoLightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
+function renderPromoLightbox(){
+  const s = promoSlidesCache[promoLightboxIndex];
+  if (!s) return;
+  const img = document.getElementById('promoLightboxImg');
+  img.src = s.image_url;
+  img.alt = s.headline || '';
+  document.getElementById('promoLightboxCaption').textContent = s.headline || '';
+  const cta = document.getElementById('promoLightboxCta');
+  if (s.cta_href) {
+    cta.href = s.cta_href;
+    cta.textContent = s.cta_label || 'Learn More';
+    cta.style.display = 'inline-flex';
+  } else {
+    cta.style.display = 'none';
+  }
+}
+function closePromoLightbox(){
+  document.getElementById('promoLightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function promoLightboxStep(delta){
+  promoLightboxIndex = (promoLightboxIndex + delta + promoSlidesCache.length) % promoSlidesCache.length;
+  renderPromoLightbox();
+}
+document.getElementById('promoLightboxClose').addEventListener('click', closePromoLightbox);
+document.getElementById('promoLightboxPrev').addEventListener('click', () => promoLightboxStep(-1));
+document.getElementById('promoLightboxNext').addEventListener('click', () => promoLightboxStep(1));
+document.getElementById('promoLightbox').addEventListener('click', (e) => { if (e.target.id === 'promoLightbox') closePromoLightbox(); });
+document.getElementById('promoLightboxCta').addEventListener('click', closePromoLightbox);
+
+let galleryItemsCache = [];
+function initGalleryCarousel(items){
+  galleryItemsCache = items;
+  const bento = document.getElementById('galleryBento');
+  const MAX_TILES = 7;
+  const visible = items.slice(0, MAX_TILES);
+  const extraCount = items.length - MAX_TILES;
+  const zoomIcon = `<span class="gt-zoom-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M11 8v6M8 11h6"/></svg></span>`;
+  bento.innerHTML = visible.map((g, i) => `
+    <button type="button" class="gallery-tile${i===0?' large':''}" onclick="openGalleryLightbox(${i})">
+      <img src="${esc(g.image_url)}" alt="${esc(g.alt_text || g.label || '')}" loading="lazy"/>
+      ${zoomIcon}
+      ${g.label ? `<span class="gt-caption">${esc(g.label)}</span>` : ''}
+      ${(i === visible.length - 1 && extraCount > 0) ? `<span class="gt-more">+${extraCount} more</span>` : ''}
+    </button>`).join('');
+}
+
+let galleryLightboxIndex = 0;
+function openGalleryLightbox(i){
+  galleryLightboxIndex = i;
+  renderGalleryLightbox();
+  document.getElementById('galleryLightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function renderGalleryLightbox(){
+  const g = galleryItemsCache[galleryLightboxIndex];
+  if (!g) return;
+  const img = document.getElementById('galleryLightboxImg');
+  img.src = g.image_url;
+  img.alt = g.alt_text || g.label || '';
+  document.getElementById('galleryLightboxCaption').textContent = g.label || '';
+}
+function closeGalleryLightbox(){
+  document.getElementById('galleryLightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function galleryLightboxStep(delta){
+  galleryLightboxIndex = (galleryLightboxIndex + delta + galleryItemsCache.length) % galleryItemsCache.length;
+  renderGalleryLightbox();
+}
+document.getElementById('galleryLightboxClose').addEventListener('click', closeGalleryLightbox);
+document.getElementById('galleryLightboxPrev').addEventListener('click', () => galleryLightboxStep(-1));
+document.getElementById('galleryLightboxNext').addEventListener('click', () => galleryLightboxStep(1));
+document.getElementById('galleryLightbox').addEventListener('click', (e) => { if (e.target.id === 'galleryLightbox') closeGalleryLightbox(); });
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('galleryLightbox').classList.contains('open')) {
+    if (e.key === 'Escape') closeGalleryLightbox();
+    if (e.key === 'ArrowLeft') galleryLightboxStep(-1);
+    if (e.key === 'ArrowRight') galleryLightboxStep(1);
+  } else if (document.getElementById('promoLightbox').classList.contains('open')) {
+    if (e.key === 'Escape') closePromoLightbox();
+    if (e.key === 'ArrowLeft') promoLightboxStep(-1);
+    if (e.key === 'ArrowRight') promoLightboxStep(1);
+  }
+});
 
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function toggleClientPopover(i){
