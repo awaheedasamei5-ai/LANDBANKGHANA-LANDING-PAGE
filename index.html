@@ -114,22 +114,31 @@ section{position:relative;}
 .hero-badge.b3 .lbl{color:rgba(255,255,255,.7);}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes heroBadgeIn{0%{opacity:0;transform:scale(.35) translateY(6px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes badgeArrival{0%,86%{box-shadow:0 16px 34px -14px rgba(8,25,16,.35),0 0 0 1px rgba(34,165,76,.14);}95%{box-shadow:0 16px 34px -14px rgba(8,25,16,.35),0 0 0 3px rgba(34,165,76,.55),0 0 24px 3px rgba(34,165,76,.5);}100%{box-shadow:0 16px 34px -14px rgba(8,25,16,.35),0 0 0 1px rgba(34,165,76,.14);}}
 .hero-badge{animation:heroBadgeIn .65s cubic-bezier(.34,1.56,.64,1) backwards, floaty 5s ease-in-out infinite;}
-.hero-badge.b1{animation-delay:.85s,.8s;}
-.hero-badge.b2{animation-delay:1.6s,1.6s;}
-.hero-badge.b3{animation-delay:.2s,0s;}
+.hero-badge.b1{animation:heroBadgeIn .65s cubic-bezier(.34,1.56,.64,1) .85s backwards, floaty 5s ease-in-out .8s infinite, badgeArrival 2.1s ease-out .7s infinite;}
+.hero-badge.b2{animation:heroBadgeIn .65s cubic-bezier(.34,1.56,.64,1) 1.6s backwards, floaty 5s ease-in-out 1.6s infinite, badgeArrival 1.5s ease-out 1.4s infinite;}
+.hero-badge.b3{animation:heroBadgeIn .65s cubic-bezier(.34,1.56,.64,1) .2s backwards, floaty 5s ease-in-out 0s infinite, badgeArrival 2.1s ease-out 0s infinite;}
 
 /* ---- hero flow: stat badges appear to stream out of a single point at her
-   fingertip on the laptop — a small pulsing point, thin lines, visible in front. */
+   fingertip on the laptop — a small pulsing point, thin lines, visible in
+   front; each traveling particle flares up right as it lands on its badge
+   (which flashes back), and the source pulses like a small sonar/radar. */
 .hero-flow{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible;}
 .hero-flow .flow-path{fill:none;stroke:url(#heroFlowGradient);stroke-width:.4;stroke-linecap:round;stroke-dasharray:2.4 2;filter:drop-shadow(0 0 1.5px rgba(34,165,76,.5));opacity:0;animation:heroFlowFadeIn .6s ease-out .5s forwards, heroFlowDash 1.3s linear .5s infinite;}
 @keyframes heroFlowFadeIn{to{opacity:.8;}}
 @keyframes heroFlowDash{to{stroke-dashoffset:-8.8;}}
 .hero-flow .flow-source{fill:#22A54C;transform-box:fill-box;transform-origin:center;filter:drop-shadow(0 0 2.5px rgba(34,165,76,.9));animation:heroSourcePulse 2s ease-in-out infinite;}
 @keyframes heroSourcePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.35);}}
-.hero-flow .flow-ping{fill:none;stroke:#22A54C;stroke-width:.3;transform-box:fill-box;transform-origin:center;opacity:.6;animation:heroPing 2s ease-out infinite;}
+.hero-flow .flow-ping{fill:none;stroke:#22A54C;stroke-width:.3;transform-box:fill-box;transform-origin:center;opacity:.6;}
+.hero-flow .flow-ping-a{animation:heroPing 2s ease-out infinite;}
+.hero-flow .flow-ping-b{animation:heroPing 2s ease-out 1s infinite;}
 @keyframes heroPing{0%{transform:scale(1);opacity:.55;}100%{transform:scale(5);opacity:0;}}
-.hero-flow .flow-dot{fill:#fff;filter:drop-shadow(0 0 2.5px #22A54C) drop-shadow(0 0 4px rgba(34,165,76,.8));}
+.hero-flow .flow-dot{fill:#fff;transform-box:fill-box;transform-origin:center;filter:drop-shadow(0 0 2.5px #22A54C) drop-shadow(0 0 4px rgba(34,165,76,.8));}
+.hero-flow .dot-left{animation:dotArrive 2.1s ease-in-out infinite;}
+.hero-flow .dot-right{animation:dotArrive 2.1s ease-in-out .7s infinite;}
+.hero-flow .dot-down{animation:dotArrive 1.5s ease-in-out 1.4s infinite;}
+@keyframes dotArrive{0%,84%{transform:scale(1);}94%{transform:scale(2.4);}100%{transform:scale(1);}}
 @media (prefers-reduced-motion: reduce){
   .hero-flow{display:none;}
   .hero-badge{animation:none;}
@@ -826,20 +835,21 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
             <stop offset="100%" stop-color="#22A54C" stop-opacity="0"/>
           </linearGradient>
         </defs>
-        <path id="heroFlowPathLeft" class="flow-path" d="M55,82 Q25,68 8,52"/>
-        <path id="heroFlowPathRight" class="flow-path" d="M55,82 C70,68 75,42 76,27"/>
-        <path id="heroFlowPathDown" class="flow-path" d="M55,82 Q72,79 87,76"/>
-        <circle class="flow-dot" r=".9">
+        <path id="heroFlowPathLeft" class="flow-path" d="M53,79 Q24,66 8,52"/>
+        <path id="heroFlowPathRight" class="flow-path" d="M53,79 C68,66 74,41 76,27"/>
+        <path id="heroFlowPathDown" class="flow-path" d="M53,79 Q71,77 87,76"/>
+        <circle class="flow-dot dot-left" r=".9">
           <animateMotion dur="2.1s" repeatCount="indefinite" begin="0s"><mpath href="#heroFlowPathLeft"/></animateMotion>
         </circle>
-        <circle class="flow-dot" r=".9">
+        <circle class="flow-dot dot-right" r=".9">
           <animateMotion dur="2.1s" repeatCount="indefinite" begin=".7s"><mpath href="#heroFlowPathRight"/></animateMotion>
         </circle>
-        <circle class="flow-dot" r=".9">
+        <circle class="flow-dot dot-down" r=".9">
           <animateMotion dur="1.5s" repeatCount="indefinite" begin="1.4s"><mpath href="#heroFlowPathDown"/></animateMotion>
         </circle>
-        <circle class="flow-ping" cx="55" cy="82" r="1.2"/>
-        <circle class="flow-source" cx="55" cy="82" r=".9"/>
+        <circle class="flow-ping flow-ping-a" cx="53" cy="79" r="1.1"/>
+        <circle class="flow-ping flow-ping-b" cx="53" cy="79" r="1.1"/>
+        <circle class="flow-source" cx="53" cy="79" r=".9"/>
       </svg>
       <div class="hero-badge b1"><span class="num" id="statYears">7+</span><span class="lbl">Years Experience</span></div>
       <div class="hero-badge b2"><span class="num" id="statAcres">1,200+</span><span class="lbl">Acres Secured</span></div>
