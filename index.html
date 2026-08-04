@@ -343,15 +343,30 @@ section{position:relative;}
 .about-card{position:relative;overflow:hidden;border-radius:32px;color:#fff;aspect-ratio:4/3.4;background:linear-gradient(160deg,#0B2417,#081910);}
 .about-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:aboutZoom 16s ease-in-out infinite alternate;}
 @keyframes aboutZoom{from{transform:scale(1) translate(0,0);}to{transform:scale(1.14) translate(-1%,-1%);}}
-.about-overlay{position:absolute;inset:0;background:linear-gradient(160deg,rgba(11,36,23,.65),rgba(8,25,16,.92) 65%);}
-.about-card-content{position:relative;z-index:1;padding:44px;height:100%;display:flex;flex-direction:column;justify-content:space-between;}
-.about-card .quote{font-family:'Space Grotesk',sans-serif;font-size:22px;line-height:1.4;}
-.about-card .quote .accent{color:var(--brand);}
+.about-overlay{position:absolute;inset:0;background:linear-gradient(to bottom, rgba(11,36,23,.05) 0%, rgba(9,30,19,.4) 50%, rgba(7,22,14,.94) 88%);}
+.about-card-content{position:relative;z-index:1;padding:44px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;}
+.about-quotes{all:unset;cursor:pointer;display:block;min-height:64px;}
+.about-quotes .quote{font-family:'Space Grotesk',sans-serif;font-size:22px;line-height:1.4;display:block;margin-bottom:10px;animation:aboutQuoteFade .6s ease;}
+.about-quotes .quote-attr{font-size:13px;color:rgba(255,255,255,.6);display:block;animation:aboutQuoteFade .6s ease .05s backwards;}
+@keyframes aboutQuoteFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.about-quotes-meta{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap;}
+.about-quotes-dots{display:flex;gap:6px;flex-wrap:wrap;}
+.about-quotes-dots .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;border:none;padding:0;transition:all .25s ease;}
+.about-quotes-dots .dot.active{background:var(--brand);width:20px;border-radius:4px;}
+.about-quotes-status{font-size:11px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:5px;}
+.about-quotes-status svg{width:11px;height:11px;}
 .values-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px;}
 .value{border:1px solid var(--line);border-radius:16px;padding:18px 20px;background:#fff;}
 .value h4{font-size:15px;margin-bottom:6px;}
 .value p{font-size:13px;color:var(--muted);}
 @media (max-width:900px){.about-grid{grid-template-columns:1fr;}.about-card{aspect-ratio:4/3;}}
+@media (max-width:560px){
+  .about-card{aspect-ratio:auto;min-height:320px;}
+  .about-card-content{padding:28px;}
+  .about-quotes .quote{font-size:17px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
+  .about-card.expanded{aspect-ratio:auto;}
+  .about-card.expanded .about-quotes .quote{-webkit-line-clamp:unset;overflow:visible;}
+}
 @media (prefers-reduced-motion: reduce){.about-photo{animation:none;}}
 
 /* ---------- GALLERY ---------- */
@@ -1152,8 +1167,11 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <img class="about-photo" id="aboutPhotoImg" src="assets/photos/about.jpg" alt="A Trulander JSF Limited team member"/>
       <div class="about-overlay"></div>
       <div class="about-card-content">
-        <div class="quote" id="aboutQuote">"Property as risk-free and available as air — everywhere, for everyone."</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.55)" id="aboutQuoteAttribution">— Trulander JSF Limited, Vision Statement</div>
+        <button type="button" class="about-quotes" id="aboutQuotes" aria-label="Quote slideshow — click to pause and read"></button>
+        <div class="about-quotes-meta">
+          <div class="about-quotes-dots" id="aboutQuotesDots"></div>
+          <span class="about-quotes-status" id="aboutQuotesStatus"></span>
+        </div>
       </div>
     </div>
     <div class="reveal">
@@ -1753,6 +1771,75 @@ document.addEventListener('click', function(e){
   setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), goingHomeFirst ? 60 : 0);
 });
 
+/* --- About Us quote slideshow: vision statement + mission statement +
+   well-known real-estate quotes, auto-advancing, click-to-pause --- */
+(function setupAboutQuotes(){
+  const box = document.getElementById('aboutQuotes');
+  const dotsWrap = document.getElementById('aboutQuotesDots');
+  const status = document.getElementById('aboutQuotesStatus');
+  const card = document.getElementById('aboutCard');
+  if (!box) return;
+
+  const ABOUT_QUOTES = [
+    { text: 'Property as risk-free and available as air — everywhere, for everyone.', attr: 'Trulander JSF Limited, Vision Statement' },
+    { text: 'To help humanity prosper by providing property void of risk, at your convenience.', attr: 'Trulander JSF Limited, Mission Statement' },
+    { text: "Buy land, they're not making it anymore.", attr: 'Mark Twain' },
+    { text: 'Ninety percent of all millionaires become so through owning real estate.', attr: 'Andrew Carnegie' },
+    { text: 'Real estate cannot be lost or stolen, nor can it be carried away. Purchased with common sense, paid for in full, and managed with reasonable care, it is about the safest investment in the world.', attr: 'Franklin D. Roosevelt' },
+    { text: 'The best investment on earth is earth.', attr: 'Louis Glickman' },
+    { text: 'Landlords grow rich in their sleep without working, risking or economizing.', attr: 'John Stuart Mill' },
+    { text: 'Real estate is an imperishable asset, ever increasing in value. It is the most solid security that human ingenuity has devised.', attr: 'Russell Sage' },
+    { text: 'Every person who invests in well-selected real estate in a growing section of a prosperous community adopts the surest and safest method of becoming independent.', attr: 'Theodore Roosevelt' },
+    { text: 'Own land and hold it, hills grow gold.', attr: 'B. C. Forbes' },
+    { text: 'Real estate investing, even on a very small scale, remains a tried and true means of building an individual’s cash flow and wealth.', attr: 'Robert Kiyosaki' },
+    { text: 'Land is the only thing in the world worth working for, worth fighting for, worth dying for, because it’s the only thing that lasts.', attr: 'Gerald O’Hara, Gone with the Wind' }
+  ];
+
+  let index = 0, paused = false, timer = null;
+
+  function renderDots(){
+    dotsWrap.innerHTML = ABOUT_QUOTES.map((_, i) => `<button type="button" class="dot${i===index?' active':''}" data-i="${i}" aria-label="Show quote ${i+1}"></button>`).join('');
+  }
+  function renderStatus(){
+    status.innerHTML = paused
+      ? '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg> Paused — click to resume'
+      : '';
+  }
+  function renderSlide(){
+    const q = ABOUT_QUOTES[index];
+    box.innerHTML = `<span class="quote">"${esc(q.text)}"</span><span class="quote-attr">— ${esc(q.attr)}</span>`;
+    renderDots();
+    renderStatus();
+  }
+  function next(){ index = (index + 1) % ABOUT_QUOTES.length; renderSlide(); }
+  function start(){ stop(); timer = setInterval(next, 6000); }
+  function stop(){ if (timer) clearInterval(timer); timer = null; }
+
+  box.addEventListener('click', () => {
+    paused = !paused;
+    if (paused) stop(); else start();
+    card.classList.toggle('expanded', paused);
+    renderStatus();
+  });
+  dotsWrap.addEventListener('click', (e) => {
+    const dot = e.target.closest('.dot');
+    if (!dot) return;
+    index = parseInt(dot.dataset.i, 10);
+    paused = true; stop();
+    card.classList.add('expanded');
+    renderSlide();
+  });
+
+  window.setAboutVisionQuote = function(key, value){
+    if (key === 'aboutQuote') ABOUT_QUOTES[0].text = value;
+    if (key === 'aboutQuoteAttribution') ABOUT_QUOTES[0].attr = value.replace(/^—\s*/, '');
+    if (index === 0) renderSlide();
+  };
+
+  renderSlide();
+  start();
+})();
+
 /* --- mobile menu --- */
 const burger = document.getElementById('burgerBtn');
 const mobilePanel = document.getElementById('mobilePanel');
@@ -2289,6 +2376,10 @@ async function loadContent(){
     if (copyRows && copyRows.length) {
       copyRows.forEach(({ key, value }) => {
         if (!value) return;
+        if (key === 'aboutQuote' || key === 'aboutQuoteAttribution') {
+          if (window.setAboutVisionQuote) window.setAboutVisionQuote(key, value);
+          return;
+        }
         const el = document.getElementById(key);
         if (el) el.textContent = value;
       });
