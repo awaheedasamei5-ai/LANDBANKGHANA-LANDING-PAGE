@@ -51,7 +51,7 @@ section{position:relative;}
 .reveal.in{opacity:1;transform:none;}
 
 /* ---------- NAV ---------- */
-#nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 0;transition:background .3s ease,box-shadow .3s ease,padding .3s ease;}
+#nav{position:fixed;top:0;left:0;right:0;z-index:102;padding:16px 0;transition:background .3s ease,box-shadow .3s ease,padding .3s ease;}
 #nav .navbar{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.6);border-radius:999px;padding:8px 10px 8px 18px;box-shadow:0 10px 30px -14px rgba(8,25,16,.2);}
 #nav.scrolled .navbar{background:rgba(255,255,255,.92);}
 .brand{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;}
@@ -65,12 +65,22 @@ section{position:relative;}
 .view-toggle{width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex:none;}
 .view-toggle:hover{border-color:var(--brand);color:var(--brand-dark);}
 .view-toggle svg{width:18px;height:18px;}
-.burger{display:none;width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;align-items:center;justify-content:center;cursor:pointer;}
-.mobile-panel{position:fixed;inset:0;z-index:99;background:var(--ink);color:#fff;display:none;flex-direction:column;padding:100px 28px 40px;gap:4px;}
+.burger{display:none;width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:102;}
+.mobile-panel{position:fixed;inset:0;z-index:101;background:var(--ink);color:#fff;display:none;flex-direction:column;padding:112px 24px 40px;gap:4px;overflow-y:auto;}
+/* #nav sits above (z-index:102) so the fixed pill — and the burger toggle inside it — stays reachable while the menu is open; the panel's own top padding keeps its content clear of the pill either way. */
 .mobile-panel.open{display:flex;}
-.mobile-panel a{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:600;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:14px;}
-.mobile-panel a svg{width:24px;height:24px;flex:none;color:var(--brand);}
-.mobile-panel .btn{margin-top:20px;}
+.mobile-nav-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.mobile-nav-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:18px 16px;display:flex;flex-direction:column;align-items:flex-start;gap:16px;transition:transform .15s ease,background .15s ease;}
+.mobile-nav-item:active{transform:scale(.96);background:rgba(255,255,255,.1);}
+.mobile-nav-item.active{border-color:var(--brand);background:rgba(34,165,76,.14);}
+.mobile-nav-item .ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;}
+.mobile-nav-item .ic svg{width:21px;height:21px;}
+.mobile-nav-item .ic.tone-1{background:var(--brand);color:#fff;}
+.mobile-nav-item .ic.tone-2{background:#fff;color:var(--brand-dark);}
+.mobile-nav-item .ic.tone-3{background:rgba(255,255,255,.12);color:var(--brand);}
+.mobile-nav-item .ic.tone-4{background:var(--brand-dark);color:#fff;}
+.mobile-nav-item span{font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:600;line-height:1.25;}
+.mobile-panel .btn{margin-top:22px;}
 
 @media (max-width:900px){
   .nav-links,.nav-cta .btn{display:none;}
@@ -111,6 +121,17 @@ section{position:relative;}
   .hero-grid{grid-template-columns:1fr;}
   .hero-visual{max-width:420px;margin:0 auto;min-height:380px;}
   .hero-photo{max-height:400px;}
+}
+@media (max-width:480px){
+  #home{padding:110px 0 40px;}
+  .hero-visual{min-height:300px;max-width:260px;}
+  .hero-photo{max-height:300px;}
+  .hero-badge{padding:9px 12px;min-width:0;border-radius:13px;gap:0;}
+  .hero-badge .num{font-size:16px;}
+  .hero-badge .lbl{font-size:9px;white-space:nowrap;}
+  .hero-badge.b1{top:4%;left:-6px;}
+  .hero-badge.b2{bottom:16%;right:-6px;}
+  .hero-badge.b3{top:42%;left:-14px;}
 }
 
 /* ---------- CLIENTS STRIP ---------- */
@@ -154,8 +175,8 @@ section{position:relative;}
 .promo-dots{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5;}
 .promo-dots button{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.5);border:none;cursor:pointer;padding:0;transition:width .2s,background .2s;}
 .promo-dots button.active{background:#fff;width:24px;border-radius:6px;}
-@media (max-width:700px){.promo-slide{aspect-ratio:16/11;max-height:260px;}.promo-arrow{width:32px;height:32px;}.promo-arrow svg{width:16px;height:16px;}.promo-dots{bottom:10px;}}
-@media (max-width:480px){.promo-slide{aspect-ratio:4/3;max-height:220px;}}
+@media (max-width:700px){.promo-slide{aspect-ratio:2/1;max-height:260px;}.promo-arrow{width:32px;height:32px;}.promo-arrow svg{width:16px;height:16px;}.promo-dots{bottom:10px;}}
+@media (max-width:480px){.promo-slide{aspect-ratio:2/1;max-height:190px;}}
 
 /* ---------- HELP CARDS ---------- */
 #help{padding:68px 0;}
@@ -662,33 +683,47 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <svg id="viewToggleIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
       </button>
       <button class="burger" id="burgerBtn" aria-label="Open menu">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <svg id="burgerIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
     </div>
   </div>
 </header>
 
 <div class="mobile-panel" id="mobilePanel">
-  <a href="#/" data-nav-mobile>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-    Home
-  </a>
-  <a href="#/royal-palm" data-nav-mobile>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12M12 12c-4-1-6-4-6-8 4 0 7 2 8 6"/><path d="M12 12c4-1 6-4 6-8-4 0-7 2-8 6"/></svg>
-    Royal Palm Enclave
-  </a>
-  <a href="#/about" data-nav-mobile>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
-    About Us
-  </a>
-  <a href="#/services" data-nav-mobile>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
-    Services
-  </a>
-  <a href="#/contact" data-nav-mobile>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-    Contact
-  </a>
+  <div class="mobile-nav-grid">
+    <a href="#/" data-nav-mobile data-route-link="home" class="mobile-nav-item">
+      <span class="ic tone-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span>
+      <span>Home</span>
+    </a>
+    <a href="#/royal-palm" data-nav-mobile data-route-link="royal-palm" class="mobile-nav-item">
+      <span class="ic tone-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12M12 12c-4-1-6-4-6-8 4 0 7 2 8 6"/><path d="M12 12c4-1 6-4 6-8-4 0-7 2-8 6"/></svg></span>
+      <span>Royal Palm Enclave</span>
+    </a>
+    <a href="#/about" data-nav-mobile data-route-link="about" class="mobile-nav-item">
+      <span class="ic tone-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg></span>
+      <span>About Us</span>
+    </a>
+    <a href="#/services" data-nav-mobile data-route-link="services" class="mobile-nav-item">
+      <span class="ic tone-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></span>
+      <span>Services</span>
+    </a>
+    <a href="#/plots" data-nav-mobile data-route-link="plots" class="mobile-nav-item">
+      <span class="ic tone-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+      <span>Hot Plots</span>
+    </a>
+    <a href="#/site-visit" data-nav-mobile data-route-link="site-visit" class="mobile-nav-item">
+      <span class="ic tone-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg></span>
+      <span>Book Site Visit</span>
+    </a>
+    <a href="#/refer-earn" data-nav-mobile data-route-link="refer-earn" class="mobile-nav-item">
+      <span class="ic tone-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1 3 2.5-1.3 2-3 2.5-3 1.1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5"/></svg></span>
+      <span>Refer &amp; Earn</span>
+    </a>
+    <a href="#/contact" data-nav-mobile data-route-link="contact" class="mobile-nav-item">
+      <span class="ic tone-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+      <span>Contact</span>
+    </a>
+  </div>
   <a href="#/contact" class="btn btn-accent btn-block" data-nav-mobile>Get Started</a>
 </div>
 
@@ -1122,39 +1157,6 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </div>
 </div>
 
-<!-- ============ PROCESS ============ -->
-<section id="process">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">Our Process</span>
-      <h2>The Trulander Transaction Process.</h2>
-      <p>The exact steps every buyer goes through with us — nothing skipped, nothing rushed.</p>
-    </div>
-    <div class="timeline">
-      <div class="tstep reveal"><h4>Talk To Our Team</h4><p>An initial conversation with our sales team, then we schedule your free site visit to Royal Palm Enclave.</p></div>
-      <div class="tstep reveal"><h4>Independent Land Search</h4><p>We hand you everything you need to verify the land yourself at the Lands Commission — no pressure, no rush.</p></div>
-      <div class="tstep reveal"><h4>Quotation &amp; Contract</h4><p>Once you're satisfied and accept your quotation, formal registration forms and the contract for sale are signed.</p></div>
-      <div class="tstep reveal"><h4>Secure Payment</h4><p>Payment goes directly to Trulander's accounts only — never cash — with a receipt issued for every payment made.</p></div>
-      <div class="tstep reveal"><h4>Indenture Prepared</h4><p>Indenture preparation begins once your 50% deposit is in, and is ready within 1–10 days.</p></div>
-      <div class="tstep reveal"><h4>Land Allocated</h4><p>Your plot is allocated at 50% payment — you can start your project right after the initial deposit.</p></div>
-    </div>
-    <div class="process-photo reveal" id="processPhoto"><img id="processPhotoImg" alt="Trulander JSF Limited team on site"/></div>
-    <div class="seller-note reveal"><b>Selling instead?</b> The same team verifies your title, prepares your documents, and matches your land with buyers who are ready to move — safely and on your terms.</div>
-  </div>
-</section>
-
-<!-- ============ STATS ============ -->
-<section id="stats">
-  <div class="wrap">
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat"><div class="val">7+</div><div class="lbl">Years of Experience</div></div>
-      <div class="stat"><div class="val">100%</div><div class="lbl">Litigation-Free Transfers</div></div>
-      <div class="stat"><div class="val">1,200+</div><div class="lbl">Acres Secured</div></div>
-      <div class="stat"><div class="val">500+</div><div class="lbl">Happy Clients</div></div>
-    </div>
-  </div>
-</section>
-
 <!-- ============ ABOUT ============ -->
 <section id="about">
   <div class="wrap">
@@ -1185,6 +1187,39 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <div class="value"><h4>People-First</h4><p id="aboutPeopleFirst">Real people guide your transaction — not a listing you're left to figure out alone.</p></div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section id="stats">
+  <div class="wrap">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat"><div class="val">7+</div><div class="lbl">Years of Experience</div></div>
+      <div class="stat"><div class="val">100%</div><div class="lbl">Litigation-Free Transfers</div></div>
+      <div class="stat"><div class="val">1,200+</div><div class="lbl">Acres Secured</div></div>
+      <div class="stat"><div class="val">500+</div><div class="lbl">Happy Clients</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESS ============ -->
+<section id="process">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Our Process</span>
+      <h2>The Trulander Transaction Process.</h2>
+      <p>The exact steps every buyer goes through with us — nothing skipped, nothing rushed.</p>
+    </div>
+    <div class="timeline">
+      <div class="tstep reveal"><h4>Talk To Our Team</h4><p>An initial conversation with our sales team, then we schedule your free site visit to Royal Palm Enclave.</p></div>
+      <div class="tstep reveal"><h4>Independent Land Search</h4><p>We hand you everything you need to verify the land yourself at the Lands Commission — no pressure, no rush.</p></div>
+      <div class="tstep reveal"><h4>Quotation &amp; Contract</h4><p>Once you're satisfied and accept your quotation, formal registration forms and the contract for sale are signed.</p></div>
+      <div class="tstep reveal"><h4>Secure Payment</h4><p>Payment goes directly to Trulander's accounts only — never cash — with a receipt issued for every payment made.</p></div>
+      <div class="tstep reveal"><h4>Indenture Prepared</h4><p>Indenture preparation begins once your 50% deposit is in, and is ready within 1–10 days.</p></div>
+      <div class="tstep reveal"><h4>Land Allocated</h4><p>Your plot is allocated at 50% payment — you can start your project right after the initial deposit.</p></div>
+    </div>
+    <div class="process-photo reveal" id="processPhoto"><img id="processPhotoImg" alt="Trulander JSF Limited team on site"/></div>
+    <div class="seller-note reveal"><b>Selling instead?</b> The same team verifies your title, prepares your documents, and matches your land with buyers who are ready to move — safely and on your terms.</div>
   </div>
 </section>
 
@@ -1540,10 +1575,11 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
           <div class="field"><label>When would you like to join our site visit? *</label>
             <select name="visit_day" required>
               <option value="">Select one</option>
-              <option value="Yes">Yes, any time works for me</option>
-              <option value="Sunday 11:30 AM">Sunday, 11:30 AM</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Sunday">Sunday</option>
               <option value="Other">Other — I'll specify below</option>
             </select>
+            <div class="hint">We run site visits every Wednesday and Sunday — we'll confirm your exact pickup time by phone or WhatsApp.</div>
           </div>
           <div class="field"><label>If yes, preferred pick-up location</label>
             <select name="pickup_location">
@@ -1709,17 +1745,26 @@ window.addEventListener('scroll', () => {
    single-file site — sections never move in the DOM, the router just shows
    exactly one "page" (a group of sections for Home, or a single section for
    everything else) and hides the rest. --- */
-const HOME_SECTIONS = ['home','promo','royal-palm','help','qualify','plots-preview','process','stats','about','gallery','stories','remote-sales','contact','clients'];
-const ROUTABLE_SECTIONS = HOME_SECTIONS.concat(['plots','services','service-surveyor','service-legal','service-documentation','service-help','site-visit']);
+const DESKTOP_HOME_SECTIONS = ['home','promo','royal-palm','help','qualify','plots-preview','process','stats','about','gallery','stories','remote-sales','contact','clients'];
+// Phones get a lean Home (just the hero + conversion points) — everything
+// else lives one tap away in the mobile menu instead of one long scroll.
+const MOBILE_HOME_SECTIONS = ['home','promo','qualify','plots-preview','contact'];
+const isMobileNav = () => window.matchMedia('(max-width:760px)').matches;
+function currentHomeSections(){ return isMobileNav() ? MOBILE_HOME_SECTIONS : DESKTOP_HOME_SECTIONS; }
+const ROUTABLE_SECTIONS = DESKTOP_HOME_SECTIONS.concat(['plots','services','service-surveyor','service-legal','service-documentation','service-help','site-visit']);
 const ROUTE_SECTION = {
   'royal-palm': 'royal-palm',
-  'about': 'about',
+  // About Us is the "everything about the company" destination — folds in
+  // Stats, Process, Gallery, Stories and Clients so those aren't stranded
+  // once they're off the lean mobile Home.
+  'about': ['about','stats','process','gallery','stories','clients'],
   'services': 'services',
   'services/surveyor': 'service-surveyor',
   'services/legal': 'service-legal',
   'services/documentation': 'service-documentation',
   'services/help': 'service-help',
   'plots': 'plots',
+  'refer-earn': 'remote-sales',
   'site-visit': 'site-visit',
   'contact': 'contact'
 };
@@ -1729,18 +1774,20 @@ function applyRoute(){
   document.body.classList.toggle('is-subpage', !isHome);
 
   if (isHome) {
+    const homeSections = currentHomeSections();
     ROUTABLE_SECTIONS.forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.classList.toggle('route-hidden', !HOME_SECTIONS.includes(id));
+      if (el) el.classList.toggle('route-hidden', !homeSections.includes(id));
     });
   } else {
-    const target = ROUTE_SECTION[hash];
-    if (!target || !document.getElementById(target)) { location.hash = '#/'; return; }
+    const raw = ROUTE_SECTION[hash];
+    const targets = Array.isArray(raw) ? raw : (raw ? [raw] : null);
+    if (!targets || !document.getElementById(targets[0])) { location.hash = '#/'; return; }
     ROUTABLE_SECTIONS.forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.classList.toggle('route-hidden', id !== target);
+      if (el) el.classList.toggle('route-hidden', !targets.includes(id));
     });
-    if (target === 'plots' && typeof applyPlotsFilters === 'function') { try { applyPlotsFilters(); } catch(e){} }
+    if (targets.includes('plots') && typeof applyPlotsFilters === 'function') { try { applyPlotsFilters(); } catch(e){} }
   }
 
   document.querySelectorAll('[data-route-link]').forEach(a => {
@@ -1752,6 +1799,13 @@ function applyRoute(){
   window.scrollTo(0, 0);
 }
 window.addEventListener('hashchange', applyRoute);
+// A phone rotated or resized across the mobile breakpoint should re-evaluate
+// which sections belong on Home, without needing a manual refresh.
+let lastNavIsMobile = isMobileNav();
+window.addEventListener('resize', () => {
+  const nowMobile = isMobileNav();
+  if (nowMobile !== lastNavIsMobile) { lastNavIsMobile = nowMobile; if (!location.hash || location.hash === '#/') applyRoute(); }
+});
 applyRoute();
 
 /* legacy same-page anchors (e.g. #qualify, #help, #process, #remote-sales)
@@ -1843,8 +1897,16 @@ document.addEventListener('click', function(e){
 /* --- mobile menu --- */
 const burger = document.getElementById('burgerBtn');
 const mobilePanel = document.getElementById('mobilePanel');
-burger.addEventListener('click', () => mobilePanel.classList.add('open'));
-mobilePanel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobilePanel.classList.remove('open')));
+const burgerIcon = document.getElementById('burgerIcon');
+const BURGER_PATH = 'M3 6h18M3 12h18M3 18h18';
+const CLOSE_PATH = 'M18 6L6 18M6 6l12 12';
+function setMobilePanel(open){
+  mobilePanel.classList.toggle('open', open);
+  burgerIcon.innerHTML = `<path d="${open ? CLOSE_PATH : BURGER_PATH}"/>`;
+  burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+}
+burger.addEventListener('click', () => setMobilePanel(!mobilePanel.classList.contains('open')));
+mobilePanel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMobilePanel(false)));
 
 /* --- mobile/desktop view toggle ---
    Desktop browsers largely ignore the viewport <meta> tag, so forcing a
