@@ -2543,7 +2543,11 @@ siteVisitForm?.addEventListener('submit', async (e) => {
     siteVisitLastRecord = record;
     renderSiteVisitSuccess(record);
   } catch (err) {
-    msg.textContent = 'Something went wrong submitting your request. Please try again, or reach us directly via WhatsApp.';
+    // Logged (and shown, when available) so a failure here is diagnosable
+    // from the browser console / a screenshot instead of a dead end.
+    console.error('Site visit request failed:', err);
+    const detail = err && err.message && err.message !== 'offline' ? ` (${err.message})` : '';
+    msg.textContent = `Something went wrong submitting your request${detail}. Please try again, or reach us directly via WhatsApp.`;
     msg.className = 'form-msg err';
   } finally {
     btn.disabled = false; btn.textContent = originalLabel;
