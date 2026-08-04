@@ -109,6 +109,9 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
 .detail-desc{background:var(--bg);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;margin-bottom:16px;}
 .file-thumb-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
 .file-thumb-grid img{width:84px;height:84px;object-fit:cover;border-radius:10px;cursor:pointer;border:1px solid var(--line);}
+.pm-thumb{position:relative;width:84px;height:84px;flex:none;}
+.pm-thumb img,.pm-thumb .pm-video-tile{width:84px;height:84px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;background:var(--ink);color:#fff;font-size:11px;font-weight:700;text-align:center;}
+.pm-thumb .pm-del{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#B3261E;color:#fff;border:2px solid #fff;font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
 .doc-item{display:flex;align-items:center;gap:8px;font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;}
 .doc-item svg{width:15px;height:15px;color:var(--brand);flex:none;}
 .doc-item .dl-btn{margin-left:auto;font-size:12px;padding:5px 10px;}
@@ -678,12 +681,25 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
             <div class="field"><label>Nearest landmark (optional)</label><input name="nearest_landmark" placeholder="e.g. 5 mins from the American House"/></div>
             <div class="field"><label>Description (optional)</label><textarea name="description" rows="3" placeholder="More details about this plot..."></textarea></div>
             <div class="form-grid">
-              <div class="field"><label>Main photo URL</label><input name="image_url" placeholder="https://..."/></div>
-              <div class="field"><label>Or upload main photo</label><input type="file" accept="image/*" id="plotImgFile1"/></div>
+              <div class="field"><label>Cover photo URL</label><input name="image_url" placeholder="https://..."/></div>
+              <div class="field"><label>Or upload cover photo</label><input type="file" accept="image/*" id="plotImgFile1"/></div>
             </div>
-            <div class="form-grid">
-              <div class="field"><label>2nd photo (optional)</label><input type="file" accept="image/*" id="plotImgFile2"/><input type="hidden" name="image_url_2"/></div>
-              <div class="field"><label>3rd photo (optional)</label><input type="file" accept="image/*" id="plotImgFile3"/><input type="hidden" name="image_url_3"/></div>
+            <div class="hint" id="plotMediaSaveFirstHint">Save the plot once with the details above, then add the rest of the photos and any videos below — aim for at least 8 photos so buyers get a real feel for the land.</div>
+            <div class="field" id="plotMediaSection" style="display:none">
+              <label>Photos &amp; videos gallery</label>
+              <div class="hint">Shown to buyers in the plot's gallery, in addition to the cover photo above.</div>
+              <div id="plotMediaList" class="file-thumb-grid" style="margin:10px 0"></div>
+              <div class="form-grid">
+                <div class="field"><label>Add a photo</label><input type="file" accept="image/*" id="plotMediaImgFile"/></div>
+                <div class="field"><label>Add a video</label>
+                  <div style="display:flex;gap:8px">
+                    <input type="url" id="plotMediaVideoUrl" placeholder="YouTube / TikTok / Facebook / Instagram link" style="flex:1"/>
+                    <button type="button" class="btn" id="plotMediaVideoUrlBtn">Add link</button>
+                  </div>
+                  <input type="file" accept="video/*" id="plotMediaVideoFile" style="margin-top:8px"/>
+                  <div class="hint">Paste a link and click Add, or upload a file directly (under 50MB) — either way it plays right on the site.</div>
+                </div>
+              </div>
             </div>
             <div class="form-grid">
               <div class="field"><label>Seller</label><select name="seller_id" id="plotSellerSelect"><option value="">— No seller linked —</option></select></div>
@@ -1651,14 +1667,6 @@ document.getElementById('plotImgFile1').addEventListener('change', async (e) => 
   if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1200, 'plots'); if (url) plotForm.image_url.value = url; }
   e.target.value = '';
 });
-document.getElementById('plotImgFile2').addEventListener('change', async (e) => {
-  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1200, 'plots'); if (url) plotForm.image_url_2.value = url; }
-  e.target.value = '';
-});
-document.getElementById('plotImgFile3').addEventListener('change', async (e) => {
-  if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1200, 'plots'); if (url) plotForm.image_url_3.value = url; }
-  e.target.value = '';
-});
 plotForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const d = Object.fromEntries(new FormData(plotForm).entries());
@@ -1668,12 +1676,86 @@ plotForm.addEventListener('submit', async (e) => {
   d.price_amount = d.price_amount ? parseFloat(d.price_amount) : null;
   d.seller_id = d.seller_id || null;
   const id = d.id; delete d.id;
-  const { error } = id ? await sb.from('plots').update(d).eq('id', id) : await sb.from('plots').insert(d);
+  const { data: saved, error } = id
+    ? await sb.from('plots').update(d).eq('id', id).select('id').single()
+    : await sb.from('plots').insert(d).select('id').single();
   if (error) return toast('Error: ' + error.message);
-  toast('Plot saved'); plotForm.reset(); document.getElementById('plotCancelEdit').style.display='none'; updatePlotMapPreview('');
+  toast('Plot saved');
+  // Switch straight into "editing" the saved plot instead of resetting —
+  // that's what reveals the photo/video gallery manager below, so there's
+  // no need to re-open Edit just to keep adding media after the first save.
+  plotForm.id.value = saved.id;
+  document.getElementById('plotCancelEdit').style.display = 'inline-flex';
+  showPlotMediaSection(saved.id);
   loadPlots();
 });
-document.getElementById('plotCancelEdit').addEventListener('click', () => { plotForm.reset(); document.getElementById('plotCancelEdit').style.display='none'; updatePlotMapPreview(''); });
+document.getElementById('plotCancelEdit').addEventListener('click', () => {
+  plotForm.reset(); document.getElementById('plotCancelEdit').style.display='none'; updatePlotMapPreview('');
+  hidePlotMediaSection();
+});
+
+/* ---- plot photo & video gallery (plot_media) ---- */
+let currentPlotMediaId = null;
+function showPlotMediaSection(plotId){
+  currentPlotMediaId = plotId;
+  document.getElementById('plotMediaSaveFirstHint').style.display = 'none';
+  document.getElementById('plotMediaSection').style.display = 'block';
+  loadPlotMediaList();
+}
+function hidePlotMediaSection(){
+  currentPlotMediaId = null;
+  document.getElementById('plotMediaSaveFirstHint').style.display = 'block';
+  document.getElementById('plotMediaSection').style.display = 'none';
+  document.getElementById('plotMediaList').innerHTML = '';
+}
+async function loadPlotMediaList(){
+  if (!currentPlotMediaId) return;
+  const { data, error } = await sb.from('plot_media').select('*').eq('plot_id', currentPlotMediaId).order('sort_order');
+  if (error) return;
+  document.getElementById('plotMediaList').innerHTML = (data||[]).map(m => `
+    <div class="pm-thumb">
+      ${m.kind === 'image'
+        ? `<img src="${esc(m.url)}" onclick="viewMedia('${esc(m.url)}')"/>`
+        : `<div class="pm-video-tile" title="${esc(m.url)}">▶ Video<br>${esc(m.video_provider||'')}</div>`}
+      <button type="button" class="pm-del" onclick="deletePlotMedia('${m.id}')" aria-label="Remove" title="Remove">×</button>
+    </div>`).join('') || '<p class="hint">No extra photos or videos yet.</p>';
+}
+async function deletePlotMedia(id){
+  if (!confirm('Remove this from the gallery?')) return;
+  const { error } = await sb.from('plot_media').delete().eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  loadPlotMediaList();
+}
+async function addPlotMediaRow(kind, url, video_provider){
+  const { data: existing } = await sb.from('plot_media').select('sort_order').eq('plot_id', currentPlotMediaId).order('sort_order', { ascending: false }).limit(1);
+  const nextOrder = existing && existing.length ? existing[0].sort_order + 1 : 0;
+  const { error } = await sb.from('plot_media').insert({ plot_id: currentPlotMediaId, kind, url, video_provider: video_provider || null, sort_order: nextOrder });
+  if (error) { toast('Error: ' + error.message); return; }
+  loadPlotMediaList();
+}
+document.getElementById('plotMediaImgFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file || !currentPlotMediaId) return;
+  const url = await uploadImage(file, 4/3, 1200, 'plots');
+  if (url) { await addPlotMediaRow('image', url); toast('Photo added'); }
+});
+document.getElementById('plotMediaVideoUrlBtn').addEventListener('click', async () => {
+  const input = document.getElementById('plotMediaVideoUrl');
+  const url = input.value.trim();
+  if (!url || !currentPlotMediaId) return;
+  input.value = '';
+  await addPlotMediaRow('video', url, detectVideoProvider(url));
+  toast('Video added');
+});
+document.getElementById('plotMediaVideoFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file || !currentPlotMediaId) return;
+  if (file.size > 50 * 1024 * 1024) { toast('Video is too large — please keep uploads under 50MB.'); return; }
+  const url = await uploadVideoFile(file, 'videos/plots');
+  if (url) { await addPlotMediaRow('video', url, 'file'); toast('Video uploaded'); }
+});
 async function loadPlots(){
   const { data, error } = await sb.from('plots').select('*').order('sort_order');
   if (error) return;
@@ -1693,11 +1775,12 @@ function editPlot(p){
   plotForm.id.value = p.id; plotForm.listing_type.value = p.listing_type || 'third_party'; plotForm.plot_type.value = p.plot_type || 'residential'; plotForm.title.value = p.title; plotForm.size.value = p.size; plotForm.location.value = p.location;
   plotForm.price_amount.value = p.price_amount!=null?p.price_amount:''; plotForm.currency.value = p.currency||'GHS';
   plotForm.nearest_landmark.value = p.nearest_landmark||''; plotForm.description.value = p.description||'';
-  plotForm.image_url.value = p.image_url||''; plotForm.image_url_2.value = p.image_url_2||''; plotForm.image_url_3.value = p.image_url_3||'';
+  plotForm.image_url.value = p.image_url||'';
   plotForm.seller_id.value = p.seller_id||''; plotForm.status.value = p.status; plotForm.sort_order.value = p.sort_order;
   plotForm.featured.checked = p.featured; plotForm.active.checked = p.active;
   updatePlotMapPreview(p.location);
   document.getElementById('plotCancelEdit').style.display='inline-flex';
+  showPlotMediaSection(p.id);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1813,6 +1896,7 @@ async function openSubmission(id){
   }
   const images = files.filter(f => f.kind === 'image');
   const docs = files.filter(f => f.kind === 'document');
+  const videos = files.filter(f => f.kind === 'video');
   detail.innerHTML = `
     <h3>${esc(sub.land_title)}</h3>
     <p class="hint">Submitted ${new Date(sub.created_at).toLocaleString()} · <span class="pill ${sub.status==='approved'?'on':sub.status==='rejected'?'off':''}">${esc(sub.status)}</span></p>
@@ -1837,6 +1921,13 @@ async function openSubmission(id){
     <div class="detail-desc">${esc(sub.description)}</div>
     <b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:8px">Land photos (${images.length})</b>
     ${images.length ? `<div class="file-thumb-grid">${images.map(f=>`<img src="${esc(f.file_url)}" onclick="viewMedia('${esc(f.file_url)}')"/>`).join('')}</div>` : '<p class="hint" style="margin-bottom:16px">No photos attached.</p>'}
+    <b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:8px">Videos (${videos.length})</b>
+    ${videos.length ? videos.map(f=>`
+      <div class="doc-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        <span>${esc(f.file_url)}</span>
+        <a class="btn dl-btn" href="${esc(f.file_url)}" target="_blank" rel="noopener">Open</a>
+      </div>`).join('') : '<p class="hint" style="margin-bottom:16px">No videos attached.</p>'}
     <b style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block;margin-bottom:8px">Supporting documents (${docs.length})</b>
     ${docs.length ? docs.map(f=>`
       <div class="doc-item">
@@ -1861,6 +1952,7 @@ async function approveSubmission(id){
     files = data || [];
   }
   const images = files.filter(f => f.kind === 'image');
+  const videos = files.filter(f => f.kind === 'video');
 
   let sellerId = null;
   const { data: existingSeller } = await sb.from('sellers').select('id').eq('phone', sub.phone).maybeSingle();
@@ -1879,10 +1971,21 @@ async function approveSubmission(id){
     title: sub.land_title, size: sub.land_size || 'Not specified', location: sub.land_location,
     nearest_landmark: sub.nearest_landmark, description: sub.description,
     price_amount: sub.asking_price_amount, currency: sub.currency || 'GHS',
-    image_url: images[0]?.file_url || null, image_url_2: images[1]?.file_url || null, image_url_3: images[2]?.file_url || null,
+    image_url: images[0]?.file_url || null,
     seller_id: sellerId, status: 'available', active: true
   }).select('id').single();
   if (pErr) return toast('Error publishing plot: ' + pErr.message);
+
+  // Carry over every photo and video the seller submitted — not just the
+  // first few — so nothing they uploaded gets silently dropped on approval.
+  const mediaRows = [
+    ...images.map((f, i) => ({ plot_id: plot.id, kind: 'image', url: f.file_url, sort_order: i })),
+    ...videos.map((f, i) => ({ plot_id: plot.id, kind: 'video', url: f.file_url, video_provider: detectVideoProvider(f.file_url), sort_order: i }))
+  ];
+  if (mediaRows.length) {
+    const { error: mErr } = await sb.from('plot_media').insert(mediaRows);
+    if (mErr) toast('Plot published, but gallery media failed to copy: ' + mErr.message);
+  }
 
   const { data: userData } = await sb.auth.getUser();
   const { error: uErr } = await sb.from('seller_submissions').update({

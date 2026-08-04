@@ -325,8 +325,12 @@ section{position:relative;}
 .modal-close svg{width:16px;height:16px;}
 .modal-gallery{position:relative;aspect-ratio:16/9;background:var(--bg);border-radius:26px 26px 0 0;overflow:hidden;}
 .modal-gallery img.main{width:100%;height:100%;object-fit:cover;display:block;}
-.modal-thumbs{position:absolute;bottom:12px;left:12px;display:flex;gap:8px;}
+#modalMainVideoWrap{width:100%;height:100%;align-items:center;justify-content:center;background:#000;}
+#modalMainVideoWrap iframe,#modalMainVideoWrap video{width:100%;height:100%;border:0;}
+.modal-thumbs{position:absolute;bottom:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 24px);}
 .modal-thumbs img{width:52px;height:40px;object-fit:cover;border-radius:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 4px 10px -4px rgba(0,0,0,.4);}
+.modal-thumb-video{width:52px;height:40px;border-radius:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 4px 10px -4px rgba(0,0,0,.4);background:var(--ink);display:flex;align-items:center;justify-content:center;flex:none;}
+.modal-thumb-video svg{width:16px;height:16px;color:#fff;}
 .modal-content{padding:28px 30px 32px;}
 .modal-price{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;color:var(--brand-dark);margin:8px 0 18px;}
 .modal-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
@@ -1461,9 +1465,15 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
               <input type="file" id="sellerImagesInput" accept="image/*" multiple/>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16l4.5-6 4 5 3-3.5L20 16"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
               <div class="fd-label">Click to upload photos of the land</div>
-              <div class="fd-sub">JPG or PNG, as many as you like</div>
+              <div class="fd-sub">At least 8 photos gives buyers real confidence — JPG or PNG, as many as you like</div>
             </div>
             <div class="file-list" id="sellerImagesList"></div>
+          </div>
+
+          <div class="field">
+            <label>Video links (optional)</label>
+            <textarea name="video_links" rows="2" placeholder="Paste one video link per line — YouTube, TikTok, Facebook, or Instagram"></textarea>
+            <div class="hint">A walk-through video helps buyers see exactly what they're buying.</div>
           </div>
 
           <div class="field">
@@ -2366,6 +2376,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
       const imgFiles = sellerImages.getFiles();
       const docFiles = sellerDocs.getFiles();
+      const videoLinks = (data.video_links || '').split('\n').map(s => s.trim()).filter(Boolean);
       const totalFiles = imgFiles.length + docFiles.length;
       let uploaded = 0;
       if (totalFiles) { progress.classList.add('show'); progress.textContent = `Uploading files... 0/${totalFiles}`; }
@@ -2381,6 +2392,9 @@ document.getElementById('year').textContent = new Date().getFullYear();
         fileRows.push({ submission_id: submissionId, kind: 'document', file_url: url, file_path: path, file_name: docFiles[i].name, sort_order: i });
         uploaded++; progress.textContent = `Uploading files... ${uploaded}/${totalFiles}`;
       }
+      videoLinks.forEach((link, i) => {
+        fileRows.push({ submission_id: submissionId, kind: 'video', file_url: link, file_path: null, file_name: null, sort_order: i });
+      });
       if (fileRows.length) {
         const { error: fErr } = await withRetry(() => sb.from('seller_submission_files').insert(fileRows));
         if (fErr) throw fErr;
@@ -2700,7 +2714,7 @@ try {
 async function loadContent(){
   if (!sb) return;
   try{
-    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}, {data:copyRows}] = await Promise.all([
+    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}, {data:copyRows}, {data:plotMediaData}] = await Promise.all([
       sb.from('banners').select('*').eq('kind','hero').eq('active',true).order('sort_order').limit(1),
       sb.from('banners').select('*').eq('kind','promo').eq('active',true).order('sort_order'),
       sb.from('stats').select('*').eq('active',true).order('sort_order'),
@@ -2712,7 +2726,8 @@ async function loadContent(){
       sb.from('plots').select('*').eq('active',true).order('sort_order'),
       sb.from('sellers').select('*').eq('active',true),
       sb.from('reviews').select('*').eq('approved',true).order('created_at',{ascending:false}),
-      sb.from('site_copy').select('*')
+      sb.from('site_copy').select('*'),
+      sb.from('plot_media').select('*').order('sort_order')
     ]);
 
     if (copyRows && copyRows.length) {
@@ -2846,13 +2861,14 @@ async function loadContent(){
 
     if (promoBanners && promoBanners.length) initPromoCarousel(promoBanners);
 
-    renderPlots(plotsData || [], sellersData || []);
+    renderPlots(plotsData || [], sellersData || [], plotMediaData || []);
     renderTestimonials(reviewsData || []);
   } catch(e){ console.warn('Content load skipped:', e); }
 }
 
 /* --- Hot Plots marketplace --- */
 let sellersCache = {};
+let plotMediaCache = {};
 let siteSettingsCache = null;
 function formatPrice(p){
   return p.price_amount != null ? `${esc(p.currency||'GHS')} ${Number(p.price_amount).toLocaleString()}` : 'Price on request';
@@ -2874,9 +2890,13 @@ function toggleFavoritePlot(id, btn){
   if (favToggle && favToggle.classList.contains('active')) applyPlotsFilters();
 }
 
-function renderPlots(plots, sellers){
+function renderPlots(plots, sellers, plotMedia){
   plotsCache = plots;
   sellersCache = Object.fromEntries(sellers.map(s => [s.id, s]));
+  plotMediaCache = {};
+  (plotMedia || []).forEach(m => {
+    (plotMediaCache[m.plot_id] = plotMediaCache[m.plot_id] || []).push(m);
+  });
   renderPlotsPreview(plots);
   const toolbar = document.getElementById('plotsToolbar');
   if (!plots.length){
@@ -3093,14 +3113,21 @@ function openPlotModalById(id){
   const p = plotsCache.find(pl => String(pl.id) === String(id));
   if (p) openPlotModalRecord(p);
 }
+let plotModalMediaList = [];
 function openPlotModalRecord(p){
   if (!p) return;
   const seller = p.seller_id ? sellersCache[p.seller_id] : null;
-  const imgs = [p.image_url, p.image_url_2, p.image_url_3].filter(Boolean);
+  let media = (plotMediaCache[p.id] || []).slice();
+  if (!media.length && p.image_url) media = [{ kind: 'image', url: p.image_url }];
+  plotModalMediaList = media;
+  const first = media[0];
   document.getElementById('plotModalBody').innerHTML = `
     <div class="modal-gallery">
-      <img class="main" id="modalMainImg" src="${esc(imgs[0] || '')}" alt="${esc(p.title)}"/>
-      ${imgs.length > 1 ? `<div class="modal-thumbs">${imgs.map(u => `<img src="${esc(u)}" onclick="document.getElementById('modalMainImg').src='${esc(u)}'"/>`).join('')}</div>` : ''}
+      <img class="main" id="modalMainImg" src="${esc(first && first.kind === 'image' ? first.url : '')}" alt="${esc(p.title)}" style="${first && first.kind === 'video' ? 'display:none' : ''}"/>
+      <div id="modalMainVideoWrap" style="display:${first && first.kind === 'video' ? 'flex' : 'none'}"></div>
+      ${media.length > 1 ? `<div class="modal-thumbs">${media.map((m, i) => m.kind === 'video'
+        ? `<div class="modal-thumb-video" onclick="showPlotModalMedia(${i})" title="Play video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`
+        : `<img src="${esc(m.url)}" onclick="showPlotModalMedia(${i})"/>`).join('')}</div>` : ''}
     </div>
     <div class="modal-content">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">
@@ -3135,7 +3162,33 @@ function openPlotModalRecord(p){
       </div>
       <p class="form-msg" id="shareMsg" style="text-align:center"></p>
     </div>`;
+  if (first && first.kind === 'video') showPlotModalMedia(0);
   document.getElementById('plotModalOverlay').classList.add('open');
+}
+function showPlotModalMedia(i){
+  const m = plotModalMediaList[i];
+  if (!m) return;
+  const img = document.getElementById('modalMainImg');
+  const videoWrap = document.getElementById('modalMainVideoWrap');
+  if (!img || !videoWrap) return;
+  if (m.kind === 'video') {
+    img.style.display = 'none';
+    videoWrap.style.display = 'flex';
+    if (m.video_provider === 'file') {
+      videoWrap.innerHTML = `<video src="${esc(m.url)}" controls playsinline></video>`;
+    } else {
+      const embedUrl = buildVideoEmbedUrl(m.video_provider || 'youtube', m.url);
+      videoWrap.innerHTML = embedUrl
+        ? `<iframe src="${esc(embedUrl)}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen scrolling="no"></iframe>`
+        : `<a href="${esc(m.url)}" target="_blank" rel="noopener" class="btn btn-accent">Watch on original page</a>`;
+    }
+  } else {
+    videoWrap.style.display = 'none';
+    videoWrap.innerHTML = '';
+    img.style.display = 'block';
+    img.src = m.url;
+    img.alt = '';
+  }
 }
 function updateModalFavIcon(id){
   const icon = document.getElementById('modalFavIcon');
@@ -3162,7 +3215,11 @@ async function sharePlot(id, title){
     }
   }
 }
-function closePlotModal(){ document.getElementById('plotModalOverlay').classList.remove('open'); }
+function closePlotModal(){
+  document.getElementById('plotModalOverlay').classList.remove('open');
+  const videoWrap = document.getElementById('modalMainVideoWrap');
+  if (videoWrap) videoWrap.innerHTML = '';
+}
 document.getElementById('plotModalClose').addEventListener('click', closePlotModal);
 document.getElementById('plotModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'plotModalOverlay') closePlotModal(); });
 
@@ -3279,11 +3336,25 @@ document.getElementById('promoLightboxCta').addEventListener('click', closePromo
 let galleryItemsCache = [];
 function buildVideoEmbedUrl(provider, url){
   if (provider === 'youtube') {
-    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-    return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0` : null;
+    // Try a real URL parse first (handles share links with other query
+    // params before v=, e.g. ?si=xyz&v=ID) and fall back to path matching
+    // for youtu.be/shorts/embed/live links.
+    let id = null;
+    try {
+      const u = new URL(url);
+      if (u.searchParams.get('v')) id = u.searchParams.get('v');
+    } catch (e) { /* not a valid absolute URL, fall through to regex */ }
+    if (!id) {
+      const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|shorts\/|live\/))([\w-]{6,})/);
+      if (m) id = m[1];
+    }
+    return id ? `https://www.youtube.com/embed/${id}?autoplay=1&rel=0` : null;
   }
   if (provider === 'tiktok') {
     const m = url.match(/\/video\/(\d+)/);
+    // Short share links (vm.tiktok.com/..., tiktok.com/t/...) don't carry a
+    // numeric video id and can't be resolved client-side — send those to
+    // TikTok directly rather than showing a broken embed.
     return m ? `https://www.tiktok.com/embed/v2/${m[1]}` : null;
   }
   if (provider === 'facebook') {
