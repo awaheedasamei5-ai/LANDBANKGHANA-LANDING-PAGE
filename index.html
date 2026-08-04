@@ -532,7 +532,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 
 /* ---------- SERVICES HUB ---------- */
 #services{padding:120px 0 70px;}
-.services-hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;}
+.services-hub-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;}
 .service-hub-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:30px;transition:transform .22s,box-shadow .22s,border-color .22s;display:flex;flex-direction:column;}
 .service-hub-card:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:var(--brand);}
 .service-hub-card .shc-ic{width:52px;height:52px;border-radius:14px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
@@ -540,7 +540,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 .service-hub-card h3{font-size:18px;margin-bottom:10px;}
 .service-hub-card p{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:20px;flex:1;}
 .service-hub-card .btn{align-self:flex-start;}
-@media (max-width:800px){.services-hub-grid{grid-template-columns:1fr;}#services{padding:100px 0 50px;}}
+@media (max-width:800px){.services-hub-grid{grid-template-columns:minmax(0,1fr);}#services{padding:100px 0 50px;}}
 
 /* ---------- SERVICE REQUEST PAGES ---------- */
 .service-page{padding:120px 0 70px;}
