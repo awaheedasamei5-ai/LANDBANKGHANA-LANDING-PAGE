@@ -614,3 +614,23 @@ create policy "site_visit_requests admin delete" on public.site_visit_requests f
 -- once an admin starts processing it (status changes), it locks.
 create policy "site_visit_requests public edit own pending" on public.site_visit_requests
   for update to public using (status = 'pending') with check (status = 'pending');
+
+-- Self-healing admin linking: covers accounts created directly in the
+-- Supabase Dashboard (bypassing claim_admin()) and makes the "Email link"
+-- (magic link) sign-in option work without a separate activation step.
+create or replace function public.link_admin_account()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+  update public.admins
+     set user_id = auth.uid(), claimed = true
+   where user_id is null
+     and lower(email) = lower(coalesce((select email from auth.users where id = auth.uid()), ''));
+end;
+$$;

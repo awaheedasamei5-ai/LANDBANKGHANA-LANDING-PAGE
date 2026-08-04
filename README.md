@@ -236,6 +236,22 @@ first (a manual setup step on your end), whereas this works immediately with
 zero external accounts. Happy to wire up Google sign-in later if you'd prefer
 it once you're ready to set that up.
 
+There's also an **"Email link"** tab on the sign-in screen for anyone already
+invited: enter your email, and Supabase emails you a one-click sign-in link —
+no password to remember. One-time setup so the emailed link actually works:
+in the Supabase dashboard for this project, go to **Authentication → URL
+Configuration → Redirect URLs** and add your live admin URL (e.g.
+`https://awaheedasamei5-ai.github.io/LANDBANKGHANA-LANDING-PAGE/admin/index.html`)
+— without that, Supabase will refuse the redirect and the link won't sign you in.
+
+**If sign-in stops working after it used to work:** the most common cause is
+an account that exists in Supabase Authentication but was never linked to
+your invite — this happens if a user is added directly from the Supabase
+dashboard instead of through "Activate account" or "Email link" here. It now
+self-heals: any successful sign-in automatically links a matching invited
+email, so this shouldn't recur, but if you ever see "signed in but not an
+approved admin," ask an existing admin to check you're listed under **Team**.
+
 ## Deploying (do this to actually see live data)
 
 Opening `index.html` by double-clicking it only shows the static fallback

@@ -147,6 +147,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
     <p style="font-size:13.5px;color:var(--muted);margin-top:6px;">Manage Royal Palm Enclave listings, banners, stats, and contact details for Trulander JSF Limited.</p>
     <div class="auth-tabs">
       <button id="tabSignin" class="active">Sign in</button>
+      <button id="tabMagicLink">Email link</button>
       <button id="tabActivate">Activate account</button>
     </div>
 
@@ -154,6 +155,12 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <div class="field"><label>Email</label><input type="email" name="email" required/></div>
       <div class="field"><label>Password</label><input type="password" name="password" required/></div>
       <button class="btn btn-accent" style="width:100%;justify-content:center" type="submit">Sign in</button>
+    </form>
+
+    <form id="magicLinkForm" style="display:none">
+      <div class="field"><label>Invited email</label><input type="email" name="email" required/></div>
+      <div class="hint" style="margin-bottom:14px">Only emails already invited by an existing admin can sign in this way. We'll email you a link — no password needed.</div>
+      <button class="btn btn-accent" style="width:100%;justify-content:center" type="submit">Send me a sign-in link</button>
     </form>
 
     <form id="activateForm" style="display:none">
@@ -900,13 +907,24 @@ async function downloadDocument(path, name){
 
 /* ============ AUTH ============ */
 const tabSignin = document.getElementById('tabSignin');
+const tabMagicLink = document.getElementById('tabMagicLink');
 const tabActivate = document.getElementById('tabActivate');
 const signinForm = document.getElementById('signinForm');
+const magicLinkForm = document.getElementById('magicLinkForm');
 const activateForm = document.getElementById('activateForm');
 const authMsg = document.getElementById('authMsg');
 
-tabSignin.addEventListener('click', () => { tabSignin.classList.add('active'); tabActivate.classList.remove('active'); signinForm.style.display='block'; activateForm.style.display='none'; authMsg.classList.remove('show'); });
-tabActivate.addEventListener('click', () => { tabActivate.classList.add('active'); tabSignin.classList.remove('active'); activateForm.style.display='block'; signinForm.style.display='none'; authMsg.classList.remove('show'); });
+const AUTH_TABS = [
+  { btn: tabSignin, form: signinForm },
+  { btn: tabMagicLink, form: magicLinkForm },
+  { btn: tabActivate, form: activateForm }
+];
+AUTH_TABS.forEach(({ btn, form }) => {
+  btn.addEventListener('click', () => {
+    AUTH_TABS.forEach(t => { t.btn.classList.toggle('active', t.btn === btn); t.form.style.display = t.form === form ? 'block' : 'none'; });
+    authMsg.classList.remove('show');
+  });
+});
 
 function showAuthMsg(text, ok){ authMsg.textContent = text; authMsg.className = 'auth-msg show' + (ok?' ok':''); }
 function requireSb(){
@@ -931,6 +949,26 @@ signinForm.addEventListener('submit', async (e) => {
     await checkSession();
   } catch (err) {
     showAuthMsg('Something went wrong signing in. Check your connection and try again.');
+  } finally {
+    btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = originalLabel;
+  }
+});
+
+magicLinkForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!requireSb()) return;
+  const btn = magicLinkForm.querySelector('button[type=submit]');
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.classList.add('btn-loading'); btn.textContent = 'Sending...';
+  authMsg.classList.remove('show');
+  try {
+    const d = Object.fromEntries(new FormData(magicLinkForm).entries());
+    const { error } = await sb.auth.signInWithOtp({ email: d.email, options: { emailRedirectTo: location.href.split('#')[0] } });
+    if (error) { showAuthMsg(error.message); return; }
+    showAuthMsg("Check your email — we've sent a sign-in link to " + d.email + '. Open it on this device to finish signing in.', true);
+    magicLinkForm.reset();
+  } catch (err) {
+    showAuthMsg('Something went wrong sending your link. Check your connection and try again.');
   } finally {
     btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = originalLabel;
   }
@@ -972,6 +1010,11 @@ async function checkSession(){
   if (!sb) return;
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return;
+
+  // Auto-link this session to a matching invited admins row if it isn't
+  // linked yet — covers accounts created via magic link, or created
+  // directly in the Supabase Dashboard (which skip claim_admin()).
+  await sb.rpc('link_admin_account').catch(() => {});
 
   // A valid Supabase login is not the same as being an approved admin — verify
   // before ever showing the dashboard, so a non-admin account can't land in a
