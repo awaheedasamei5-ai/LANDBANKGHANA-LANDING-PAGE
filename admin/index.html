@@ -441,6 +441,20 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
           </form>
         </div>
         <div class="panel-card">
+          <h3>Send a test SMS</h3>
+          <p class="desc">Send a one-off test text to any phone number to confirm your API key, sender ID, and delivery are actually working — without needing to submit a real form. Doesn't use a message template.</p>
+          <form id="smsTestForm" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <div class="field" style="flex:1;min-width:220px;margin-bottom:0"><label>Phone number</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+            <button class="btn btn-accent" type="submit" id="smsTestBtn">Send test SMS</button>
+          </form>
+          <p class="form-msg" id="smsTestMsg"></p>
+        </div>
+        <div class="panel-card">
+          <h3>Message templates</h3>
+          <p class="desc">The exact SMS text sent for each type of submission. Use the placeholders shown under each box — they're swapped for the real value automatically. Changes apply to the very next submission, no redeploy needed.</p>
+          <div id="smsTemplatesList"></div>
+        </div>
+        <div class="panel-card">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
             <h3 style="margin:0">Recent SMS activity</h3>
             <button type="button" class="btn btn-ghost" id="smsLogRefreshBtn">Refresh</button>
@@ -1639,7 +1653,7 @@ if (mobileNavSelect) {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteVisitExp(); loadSiteCopy(); loadQuotations(); loadQuoteSettings(); loadRoyalPalmMedia(); loadSmsSettings(); loadSmsLog();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteVisitExp(); loadSiteCopy(); loadQuotations(); loadQuoteSettings(); loadRoyalPalmMedia(); loadSmsSettings(); loadSmsLog(); loadSmsTemplatesAdmin();
 }
 
 /* ---- BANNERS ---- */
@@ -1992,6 +2006,71 @@ async function loadSmsLog(){
       <td><span class="pill ${(l.status||'').startsWith('sent')?'on':'off'}" title="${l.status==='sent_fallback_sender'?'Delivered, but the custom sender ID was rejected — Arkesel used its default sender instead. Get your sender ID approved in the Arkesel dashboard to fix this.':''}">${esc(l.status==='sent_fallback_sender' ? 'sent (fallback sender)' : (l.status || '—'))}</span></td>
     </tr>`).join('') || '<tr><td colspan="4">No SMS activity yet.</td></tr>';
 }
+
+/* ---- SMS MESSAGE TEMPLATES ---- */
+let smsTemplatesCache = [];
+async function loadSmsTemplatesAdmin(){
+  const { data, error } = await sb.from('sms_templates').select('*').order('kind');
+  const wrap = document.getElementById('smsTemplatesList');
+  if (error) { wrap.innerHTML = '<p class="hint">Could not load message templates.</p>'; return; }
+  smsTemplatesCache = data || [];
+  wrap.innerHTML = smsTemplatesCache.map(t => `
+    <div class="inbox-row" style="cursor:default">
+      <div class="ir-top"><span>${esc(t.label)}</span></div>
+      <textarea data-kind="${esc(t.kind)}" rows="3" style="width:100%;margin-top:8px;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line)">${esc(t.template)}</textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:8px">
+        <span class="hint" style="margin:0">Placeholders: ${esc(t.placeholders_hint)}</span>
+        <button type="button" class="btn btn-ghost" data-save-kind="${esc(t.kind)}">Save</button>
+      </div>
+    </div>`).join('');
+  wrap.querySelectorAll('[data-save-kind]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const kind = btn.dataset.saveKind;
+      const textarea = wrap.querySelector(`textarea[data-kind="${CSS.escape(kind)}"]`);
+      btn.disabled = true; btn.textContent = 'Saving...';
+      const { error } = await sb.from('sms_templates').update({ template: textarea.value, updated_at: new Date().toISOString() }).eq('kind', kind);
+      btn.disabled = false; btn.textContent = 'Save';
+      if (error) return toast('Error: ' + error.message);
+      toast('Template saved');
+    });
+  });
+}
+document.getElementById('smsTestForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('smsTestBtn');
+  const msg = document.getElementById('smsTestMsg');
+  const phone = e.target.phone.value;
+  btn.disabled = true; btn.textContent = 'Sending...';
+  msg.className = 'form-msg';
+  try {
+    const { data, error } = await sb.functions.invoke('send-sms', {
+      body: {
+        phone, kind: 'test',
+        message: 'This is a test message from the Trulander JSF Limited admin panel. If you received this, SMS delivery is working correctly.'
+      }
+    });
+    if (error) throw error;
+    if (data && data.skipped) {
+      msg.textContent = 'SMS is disabled or has no API key saved — enable it and save settings first.';
+      msg.className = 'form-msg err';
+    } else if (data && data.status === 'sent_fallback_sender') {
+      msg.textContent = 'Sent, but your sender ID was rejected — Arkesel used its default sender instead. Check the phone, then get your sender ID approved in Arkesel.';
+      msg.className = 'form-msg ok';
+    } else if (data && data.status === 'sent') {
+      msg.textContent = 'Sent! Check the recipient phone in a moment, then refresh the activity log below to confirm.';
+      msg.className = 'form-msg ok';
+    } else {
+      msg.textContent = 'The gateway reported a failure — check Recent SMS activity below for the exact error.';
+      msg.className = 'form-msg err';
+    }
+    loadSmsLog();
+  } catch (err) {
+    msg.textContent = 'Something went wrong sending the test — ' + (err.message || 'please try again.');
+    msg.className = 'form-msg err';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send test SMS';
+  }
+});
 
 /* ---- PAGE CONTENT (field-based editing) ---- */
 const SITE_COPY_GROUPS = {

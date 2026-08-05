@@ -2274,6 +2274,32 @@ function sendFormSMS(phone, message, kind, relatedTable, relatedId){
   } catch (e) {}
 }
 const COMPANY_CONTACT = () => (siteSettingsCache && (siteSettingsCache.phone || siteSettingsCache.whatsapp)) || '0302 956 795';
+/* Admin-editable SMS message templates (Settings > SMS notifications).
+   Loaded once at startup; these hardcoded strings are only the safety-net
+   fallback used if the table is empty or unreachable, so a missing/offline
+   template config can never silently block a thank-you text going out. */
+let smsTemplatesCache = {};
+const SMS_TEMPLATE_FALLBACK = {
+  buyer_inquiry: 'Hi {name}, thank you for reaching out to Trulander JSF Limited about acquiring land. We\'ve received your enquiry and a member of our team will call you shortly to discuss your requirements. For urgent enquiries, call/WhatsApp {company_contact}. We look forward to helping you find genuine, risk-free land.',
+  seller_submission: 'Hi {name}, thank you for submitting your land details to Trulander JSF Limited. Our team is reviewing your submission and will call you shortly to discuss next steps. For questions, call/WhatsApp {company_contact}. We appreciate you trusting us with your listing.',
+  remote_sales_application: 'Hi {name}, thank you for applying to Trulander JSF Limited\'s Referral Program. Our team will call you shortly to complete your onboarding. Call/WhatsApp {company_contact} if you have questions in the meantime.',
+  service_request_surveyor: 'Hi {name}, thank you for requesting surveyor assistance from Trulander JSF Limited. Our team will call you shortly to schedule your survey. Call/WhatsApp {company_contact} for urgent needs.',
+  service_request_legal: 'Hi {name}, thank you for reaching out to Trulander JSF Limited\'s legal team. We\'ve received your request and will call you shortly for a confidential consultation. Call/WhatsApp {company_contact} anytime.',
+  service_request_documentation: 'Hi {name}, thank you for requesting documentation support from Trulander JSF Limited. Our team will call you shortly to guide you through the process. Call/WhatsApp {company_contact} for questions.',
+  service_request_help: 'Hi {name}, thank you for reaching out to Trulander JSF Limited about your land issue. Our team will call you shortly with guidance. Call/WhatsApp {company_contact} if you need to speak sooner.',
+  site_visit_request: 'Hi {name}, thank you for booking a free site visit to Royal Palm Enclave, Tsopoli with Trulander JSF Limited. We\'ve received your request and will call you shortly to confirm your pickup time. Call/WhatsApp {company_contact} for any changes.',
+  site_visit_experience: 'Hi {name}, thank you for sharing your site visit experience with Trulander JSF Limited. We value your feedback and our team may reach out for further discussion. Call/WhatsApp {company_contact} anytime.',
+  plot_enquiry: 'Hi {name}, thank you for your enquiry about "{plot_title}" with Trulander JSF Limited. Your message has been received and we\'ll be in touch shortly. Call/WhatsApp {company_contact} if you\'d like to speak with us directly.',
+  quotation_request: 'Hi {name}, thank you for requesting a quotation for Royal Palm Enclave, Tsopoli with Trulander JSF Limited. Your personalized quotation (GHS {total} total) has been generated and our team will call you shortly to guide you through it. Call/WhatsApp {company_contact} for any questions.',
+  lead: 'Hi {name}, thank you for contacting Trulander JSF Limited. We\'ve received your message and will get back to you within one business day. Call/WhatsApp {company_contact} for urgent matters.'
+};
+function renderSmsMessage(kind, vars){
+  let t = smsTemplatesCache[kind] || SMS_TEMPLATE_FALLBACK[kind]
+    || 'Hi {name}, thank you for contacting Trulander JSF Limited. We\'ve received your request and our team will be in touch shortly. Call/WhatsApp {company_contact} for anything urgent.';
+  const withCompany = Object.assign({ company_contact: COMPANY_CONTACT() }, vars);
+  Object.keys(withCompany).forEach(k => { t = t.split('{' + k + '}').join(withCompany[k] == null ? '' : String(withCompany[k])); });
+  return t;
+}
 /* A single dropped request shouldn't be a hard failure for someone submitting
    a form — retry a couple of times with a short delay before giving up. */
 async function withRetry(fn, attempts = 3, delayMs = 600){
@@ -2758,7 +2784,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
         <p>Thanks — our team will reach out to you shortly to help you move forward.</p>`;
       document.getElementById('buyerModalSuccess').style.display = 'block';
       document.getElementById('buyerPlotPickerWrap').style.display = 'none';
-      sendFormSMS(data.phone, `Hi ${data.name}, thank you for reaching out to Trulander JSF Limited about acquiring land. We've received your enquiry and a member of our team will call you shortly to discuss your requirements. For urgent enquiries, call/WhatsApp ${COMPANY_CONTACT()}. We look forward to helping you find genuine, risk-free land.`, 'buyer_inquiry', 'buyer_inquiries');
+      sendFormSMS(data.phone, renderSmsMessage('buyer_inquiry', { name: data.name }), 'buyer_inquiry', 'buyer_inquiries');
       buyerForm.reset();
     } catch (err) {
       msg.textContent = 'Something went wrong sending your request. Please try again, or reach us directly via WhatsApp.';
@@ -2833,7 +2859,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
       progress.classList.remove('show');
       document.getElementById('sellerModalFormWrap').style.display = 'none';
       document.getElementById('sellerModalSuccess').style.display = 'block';
-      sendFormSMS(data.phone, `Hi ${data.name}, thank you for submitting your land details to Trulander JSF Limited. Our team is reviewing your submission and will call you shortly to discuss next steps. For questions, call/WhatsApp ${COMPANY_CONTACT()}. We appreciate you trusting us with your listing.`, 'seller_submission', 'seller_submissions', submissionId);
+      sendFormSMS(data.phone, renderSmsMessage('seller_submission', { name: data.name }), 'seller_submission', 'seller_submissions', submissionId);
       sellerForm.reset();
       sellerImages.reset(); sellerDocs.reset(); sellerVideos.reset();
     } catch (err) {
@@ -2875,7 +2901,7 @@ document.getElementById('remoteSalesForm')?.addEventListener('submit', async (e)
     if (error) throw error;
     msg.innerHTML = successMsgHTML("Application received — our team will call you shortly to complete your onboarding.");
     msg.className = 'form-msg ok';
-    sendFormSMS(data.phone, `Hi ${data.name}, thank you for applying to Trulander JSF Limited's Referral Program. Our team will call you shortly to complete your onboarding. Call/WhatsApp ${COMPANY_CONTACT()} if you have questions in the meantime.`, 'remote_sales_application', 'remote_sales_applications');
+    sendFormSMS(data.phone, renderSmsMessage('remote_sales_application', { name: data.name }), 'remote_sales_application', 'remote_sales_applications');
     form.reset();
   } catch (err) {
     msg.textContent = 'Something went wrong submitting your application. Please try again, or reach us directly via WhatsApp.';
@@ -2905,13 +2931,8 @@ document.querySelectorAll('.service-request-form').forEach(form => {
       if (error) throw error;
       msg.innerHTML = successMsgHTML("Request received! Our team will reach out shortly.");
       msg.className = 'form-msg service-request-msg ok';
-      const serviceSmsText = {
-        surveyor: `Hi ${data.name}, thank you for requesting surveyor assistance from Trulander JSF Limited. Our team will call you shortly to schedule your survey. Call/WhatsApp ${COMPANY_CONTACT()} for urgent needs.`,
-        legal: `Hi ${data.name}, thank you for reaching out to Trulander JSF Limited's legal team. We've received your request and will call you shortly for a confidential consultation. Call/WhatsApp ${COMPANY_CONTACT()} anytime.`,
-        documentation: `Hi ${data.name}, thank you for requesting documentation support from Trulander JSF Limited. Our team will call you shortly to guide you through the process. Call/WhatsApp ${COMPANY_CONTACT()} for questions.`,
-        help: `Hi ${data.name}, thank you for reaching out to Trulander JSF Limited about your land issue. Our team will call you shortly with guidance. Call/WhatsApp ${COMPANY_CONTACT()} if you need to speak sooner.`
-      }[form.dataset.serviceType] || `Hi ${data.name}, thank you for your service request with Trulander JSF Limited. Our team will call you shortly. Call/WhatsApp ${COMPANY_CONTACT()} for questions.`;
-      sendFormSMS(data.phone, serviceSmsText, 'service_request_' + form.dataset.serviceType, 'service_requests');
+      const serviceKind = 'service_request_' + form.dataset.serviceType;
+      sendFormSMS(data.phone, renderSmsMessage(serviceKind, { name: data.name }), serviceKind, 'service_requests');
       form.reset();
     } catch (err) {
       msg.textContent = 'Something went wrong submitting your request. Please try again, or reach us directly via WhatsApp.';
@@ -2989,7 +3010,7 @@ siteVisitForm?.addEventListener('submit', async (e) => {
     siteVisitLastRecord = record;
     renderSiteVisitSuccess(record);
     if (!editingId) {
-      sendFormSMS(record.contact, `Hi ${record.full_name}, thank you for booking a free site visit to Royal Palm Enclave, Tsopoli with Trulander JSF Limited. We've received your request and will call you shortly to confirm your pickup time. Call/WhatsApp ${COMPANY_CONTACT()} for any changes.`, 'site_visit_request', 'site_visit_requests', record.id);
+      sendFormSMS(record.contact, renderSmsMessage('site_visit_request', { name: record.full_name }), 'site_visit_request', 'site_visit_requests', record.id);
     }
   } catch (err) {
     // Logged (and shown, when available) so a failure here is diagnosable
@@ -3537,7 +3558,7 @@ siteVisitExpForm?.addEventListener('submit', async (e) => {
     }
     siteVisitExpLastRecord = record;
     renderSiteVisitExpSuccess(record);
-    sendFormSMS(record.phone, `Hi ${record.full_name}, thank you for sharing your site visit experience with Trulander JSF Limited. We value your feedback and our team may reach out for further discussion. Call/WhatsApp ${COMPANY_CONTACT()} anytime.`, 'site_visit_experience', 'site_visit_experiences', record.id);
+    sendFormSMS(record.phone, renderSmsMessage('site_visit_experience', { name: record.full_name }), 'site_visit_experience', 'site_visit_experiences', record.id);
   } catch (err) {
     console.error('Site visit experience submission failed:', err);
     const detail = err && err.message && err.message !== 'offline' ? ` (${err.message})` : '';
@@ -3722,7 +3743,7 @@ function socialIconDownload(){
 async function loadContent(){
   if (!sb) return;
   try{
-    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}, {data:copyRows}, {data:plotMediaData}, {data:quoteSettingsData}, {data:royalPalmMediaData}] = await Promise.all([
+    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}, {data:copyRows}, {data:plotMediaData}, {data:quoteSettingsData}, {data:royalPalmMediaData}, {data:smsTemplateRows}] = await Promise.all([
       sb.from('banners').select('*').eq('kind','hero').eq('active',true).order('sort_order').limit(1),
       sb.from('banners').select('*').eq('kind','promo').eq('active',true).order('sort_order'),
       sb.from('stats').select('*').eq('active',true).order('sort_order'),
@@ -3737,10 +3758,13 @@ async function loadContent(){
       sb.from('site_copy').select('*'),
       sb.from('plot_media').select('*').order('sort_order'),
       sb.from('quote_settings').select('*').maybeSingle(),
-      sb.from('royal_palm_media').select('*').eq('active',true).order('sort_order')
+      sb.from('royal_palm_media').select('*').eq('active',true).order('sort_order'),
+      sb.from('sms_templates').select('kind, template')
     ]);
     renderRoyalPalmMedia(royalPalmMediaData || []);
     if (quoteSettingsData) quoteSettingsCache = quoteSettingsData;
+    smsTemplatesCache = {};
+    (smsTemplateRows || []).forEach(row => { smsTemplatesCache[row.kind] = row.template; });
 
     if (copyRows && copyRows.length) {
       copyRows.forEach(({ key, value }) => {
@@ -4225,7 +4249,7 @@ document.getElementById('plotEnquiryForm').addEventListener('submit', async (e) 
     const successEl = document.getElementById('plotEnquiryModalSuccess');
     successEl.innerHTML = renderEnquirySentPanel(p, data);
     successEl.style.display = 'block';
-    sendFormSMS(data.phone, `Hi ${data.name}, thank you for your enquiry about "${p ? p.title : 'a plot'}" with Trulander JSF Limited. Your message has been received and we'll be in touch shortly. Call/WhatsApp ${COMPANY_CONTACT()} if you'd like to speak with us directly.`, 'plot_enquiry', 'buyer_inquiries');
+    sendFormSMS(data.phone, renderSmsMessage('plot_enquiry', { name: data.name, plot_title: p ? p.title : 'a plot' }), 'plot_enquiry', 'buyer_inquiries');
   } catch (err) {
     msg.textContent = 'Something went wrong sending your enquiry. Please try again, or reach us directly via WhatsApp.';
     msg.className = 'form-msg err';
@@ -4280,7 +4304,7 @@ document.getElementById('quoteForm').addEventListener('submit', async (e) => {
     document.getElementById('quoteModalFormWrap').style.display = 'none';
     document.getElementById('quoteSummaryText').textContent = `${data.name}, your total for ${numberOfPlots} plot(s) over ${creditPeriodMonths} months is GHS ${calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2})} — a deposit of GHS ${calc.depositAmount.toLocaleString(undefined,{minimumFractionDigits:2})} and GHS ${calc.monthlyDue.toLocaleString(undefined,{minimumFractionDigits:2})}/month after that.`;
     document.getElementById('quoteModalSuccess').style.display = 'block';
-    sendFormSMS(data.phone, `Hi ${data.name}, thank you for requesting a quotation for Royal Palm Enclave, Tsopoli with Trulander JSF Limited. Your personalized quotation (GHS ${calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2})} total) has been generated and our team will call you shortly to guide you through it. Call/WhatsApp ${COMPANY_CONTACT()} for any questions.`, 'quotation_request', 'quotation_requests', inserted.id);
+    sendFormSMS(data.phone, renderSmsMessage('quotation_request', { name: data.name, total: calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2}) }), 'quotation_request', 'quotation_requests', inserted.id);
   } catch (err) {
     msg.textContent = (err && err.message && err.message.includes('half-plot')) ? err.message : 'Something went wrong calculating your quotation. Please try again, or reach us directly via WhatsApp.';
     msg.className = 'form-msg err';
@@ -4746,7 +4770,7 @@ document.getElementById('leadForm').addEventListener('submit', async (e) => {
     if (error) throw error;
     msg.innerHTML = successMsgHTML("Thanks — we've received your message and will reach out within one business day.");
     msg.className = 'form-msg ok';
-    sendFormSMS(data.phone, `Hi ${data.name}, thank you for contacting Trulander JSF Limited. We've received your message and will get back to you within one business day. Call/WhatsApp ${COMPANY_CONTACT()} for urgent matters.`, 'lead', 'leads', null);
+    sendFormSMS(data.phone, renderSmsMessage('lead', { name: data.name }), 'lead', 'leads', null);
     form.reset();
   } catch(err){
     msg.textContent = "Something went wrong sending your message. Please try again or contact us directly.";
