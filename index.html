@@ -1052,6 +1052,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <a href="#/plots?q=Royal%20Palm" class="btn btn-ghost">Browse Available Plots</a>
         <button type="button" class="btn btn-ghost" onclick="openQuoteModal()">Request Quotation</button>
       </div>
+      <div class="rp-cta reveal" id="rpMediaButtons" style="margin-top:14px"></div>
     </div>
   </div>
 </section>
@@ -3395,11 +3396,24 @@ try {
   console.warn('Supabase unavailable — homepage will show default static content.', e);
 }
 
+/* --- Royal Palm brochures & videos: admin-managed downloadable resources --- */
+function renderRoyalPalmMedia(items){
+  const wrap = document.getElementById('rpMediaButtons');
+  if (!wrap) return;
+  if (!items.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = items.map(m => m.kind === 'brochure'
+    ? `<a href="${esc(m.file_url)}" download class="btn btn-ghost">${socialIconDownload()} Download ${esc(m.title)}</a>`
+    : `<a href="${esc(m.file_url)}" target="_blank" rel="noopener" class="btn btn-ghost">Watch ${esc(m.title)}</a>`
+  ).join('');
+}
+function socialIconDownload(){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-3px;margin-right:2px"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>';
+}
 /* --- load dynamic content from Supabase --- */
 async function loadContent(){
   if (!sb) return;
   try{
-    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}, {data:copyRows}, {data:plotMediaData}, {data:quoteSettingsData}] = await Promise.all([
+    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}, {data:copyRows}, {data:plotMediaData}, {data:quoteSettingsData}, {data:royalPalmMediaData}] = await Promise.all([
       sb.from('banners').select('*').eq('kind','hero').eq('active',true).order('sort_order').limit(1),
       sb.from('banners').select('*').eq('kind','promo').eq('active',true).order('sort_order'),
       sb.from('stats').select('*').eq('active',true).order('sort_order'),
@@ -3413,8 +3427,10 @@ async function loadContent(){
       sb.from('reviews').select('*').eq('approved',true).order('created_at',{ascending:false}),
       sb.from('site_copy').select('*'),
       sb.from('plot_media').select('*').order('sort_order'),
-      sb.from('quote_settings').select('*').maybeSingle()
+      sb.from('quote_settings').select('*').maybeSingle(),
+      sb.from('royal_palm_media').select('*').eq('active',true).order('sort_order')
     ]);
+    renderRoyalPalmMedia(royalPalmMediaData || []);
     if (quoteSettingsData) quoteSettingsCache = quoteSettingsData;
 
     if (copyRows && copyRows.length) {

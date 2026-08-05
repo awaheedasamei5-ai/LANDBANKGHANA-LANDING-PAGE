@@ -441,6 +441,22 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
           <form class="copy-form" data-group="royalpalm" id="copyFormRoyalpalm"></form>
         </div>
         <div class="panel-card">
+          <h3>Royal Palm brochures &amp; videos</h3>
+          <p class="desc">Active items appear as download/watch buttons on the Royal Palm Enclave page. Add as many as you like, and replace any item's file in place without losing its position or having to re-add it.</p>
+          <form id="royalPalmMediaAddForm" class="form-grid" style="align-items:flex-end;margin-bottom:16px">
+            <div class="field"><label>Type</label>
+              <select name="kind" id="royalPalmMediaKind">
+                <option value="brochure">Brochure (PDF)</option>
+                <option value="video">Video</option>
+              </select>
+            </div>
+            <div class="field"><label>Title</label><input name="title" required placeholder="e.g. Royal Palm Enclave Brochure 2026"/></div>
+            <div class="field"><label id="royalPalmMediaFileLabel">File (PDF)</label><input type="file" name="file" id="royalPalmMediaFile" accept="application/pdf" required/></div>
+            <button type="submit" class="btn btn-accent" id="royalPalmMediaAddBtn" style="height:44px">Add</button>
+          </form>
+          <div id="royalPalmMediaList"></div>
+        </div>
+        <div class="panel-card">
           <h3>Services</h3>
           <p class="desc">Edit the intro copy at the top of the Services hub page.</p>
           <form class="copy-form" data-group="services" id="copyFormServices"></form>
@@ -1454,7 +1470,7 @@ if (mobileNavSelect) {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteVisitExp(); loadSiteCopy(); loadQuotations(); loadQuoteSettings();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteVisitExp(); loadSiteCopy(); loadQuotations(); loadQuoteSettings(); loadRoyalPalmMedia();
 }
 
 /* ---- BANNERS ---- */
@@ -3000,6 +3016,81 @@ async function loadQuoteSettings(){
   quoteSettingsForm.terms_text.value = data.terms_text || '';
   quoteSettingsForm.footer_text.value = data.footer_text || '';
 }
+
+/* ---- ROYAL PALM BROCHURES & VIDEOS ---- */
+let royalPalmMediaCache = [];
+document.getElementById('royalPalmMediaKind').addEventListener('change', (e) => {
+  const isVideo = e.target.value === 'video';
+  document.getElementById('royalPalmMediaFileLabel').textContent = isVideo ? 'File (video, up to 50MB)' : 'File (PDF)';
+  document.getElementById('royalPalmMediaFile').accept = isVideo ? 'video/*' : 'application/pdf';
+});
+async function loadRoyalPalmMedia(){
+  const { data, error } = await sb.from('royal_palm_media').select('*').order('sort_order').order('created_at');
+  if (error) return;
+  royalPalmMediaCache = data || [];
+  renderRoyalPalmMediaList();
+}
+function renderRoyalPalmMediaList(){
+  const wrap = document.getElementById('royalPalmMediaList');
+  if (!royalPalmMediaCache.length) { wrap.innerHTML = '<p class="hint">No brochures or videos added yet.</p>'; return; }
+  wrap.innerHTML = royalPalmMediaCache.map(m => `
+    <div class="inbox-row" style="cursor:default">
+      <div class="ir-top">
+        <span><span class="pill ${m.active?'on':'off'}" style="margin-right:8px">${m.active?'Active':'Hidden'}</span>${esc(m.title)}</span>
+        <span class="ir-date">${m.kind === 'brochure' ? 'Brochure' : 'Video'}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <a class="btn btn-ghost" href="${esc(m.file_url)}" target="_blank" rel="noopener">Preview</a>
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('rpmReplace-${m.id}').click()">Replace file</button>
+        <input type="file" id="rpmReplace-${m.id}" style="display:none" accept="${m.kind==='video'?'video/*':'application/pdf'}"/>
+        <button type="button" class="btn btn-ghost" onclick="toggleRoyalPalmMediaActive('${m.id}', ${!m.active})">${m.active?'Hide':'Show'}</button>
+        <button type="button" class="btn btn-danger" onclick="deleteRow('royal_palm_media','${m.id}',loadRoyalPalmMedia)">Delete</button>
+      </div>
+    </div>`).join('');
+  royalPalmMediaCache.forEach(m => {
+    document.getElementById(`rpmReplace-${m.id}`).addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      if (file.size > 50 * 1024 * 1024) { toast('File is too large — please keep uploads under 50MB.'); return; }
+      toast('Uploading replacement...');
+      const url = await uploadVideoFile(file, 'royal-palm');
+      if (!url) return;
+      const { error } = await sb.from('royal_palm_media').update({ file_url: url, file_path: url }).eq('id', m.id);
+      if (error) return toast('Error: ' + error.message);
+      toast('File replaced');
+      loadRoyalPalmMedia();
+    });
+  });
+}
+async function toggleRoyalPalmMediaActive(id, active){
+  const { error } = await sb.from('royal_palm_media').update({ active }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  loadRoyalPalmMedia();
+}
+document.getElementById('royalPalmMediaAddForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('royalPalmMediaAddBtn');
+  const kind = form.kind.value;
+  const title = form.title.value;
+  const file = document.getElementById('royalPalmMediaFile').files[0];
+  if (!file) return;
+  if (file.size > 50 * 1024 * 1024) { toast('File is too large — please keep uploads under 50MB.'); return; }
+  btn.disabled = true; btn.textContent = 'Uploading...';
+  try {
+    const url = await uploadVideoFile(file, 'royal-palm');
+    if (!url) return;
+    const maxSort = royalPalmMediaCache.reduce((max, m) => Math.max(max, m.sort_order || 0), -1);
+    const { error } = await sb.from('royal_palm_media').insert({ kind, title, file_url: url, file_path: url, sort_order: maxSort + 1 });
+    if (error) return toast('Error: ' + error.message);
+    toast('Added');
+    form.reset();
+    loadRoyalPalmMedia();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Add';
+  }
+});
 
 /* ---- shared delete ---- */
 async function deleteRow(table, id, reload, col){
