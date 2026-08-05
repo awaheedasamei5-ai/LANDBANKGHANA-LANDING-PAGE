@@ -399,6 +399,11 @@ section{position:relative;}
 .inquiry-success p{color:var(--muted);font-size:14.5px;max-width:340px;margin:0 auto;}
 .enquiry-success-check{width:56px;height:56px;border-radius:50%;background:var(--brand-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
 .enquiry-success-check svg{width:28px;height:28px;color:var(--brand-dark);margin:0;}
+/* Stacked, even-width action buttons for success panels — deliberately not
+   reusing .qual-card .qbtns, which only applies inside .qual-card and left
+   these buttons with no flex layout at all (one stretched huge, one tiny). */
+.success-actions{display:flex;flex-direction:column;gap:10px;margin-top:24px;}
+.success-actions .btn{width:100%;}
 /* Draw-in animated checkmark used on every submission success state —
    the circle outline traces itself, then the check strokes in right after. */
 .anim-check circle{fill:none;stroke:currentColor;stroke-width:2.5;stroke-dasharray:151;stroke-dashoffset:151;animation:anim-check-circle .5s cubic-bezier(.65,0,.45,1) forwards;}
@@ -1666,10 +1671,10 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         </form>
       </div>
       <div id="quoteModalSuccess" class="inquiry-success" style="display:none;text-align:center;">
-        <svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg>
+        <div class="enquiry-success-check"><svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg></div>
         <h3>Your quotation is ready.</h3>
         <p id="quoteSummaryText"></p>
-        <div class="qbtns" style="justify-content:center;margin-top:18px">
+        <div class="success-actions">
           <button type="button" class="btn btn-primary" id="quoteDownloadBtn">Download PDF</button>
           <button type="button" class="btn btn-ghost" id="quoteModalDoneBtn">Close</button>
         </div>
@@ -4122,7 +4127,7 @@ function renderEnquirySentPanel(p, buyer){
     <div class="enquiry-success-check"><svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg></div>
     <h3>Enquiry received.</h3>
     <p>Your details are saved with our team${seller ? ", and you can send them straight to the seller below" : ", and you can reach us directly below"}.</p>
-    ${sendBtns.length ? `<div class="qbtns" style="justify-content:center;margin-top:22px">${sendBtns.join('')}</div>` : ''}
+    ${sendBtns.length ? `<div class="success-actions">${sendBtns.join('')}</div>` : ''}
     ${contactCard ? `<div class="enquiry-success-contact">
       <div class="enquiry-success-contact-label">${seller ? 'Or reach the seller directly' : 'Or reach us directly'}</div>
       ${contactCard}
