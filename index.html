@@ -421,7 +421,6 @@ section{position:relative;}
 .file-item .fi-remove svg{width:13px;height:13px;}
 .file-item img.fi-thumb{width:26px;height:26px;border-radius:6px;object-fit:cover;flex:none;}
 .inquiry-success{padding:50px 34px;text-align:center;}
-.inquiry-success svg{width:52px;height:52px;color:var(--brand);margin-bottom:16px;}
 .inquiry-success h3{font-size:20px;margin-bottom:8px;}
 .inquiry-success p{color:var(--muted);font-size:14.5px;max-width:340px;margin:0 auto;}
 .enquiry-success-check{width:56px;height:56px;border-radius:50%;background:var(--brand-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
@@ -1513,7 +1512,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       </div>
       <div id="buyerModalSuccess" class="inquiry-success" style="display:none;">
         <div id="buyerModalSuccessBody">
-          <svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg>
+          <div class="enquiry-success-check"><svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg></div>
           <h3>Request received.</h3>
           <p>Thanks — our team will reach out to you shortly to help you move forward.</p>
         </div>
@@ -1622,7 +1621,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         </form>
       </div>
       <div id="sellerModalSuccess" class="inquiry-success" style="display:none;">
-        <svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg>
+        <div class="enquiry-success-check"><svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg></div>
         <h3>Submission received.</h3>
         <p>Our team will verify your details and documents, then reach out before anything goes live.</p>
         <button type="button" class="btn btn-ghost" id="sellerModalDoneBtn" style="margin-top:20px;">Close</button>
@@ -2754,7 +2753,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
       document.getElementById('buyerModalFormWrap').style.display = 'none';
       const successBody = document.getElementById('buyerModalSuccessBody');
       successBody.innerHTML = chosenPlot ? renderEnquirySentPanel(chosenPlot, data) : `
-        <svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg>
+        <div class="enquiry-success-check"><svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg></div>
         <h3>Request received.</h3>
         <p>Thanks — our team will reach out to you shortly to help you move forward.</p>`;
       document.getElementById('buyerModalSuccess').style.display = 'block';
