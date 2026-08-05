@@ -103,11 +103,22 @@ section{position:relative;}
 .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px;}
 .hero-trust{display:flex;align-items:center;gap:10px;margin-top:26px;font-size:13px;color:var(--muted);}
 .hero-trust svg{width:18px;height:18px;color:var(--brand);flex:none;}
-.hero-visual{position:relative;display:flex;align-items:flex-end;justify-content:center;}
+.hero-visual{position:relative;min-height:560px;}
 .hero-visual::before{content:'';position:absolute;width:82%;height:82%;left:9%;top:6%;border-radius:50%;
   background:radial-gradient(circle,rgba(34,165,76,.4),transparent 70%);filter:blur(48px);z-index:0;}
+.hero-slide{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;transition:opacity 1s ease;}
+.hero-slide.active{opacity:1;visibility:visible;}
 .hero-photo{position:relative;z-index:2;max-height:560px;width:auto;max-width:100%;object-fit:contain;
   filter:drop-shadow(0 26px 30px rgba(8,25,16,.22));}
+.hero-slide-dots{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);z-index:5;display:flex;gap:8px;}
+.hero-slide-dot{width:8px;height:8px;border-radius:50%;border:none;padding:0;background:rgba(21,46,30,.18);cursor:pointer;transition:background .25s,transform .25s;}
+.hero-slide-dot.active{background:var(--brand);transform:scale(1.3);}
+.hero-badge.feature{flex-direction:row;align-items:center;gap:10px;padding:12px 16px;}
+.hero-badge.feature .hero-badge-ic{width:30px;height:30px;border-radius:9px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;flex:none;}
+.hero-badge.feature .hero-badge-ic svg{width:16px;height:16px;color:var(--brand-dark);}
+.hero-badge.feature .lbl{font-size:12.5px;font-weight:700;}
+.hero-badge.feature.b3 .hero-badge-ic{background:rgba(255,255,255,.15);}
+.hero-badge.feature.b3 .hero-badge-ic svg{color:#fff;}
 .hero-badge{position:absolute;z-index:4;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 16px 34px -14px rgba(8,25,16,.35),0 0 0 1px rgba(34,165,76,.14);display:flex;flex-direction:column;gap:2px;min-width:120px;}
 .hero-badge .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--ink);white-space:nowrap;}
 .hero-badge .lbl{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;}
@@ -150,7 +161,7 @@ section{position:relative;}
 
 @media (max-width:900px){
   .hero-grid{grid-template-columns:1fr;}
-  .hero-visual{max-width:480px;margin:0 auto;}
+  .hero-visual{max-width:480px;margin:0 auto;min-height:460px;}
   .hero-photo{max-height:460px;}
 }
 @media (max-width:480px){
@@ -937,35 +948,54 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         Every plot we recommend is put through independent title &amp; litigation checks first.
       </div>
     </div>
-    <div class="hero-visual reveal">
-      <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.webp" alt="Trulander JSF Limited helps you own land safely" width="1200" height="801" fetchpriority="high"/>
-      <svg class="hero-flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <linearGradient id="heroFlowGradient" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#22A54C" stop-opacity="0"/>
-            <stop offset="50%" stop-color="#22A54C" stop-opacity=".95"/>
-            <stop offset="100%" stop-color="#22A54C" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <path id="heroFlowPathLeft" class="flow-path" d="M53,79 Q24,66 8,52"/>
-        <path id="heroFlowPathRight" class="flow-path" d="M53,79 C68,66 74,41 76,27"/>
-        <path id="heroFlowPathDown" class="flow-path" d="M53,79 Q71,77 87,76"/>
-        <circle class="flow-dot dot-left" r=".9">
-          <animateMotion dur="2.1s" repeatCount="indefinite" begin="0s"><mpath href="#heroFlowPathLeft"/></animateMotion>
-        </circle>
-        <circle class="flow-dot dot-right" r=".9">
-          <animateMotion dur="2.1s" repeatCount="indefinite" begin=".7s"><mpath href="#heroFlowPathRight"/></animateMotion>
-        </circle>
-        <circle class="flow-dot dot-down" r=".9">
-          <animateMotion dur="1.5s" repeatCount="indefinite" begin="1.4s"><mpath href="#heroFlowPathDown"/></animateMotion>
-        </circle>
-        <circle class="flow-ping flow-ping-a" cx="53" cy="79" r="1.1"/>
-        <circle class="flow-ping flow-ping-b" cx="53" cy="79" r="1.1"/>
-        <circle class="flow-source" cx="53" cy="79" r=".9"/>
-      </svg>
-      <div class="hero-badge b1"><span class="num" id="statYears">7+</span><span class="lbl">Years Experience</span></div>
-      <div class="hero-badge b2"><span class="num" id="statAcres">1,200+</span><span class="lbl">Acres Secured</span></div>
-      <div class="hero-badge b3"><span class="num" id="statClients">500+</span><span class="lbl">Happy Clients</span></div>
+    <div class="hero-visual reveal" id="heroVisual">
+      <div class="hero-slide active" data-slide="0">
+        <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.webp" alt="Trulander JSF Limited helps you own land safely" width="1200" height="801" fetchpriority="high"/>
+        <svg class="hero-flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="heroFlowGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#22A54C" stop-opacity="0"/>
+              <stop offset="50%" stop-color="#22A54C" stop-opacity=".95"/>
+              <stop offset="100%" stop-color="#22A54C" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path id="heroFlowPathLeft" class="flow-path" d="M53,79 Q24,66 8,52"/>
+          <path id="heroFlowPathRight" class="flow-path" d="M53,79 C68,66 74,41 76,27"/>
+          <path id="heroFlowPathDown" class="flow-path" d="M53,79 Q71,77 87,76"/>
+          <circle class="flow-dot dot-left" r=".9">
+            <animateMotion dur="2.1s" repeatCount="indefinite" begin="0s"><mpath href="#heroFlowPathLeft"/></animateMotion>
+          </circle>
+          <circle class="flow-dot dot-right" r=".9">
+            <animateMotion dur="2.1s" repeatCount="indefinite" begin=".7s"><mpath href="#heroFlowPathRight"/></animateMotion>
+          </circle>
+          <circle class="flow-dot dot-down" r=".9">
+            <animateMotion dur="1.5s" repeatCount="indefinite" begin="1.4s"><mpath href="#heroFlowPathDown"/></animateMotion>
+          </circle>
+          <circle class="flow-ping flow-ping-a" cx="53" cy="79" r="1.1"/>
+          <circle class="flow-ping flow-ping-b" cx="53" cy="79" r="1.1"/>
+          <circle class="flow-source" cx="53" cy="79" r=".9"/>
+        </svg>
+        <div class="hero-badge b1"><span class="num" id="statYears">7+</span><span class="lbl">Years Experience</span></div>
+        <div class="hero-badge b2"><span class="num" id="statAcres">1,200+</span><span class="lbl">Acres Secured</span></div>
+        <div class="hero-badge b3"><span class="num" id="statClients">500+</span><span class="lbl">Happy Clients</span></div>
+      </div>
+      <div class="hero-slide" data-slide="1">
+        <img class="hero-photo" src="assets/photos/surveyor-person.webp" alt="Licensed surveyors mapping and demarcating a Trulander plot" width="586" height="833" loading="lazy"/>
+        <div class="hero-badge feature b1"><span class="hero-badge-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg></span><span class="lbl">Boundary Verification</span></div>
+        <div class="hero-badge feature b2"><span class="hero-badge-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="lbl">Site Demarcation</span></div>
+        <div class="hero-badge feature b3"><span class="hero-badge-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/></svg></span><span class="lbl">GPS Land Mapping</span></div>
+      </div>
+      <div class="hero-slide" data-slide="2">
+        <img class="hero-photo" src="assets/photos/housekeys-person.webp" alt="Own your plot with flexible, fully documented terms from Trulander JSF Limited" width="502" height="1047" loading="lazy"/>
+        <div class="hero-badge feature b1"><span class="hero-badge-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg></span><span class="lbl">Free Site Visits</span></div>
+        <div class="hero-badge feature b2"><span class="hero-badge-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h4"/></svg></span><span class="lbl">Flexible Payment Plans</span></div>
+        <div class="hero-badge feature b3"><span class="hero-badge-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg></span><span class="lbl">48Hrs Documentation</span></div>
+      </div>
+      <div class="hero-slide-dots" id="heroSlideDots">
+        <button class="hero-slide-dot active" data-goto="0" aria-label="Show land ownership slide"></button>
+        <button class="hero-slide-dot" data-goto="1" aria-label="Show surveying services slide"></button>
+        <button class="hero-slide-dot" data-goto="2" aria-label="Show flexible ownership slide"></button>
+      </div>
     </div>
   </div>
 </section>
@@ -4777,6 +4807,42 @@ function socialIcon(platform){
   return icons[p] || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>';
 }
 loadContent();
+
+/* --- desktop-only hero slideshow (mobile hides #heroVisual entirely via CSS, so this
+   never needs to run there) --- */
+(function initHeroSlideshow(){
+  const visual = document.getElementById('heroVisual');
+  if (!visual) return;
+  const slides = Array.from(visual.querySelectorAll('.hero-slide'));
+  const dots = Array.from(visual.querySelectorAll('.hero-slide-dot'));
+  if (slides.length < 2) return;
+  let current = 0;
+  let timer = null;
+  const desktopQuery = window.matchMedia('(min-width:761px)');
+
+  function goTo(i){
+    current = (i + slides.length) % slides.length;
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+    dots.forEach((d, idx) => d.classList.toggle('active', idx === current));
+  }
+  function next(){ goTo(current + 1); }
+  function start(){
+    if (timer) return;
+    timer = setInterval(next, 5500);
+  }
+  function stop(){
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+  function sync(){
+    if (desktopQuery.matches) start(); else stop();
+  }
+
+  dots.forEach(d => d.addEventListener('click', () => { goTo(Number(d.dataset.goto)); stop(); sync(); }));
+  visual.addEventListener('mouseenter', stop);
+  visual.addEventListener('mouseleave', sync);
+  desktopQuery.addEventListener('change', sync);
+  sync();
+})();
 
 /* --- contact form submit --- */
 document.getElementById('leadForm').addEventListener('submit', async (e) => {
