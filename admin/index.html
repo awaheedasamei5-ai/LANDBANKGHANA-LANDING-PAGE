@@ -111,6 +111,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
 .file-thumb-grid img{width:84px;height:84px;object-fit:cover;border-radius:10px;cursor:pointer;border:1px solid var(--line);}
 .pm-thumb{position:relative;width:84px;height:84px;flex:none;}
 .pm-thumb img,.pm-thumb .pm-video-tile{width:84px;height:84px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;background:var(--ink);color:#fff;font-size:11px;font-weight:700;text-align:center;}
+.pm-play-ic{width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:11px;}
 .pm-thumb .pm-del{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#B3261E;color:#fff;border:2px solid #fff;font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
 .doc-item{display:flex;align-items:center;gap:8px;font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;}
 .doc-item svg{width:15px;height:15px;color:var(--brand);flex:none;}
@@ -1283,6 +1284,15 @@ document.getElementById('galleryVideoThumbFile').addEventListener('change', asyn
   if (e.target.files[0]) { const url = await uploadImage(e.target.files[0], 4/3, 1400, 'photos/gallery'); if (url) galleryForm.image_url.value = url; }
   e.target.value = '';
 });
+// Auto-fill a thumbnail from the video link itself so the admin doesn't have
+// to go find/upload a separate preview image — manual upload above still wins.
+document.getElementById('galleryVideoUrl').addEventListener('blur', async (e) => {
+  const url = e.target.value.trim();
+  if (!url || galleryForm.image_url.value) return;
+  const provider = detectVideoProvider(url);
+  const thumb = provider === 'youtube' ? youtubeThumbnailUrl(url) : provider === 'tiktok' ? await tiktokThumbnailUrl(url) : null;
+  if (thumb) galleryForm.image_url.value = thumb;
+});
 galleryForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const d = Object.fromEntries(new FormData(galleryForm).entries());
@@ -1725,7 +1735,9 @@ async function loadPlotMediaList(){
     <div class="pm-thumb">
       ${m.kind === 'image'
         ? `<img src="${esc(m.url)}" onclick="viewMedia('${esc(m.url)}')"/>`
-        : `<div class="pm-video-tile" title="${esc(m.url)}">▶ Video<br>${esc(m.video_provider||'')}</div>`}
+        : m.thumbnail_url
+          ? `<div class="pm-video-tile" style="background-image:url('${esc(m.thumbnail_url)}');background-size:cover;background-position:center;" title="${esc(m.url)}"><span class="pm-play-ic">▶</span></div>`
+          : `<div class="pm-video-tile" title="${esc(m.url)}">▶ Video<br>${esc(m.video_provider||'')}</div>`}
       <button type="button" class="pm-del" onclick="deletePlotMedia('${m.id}')" aria-label="Remove" title="Remove">×</button>
     </div>`).join('') || '<p class="hint">No extra photos or videos yet.</p>';
 }
@@ -1735,12 +1747,53 @@ async function deletePlotMedia(id){
   if (error) return toast('Error: ' + error.message);
   loadPlotMediaList();
 }
-async function addPlotMediaRow(kind, url, video_provider){
+async function addPlotMediaRow(kind, url, video_provider, thumbnail_url){
   const { data: existing } = await sb.from('plot_media').select('sort_order').eq('plot_id', currentPlotMediaId).order('sort_order', { ascending: false }).limit(1);
   const nextOrder = existing && existing.length ? existing[0].sort_order + 1 : 0;
-  const { error } = await sb.from('plot_media').insert({ plot_id: currentPlotMediaId, kind, url, video_provider: video_provider || null, sort_order: nextOrder });
+  const { error } = await sb.from('plot_media').insert({ plot_id: currentPlotMediaId, kind, url, video_provider: video_provider || null, thumbnail_url: thumbnail_url || null, sort_order: nextOrder });
   if (error) { toast('Error: ' + error.message); return; }
   loadPlotMediaList();
+}
+// A YouTube thumbnail is just a predictable URL — no extraction needed.
+function youtubeThumbnailUrl(url){
+  try {
+    const u = new URL(url);
+    let id = u.searchParams.get('v');
+    if (!id) {
+      const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|shorts\/|live\/))([\w-]{6,})/);
+      if (m) id = m[1];
+    }
+    return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
+  } catch (e) { return null; }
+}
+async function tiktokThumbnailUrl(url){
+  try {
+    const res = await fetch('https://www.tiktok.com/oembed?url=' + encodeURIComponent(url));
+    if (res.ok) { const data = await res.json(); return data.thumbnail_url || null; }
+  } catch (e) { /* CORS/network failure — thumbnail just stays empty */ }
+  return null;
+}
+// For an uploaded video FILE there's no provider to ask for a thumbnail, so
+// grab a frame ourselves: seek partway into the clip and snapshot a <canvas>.
+function extractVideoFrameThumbnail(file){
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata'; video.muted = true; video.playsInline = true;
+    const objectUrl = URL.createObjectURL(file);
+    video.src = objectUrl;
+    const cleanup = () => URL.revokeObjectURL(objectUrl);
+    const timeout = setTimeout(() => { cleanup(); resolve(null); }, 8000);
+    video.addEventListener('loadeddata', () => { video.currentTime = Math.min(1, (video.duration || 2) / 2); });
+    video.addEventListener('seeked', () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        canvas.toBlob((blob) => { clearTimeout(timeout); cleanup(); resolve(blob); }, 'image/jpeg', 0.82);
+      } catch (e) { clearTimeout(timeout); cleanup(); resolve(null); }
+    });
+    video.addEventListener('error', () => { clearTimeout(timeout); cleanup(); resolve(null); });
+  });
 }
 document.getElementById('plotMediaImgFile').addEventListener('change', async (e) => {
   const file = e.target.files[0];
@@ -1754,7 +1807,9 @@ document.getElementById('plotMediaVideoUrlBtn').addEventListener('click', async 
   const url = input.value.trim();
   if (!url || !currentPlotMediaId) return;
   input.value = '';
-  await addPlotMediaRow('video', url, detectVideoProvider(url));
+  const provider = detectVideoProvider(url);
+  const thumb = provider === 'youtube' ? youtubeThumbnailUrl(url) : provider === 'tiktok' ? await tiktokThumbnailUrl(url) : null;
+  await addPlotMediaRow('video', url, provider, thumb);
   toast('Video added');
 });
 document.getElementById('plotMediaVideoFile').addEventListener('change', async (e) => {
@@ -1762,8 +1817,11 @@ document.getElementById('plotMediaVideoFile').addEventListener('change', async (
   e.target.value = '';
   if (!file || !currentPlotMediaId) return;
   if (file.size > 50 * 1024 * 1024) { toast('Video is too large — please keep uploads under 50MB.'); return; }
-  const url = await uploadVideoFile(file, 'videos/plots');
-  if (url) { await addPlotMediaRow('video', url, 'file'); toast('Video uploaded'); }
+  const [url, thumbBlob] = await Promise.all([uploadVideoFile(file, 'videos/plots'), extractVideoFrameThumbnail(file)]);
+  if (!url) return;
+  const thumbUrl = thumbBlob ? await uploadBlobToStorage(thumbBlob, 'videos/plots/thumbs') : null;
+  await addPlotMediaRow('video', url, 'file', thumbUrl);
+  toast('Video uploaded');
 });
 async function loadPlots(){
   const { data, error } = await sb.from('plots').select('*').order('sort_order');
@@ -1989,7 +2047,10 @@ async function approveSubmission(id){
   // first few — so nothing they uploaded gets silently dropped on approval.
   const mediaRows = [
     ...images.map((f, i) => ({ plot_id: plot.id, kind: 'image', url: f.file_url, sort_order: i })),
-    ...videos.map((f, i) => ({ plot_id: plot.id, kind: 'video', url: f.file_url, video_provider: detectVideoProvider(f.file_url), sort_order: i }))
+    ...videos.map((f, i) => {
+      const provider = detectVideoProvider(f.file_url);
+      return { plot_id: plot.id, kind: 'video', url: f.file_url, video_provider: provider, thumbnail_url: provider === 'youtube' ? youtubeThumbnailUrl(f.file_url) : null, sort_order: i };
+    })
   ];
   if (mediaRows.length) {
     const { error: mErr } = await sb.from('plot_media').insert(mediaRows);

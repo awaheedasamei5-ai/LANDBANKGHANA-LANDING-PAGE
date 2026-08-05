@@ -3145,7 +3145,7 @@ function openPlotModalRecord(p){
       <img class="main" id="modalMainImg" src="${esc(first && first.kind === 'image' ? first.url : '')}" alt="${esc(p.title)}" style="${first && first.kind === 'video' ? 'display:none' : ''}"/>
       <div id="modalMainVideoWrap" style="display:${first && first.kind === 'video' ? 'flex' : 'none'}"></div>
       ${media.length > 1 ? `<div class="modal-thumbs">${media.map((m, i) => m.kind === 'video'
-        ? `<div class="modal-thumb-video" onclick="showPlotModalMedia(${i})" title="Play video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`
+        ? `<div class="modal-thumb-video" onclick="showPlotModalMedia(${i})" title="Play video" style="${m.thumbnail_url ? `background-image:url('${esc(m.thumbnail_url)}');background-size:cover;background-position:center;` : ''}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`
         : `<img src="${esc(m.url)}" onclick="showPlotModalMedia(${i})"/>`).join('')}</div>` : ''}
     </div>
     <div class="modal-content">
