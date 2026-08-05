@@ -3007,14 +3007,121 @@ async function buildBrandedFormPDF({ title, subtitle, fields, record, footerNote
 
   return doc;
 }
+/* Numbered-section form layout (client info / plot size / visit preferences,
+   with checkbox-style option rows) matching the reference Site Visit Request
+   template's actual structure, recolored green and re-branded Trulander
+   instead of the reference's own internal letterhead. */
+async function buildSiteVisitRequestPDF(r){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const brandDark = [22, 128, 56], ink = [20, 26, 38], muted = [100, 110, 128], lineCol = [222, 227, 236];
+  const margin = 14;
+  const contentW = pageW - margin * 2;
+
+  doc.setFillColor(...brandDark);
+  doc.rect(0, 0, pageW, 32, 'F');
+  const logoUrl = await loadLogoDataUrl('assets/trulander-logo.png');
+  let textX = margin;
+  if (logoUrl) { try { doc.addImage(logoUrl, 'PNG', margin, 6, 20, 20); textX = margin + 26; } catch (e) {} }
+  doc.setTextColor(255, 255, 255);
+  doc.setFont(undefined, 'bold'); doc.setFontSize(14);
+  doc.text('TRULANDER JSF LIMITED', textX, 15);
+  doc.setFont(undefined, 'normal'); doc.setFontSize(8.5);
+  doc.text('Royal Palm Enclave, Tsopoli', textX, 22);
+  doc.setFont(undefined, 'bold'); doc.setFontSize(9.5);
+  doc.text('SITE VISIT REQUEST FORM', pageW - margin, 17, { align: 'right' });
+
+  let y = 44;
+  doc.setFont(undefined, 'bold'); doc.setFontSize(13); doc.setTextColor(...ink);
+  doc.text('Royal Palm Enclave Site Visit Request', margin, y);
+  y += 12;
+
+  const sectionHeader = (label) => {
+    doc.setFillColor(...brandDark);
+    doc.rect(margin, y, contentW, 8, 'F');
+    doc.setFont(undefined, 'bold'); doc.setFontSize(9.5); doc.setTextColor(255, 255, 255);
+    doc.text(label, margin + 4, y + 5.5);
+    y += 8 + 8;
+  };
+  const fieldRow = (cols) => {
+    const colW = contentW / cols.length;
+    let maxH = 0;
+    cols.forEach((c, i) => {
+      const x = margin + i * colW;
+      doc.setFont(undefined, 'bold'); doc.setFontSize(7.5); doc.setTextColor(...muted);
+      doc.text(c.label.toUpperCase(), x, y);
+      doc.setFont(undefined, 'normal'); doc.setFontSize(10); doc.setTextColor(...ink);
+      const lines = doc.splitTextToSize(String(c.value || '—'), colW - 6);
+      doc.text(lines, x, y + 6);
+      maxH = Math.max(maxH, 6 + lines.length * 5);
+    });
+    y += maxH + 8;
+  };
+  const checkboxRow = (label, options, selected) => {
+    doc.setFont(undefined, 'bold'); doc.setFontSize(7.5); doc.setTextColor(...muted);
+    doc.text(label.toUpperCase(), margin, y);
+    y += 6;
+    let x = margin;
+    options.forEach(opt => {
+      const isSel = opt === selected;
+      doc.setFont(undefined, isSel ? 'bold' : 'normal'); doc.setFontSize(9.5);
+      doc.setDrawColor(...(isSel ? brandDark : lineCol));
+      doc.setFillColor(...brandDark);
+      doc.rect(x, y - 3.2, 4, 4, isSel ? 'FD' : 'S');
+      doc.setTextColor(...(isSel ? ink : muted));
+      doc.text(opt, x + 6, y);
+      x += 6 + doc.getTextWidth(opt) + 10;
+    });
+    y += 12;
+  };
+
+  sectionHeader('1.0   CLIENT INFORMATION');
+  fieldRow([{ label: 'Full Name', value: r.full_name }, { label: 'Phone Number', value: r.contact }]);
+  fieldRow([{ label: 'Residential Address / Location', value: r.residential_address }, { label: 'Pick-up Location', value: r.pickup_location }]);
+
+  sectionHeader('2.0   PLOT SIZE');
+  checkboxRow('Interested In Buying', ['Half Plot', 'Full Plot'], r.plot_interest);
+
+  sectionHeader('3.0   VISIT PREFERENCES');
+  checkboxRow('When Would You Like To Join?', ['Wednesday 8:00 AM', 'Sunday 11:00 AM', 'Other'], r.visit_day);
+  fieldRow([{ label: 'Number Accompanying', value: r.accompaniment_count ?? '0' }, { label: 'Confirmed Visit Date', value: r.confirmed_visit_date ? new Date(r.confirmed_visit_date).toLocaleDateString() : 'To be confirmed' }]);
+
+  if (r.visit_purpose) {
+    sectionHeader('4.0   QUESTIONS / COMMENTS');
+    doc.setFont(undefined, 'normal'); doc.setFontSize(10); doc.setTextColor(...ink);
+    const lines = doc.splitTextToSize(r.visit_purpose, contentW);
+    doc.text(lines, margin, y);
+    y += lines.length * 5.4 + 8;
+  }
+
+  if (y > pageH - 55) { doc.addPage(); y = 20; }
+  doc.setDrawColor(...lineCol);
+  doc.line(margin, y, pageW - margin, y);
+  y += 8;
+  fieldRow([
+    { label: 'Status', value: (r.status || 'pending').toUpperCase() },
+    { label: 'Reference', value: String(r.id || '—').slice(0, 8).toUpperCase() },
+    { label: 'Submitted', value: new Date(r.created_at || Date.now()).toLocaleString() }
+  ]);
+
+  const pageHFinal = doc.internal.pageSize.getHeight();
+  doc.setDrawColor(...lineCol);
+  doc.line(margin, pageHFinal - 24, pageW - margin, pageHFinal - 24);
+  doc.setFont(undefined, 'normal'); doc.setFontSize(8.5); doc.setTextColor(...muted);
+  const settings = (typeof siteSettingsCache !== 'undefined' && siteSettingsCache) || {};
+  const contactBits = [];
+  if (settings.phone) contactBits.push('Call/WhatsApp ' + settings.phone);
+  if (settings.email) contactBits.push(settings.email);
+  doc.text(contactBits.join('   ·   ') || 'Trulander JSF Limited', margin, pageHFinal - 16);
+  doc.text('We will confirm your pickup time by phone or WhatsApp.', margin, pageHFinal - 10);
+  doc.text('Generated ' + new Date().toLocaleDateString(), pageW - margin, pageHFinal - 10, { align: 'right' });
+
+  return doc;
+}
 async function buildSiteVisitPDF(r){
-  return buildBrandedFormPDF({
-    title: 'Site Visit Request',
-    subtitle: 'Trulander JSF Limited — Royal Palm Enclave, Tsopoli',
-    fields: SITE_VISIT_FIELDS,
-    record: r,
-    footerNote: 'We will confirm your pickup time by phone or WhatsApp.'
-  });
+  return buildSiteVisitRequestPDF(r);
 }
 async function downloadSiteVisitPDF(r){
   const btn = document.getElementById('svDownloadBtn');
