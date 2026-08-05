@@ -2630,40 +2630,124 @@ function editSiteVisit(r){
   siteVisitForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function buildSiteVisitPDF(r){
+let logoDataUrlCache = null;
+async function loadLogoDataUrl(path){
+  if (logoDataUrlCache) return logoDataUrlCache;
+  try {
+    const res = await fetch(path);
+    const blob = await res.blob();
+    logoDataUrlCache = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) { logoDataUrlCache = null; }
+  return logoDataUrlCache;
+}
+// Shared branded PDF layout for any public form's confirmation document —
+// header band + logo, status pill, reference/submitted row, one card per
+// field, contact footer. Used by both the Site Visit Request and Site
+// Visit Experience Review PDFs so they look like one consistent document
+// family instead of each form reinventing its own layout.
+async function buildBrandedFormPDF({ title, subtitle, fields, record, footerNote, logoPath }){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  doc.setFontSize(16); doc.setTextColor(20, 60, 30);
-  doc.text('Trulander JSF Limited — Site Visit Request', 14, 20);
-  doc.setFontSize(11); doc.setTextColor(90, 90, 90);
-  doc.text('Royal Palm Enclave, Tsopoli', 14, 27);
-  doc.setDrawColor(200, 200, 200);
-  doc.line(14, 32, 196, 32);
-  doc.setFontSize(12); doc.setTextColor(20, 20, 20);
-  let y = 44;
-  SITE_VISIT_FIELDS.forEach(([key, label]) => {
-    doc.setFont(undefined, 'bold'); doc.text(label + ':', 14, y);
-    doc.setFont(undefined, 'normal'); doc.text(String(r[key] || '—'), 80, y);
-    y += 10;
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const brand = [34, 165, 76], brandDark = [22, 128, 56], ink = [8, 25, 16], muted = [92, 110, 100], lineCol = [225, 238, 230], cardBg = [246, 251, 248];
+
+  doc.setFillColor(...brand);
+  doc.rect(0, 0, pageW, 38, 'F');
+  const logoUrl = await loadLogoDataUrl(logoPath || 'assets/trulander-logo.png');
+  let textX = 14;
+  if (logoUrl) {
+    try { doc.addImage(logoUrl, 'PNG', 14, 8, 20, 20); textX = 40; } catch (e) {}
+  }
+  doc.setTextColor(255, 255, 255);
+  doc.setFont(undefined, 'bold'); doc.setFontSize(17);
+  doc.text(title, textX, 19);
+  doc.setFont(undefined, 'normal'); doc.setFontSize(10.5);
+  doc.text(subtitle, textX, 27);
+
+  const statusLabel = (record.status || 'submitted').toUpperCase();
+  doc.setFont(undefined, 'bold'); doc.setFontSize(9);
+  const pillW = doc.getTextWidth(statusLabel) + 12;
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(pageW - 14 - pillW, 13, pillW, 8, 4, 4, 'F');
+  doc.setTextColor(...brandDark);
+  doc.text(statusLabel, pageW - 14 - pillW / 2, 18.5, { align: 'center' });
+
+  let y = 50;
+  doc.setFont(undefined, 'normal'); doc.setFontSize(9);
+  doc.setTextColor(...muted);
+  const refId = String(record.id || '').slice(0, 8).toUpperCase();
+  doc.text('Reference: ' + (refId || '—'), 14, y);
+  doc.text('Submitted: ' + new Date(record.created_at || Date.now()).toLocaleString(), pageW - 14, y, { align: 'right' });
+  y += 7;
+  doc.setDrawColor(...lineCol);
+  doc.line(14, y, pageW - 14, y);
+  y += 10;
+
+  const contentW = pageW - 28;
+  fields.forEach(([key, label]) => {
+    const value = String(record[key] || '—');
+    doc.setFontSize(10.5);
+    const lines = doc.splitTextToSize(value, contentW - 10);
+    const boxH = 8 + lines.length * 5.4;
+    if (y + boxH > pageH - 30) { doc.addPage(); y = 20; }
+    doc.setFillColor(...cardBg);
+    doc.roundedRect(14, y, contentW, boxH, 3, 3, 'F');
+    doc.setFont(undefined, 'bold'); doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.text(label.toUpperCase(), 19, y + 6.5);
+    doc.setFont(undefined, 'normal'); doc.setFontSize(10.5);
+    doc.setTextColor(...ink);
+    doc.text(lines, 19, y + 13);
+    y += boxH + 5;
   });
-  doc.setFontSize(9); doc.setTextColor(140, 140, 140);
-  doc.text(`Submitted ${new Date(r.created_at || Date.now()).toLocaleString()}`, 14, y + 6);
+
+  doc.setDrawColor(...lineCol);
+  doc.line(14, pageH - 24, pageW - 14, pageH - 24);
+  doc.setFontSize(8.5);
+  doc.setTextColor(...muted);
+  const settings = (typeof siteSettingsCache !== 'undefined' && siteSettingsCache) || {};
+  const contactBits = [];
+  if (settings.phone) contactBits.push('Call/WhatsApp ' + settings.phone);
+  if (settings.email) contactBits.push(settings.email);
+  doc.text(contactBits.join('   ·   ') || 'Trulander JSF Limited', 14, pageH - 16);
+  doc.text(footerNote || '', 14, pageH - 10);
+  doc.text('Generated ' + new Date().toLocaleDateString(), pageW - 14, pageH - 10, { align: 'right' });
+
   return doc;
 }
-function downloadSiteVisitPDF(r){
+async function buildSiteVisitPDF(r){
+  return buildBrandedFormPDF({
+    title: 'Site Visit Request',
+    subtitle: 'Trulander JSF Limited — Royal Palm Enclave, Tsopoli',
+    fields: SITE_VISIT_FIELDS,
+    record: r,
+    footerNote: 'We will confirm your pickup time by phone or WhatsApp.'
+  });
+}
+async function downloadSiteVisitPDF(r){
+  const btn = document.getElementById('svDownloadBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Preparing PDF...'; }
   try {
-    const doc = buildSiteVisitPDF(r);
+    const doc = await buildSiteVisitPDF(r);
     doc.save(`Site-Visit-Request-${(r.full_name||'request').replace(/[^a-z0-9]+/gi,'-')}.pdf`);
   } catch (err) {
     const msg = document.getElementById('svActionMsg');
     if (msg) { msg.textContent = 'Could not generate the PDF — please try again.'; msg.className = 'form-msg err'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Download PDF'; }
   }
 }
 async function shareSiteVisitRequest(r){
   const summaryText = `Site Visit Request — Trulander JSF Limited\n` + SITE_VISIT_FIELDS.map(([key,label]) => `${label}: ${r[key] || '—'}`).join('\n');
   const msg = document.getElementById('svActionMsg');
   try {
-    const doc = buildSiteVisitPDF(r);
+    const doc = await buildSiteVisitPDF(r);
     const blob = doc.output('blob');
     const file = new File([blob], 'Site-Visit-Request.pdf', { type: 'application/pdf' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
