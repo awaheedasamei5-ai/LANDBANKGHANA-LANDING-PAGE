@@ -926,7 +926,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <h3>Are you interested in acquiring litigation-free land?</h3>
         <p>Tell us your budget and preferred area — we'll shortlist verified, dispute-free plots and handle the due diligence.</p>
         <div class="qbtns">
-          <button type="button" class="btn btn-accent" id="openBuyerModalBtn">Yes, help me buy</button>
+          <button type="button" class="btn btn-accent open-buyer-modal-btn" id="openBuyerModalBtn">Yes, help me buy</button>
           <a href="#help" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Not sure yet</a>
         </div>
       </div>
@@ -935,7 +935,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <h3>Do you have land you'd like to sell, safely and transparently?</h3>
         <p>We verify your documents, help you value it fairly, and connect you directly with serious, vetted buyers — no middlemen, no complications.</p>
         <div class="qbtns">
-          <button type="button" class="btn btn-primary" id="openSellerModalBtn">Yes, help me sell</button>
+          <button type="button" class="btn btn-primary open-seller-modal-btn" id="openSellerModalBtn">Yes, help me sell</button>
           <a href="#help" class="btn btn-ghost">Learn how</a>
         </div>
       </div>
@@ -1085,6 +1085,26 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <span class="eyebrow">Plots</span>
       <h2>Every verified plot, in one place.</h2>
       <p>Browse all available land — filter by type, status, and seller, or jump straight to what's selling fast or newly listed.</p>
+    </div>
+    <div class="qual-grid" style="margin-bottom:48px">
+      <div class="qual-card buy reveal">
+        <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <h3>Looking for litigation-free land?</h3>
+        <p>Tell us your budget and preferred area — we'll shortlist verified, dispute-free plots and handle the due diligence. Or just browse what's available below.</p>
+        <div class="qbtns">
+          <button type="button" class="btn btn-accent open-buyer-modal-btn">Help me find land</button>
+          <button type="button" class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)" onclick="document.getElementById('plotsViewTabs').scrollIntoView({behavior:'smooth'})">Just show me available plots</button>
+        </div>
+      </div>
+      <div class="qual-card sell reveal">
+        <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
+        <h3>Have land you'd like to sell?</h3>
+        <p>We verify your documents, help you value it fairly, and connect you directly with serious, vetted buyers — no middlemen, no complications.</p>
+        <div class="qbtns">
+          <button type="button" class="btn btn-primary open-seller-modal-btn">Yes, help me sell</button>
+          <a href="#help" class="btn btn-ghost">Learn how</a>
+        </div>
+      </div>
     </div>
     <div class="plots-view-tabs reveal" id="plotsViewTabs">
       <button type="button" class="plots-view-tab active" data-view="all">
@@ -2400,19 +2420,22 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
 /* --- buyer & seller inquiry modals --- */
 (function setupInquiryModals(){
-  function wireModal(openBtnId, overlayId, closeId){
-    const openBtn = document.getElementById(openBtnId);
+  // Multiple trigger buttons can open the same modal (the qualify block now
+  // appears on both Home and the Plots page) — wire every button sharing the
+  // trigger class, not just a single id.
+  function wireModal(openBtnClass, overlayId, closeId){
+    const openBtns = document.querySelectorAll('.' + openBtnClass);
     const overlay = document.getElementById(overlayId);
     const closeBtn = document.getElementById(closeId);
-    if (!openBtn || !overlay) return;
-    openBtn.addEventListener('click', () => { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; });
+    if (!openBtns.length || !overlay) return;
+    openBtns.forEach(openBtn => openBtn.addEventListener('click', () => { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }));
     function close(){ overlay.classList.remove('open'); document.body.style.overflow = ''; }
     closeBtn.addEventListener('click', close);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
     return close;
   }
-  const closeBuyer = wireModal('openBuyerModalBtn', 'buyerModalOverlay', 'buyerModalClose');
-  const closeSeller = wireModal('openSellerModalBtn', 'sellerModalOverlay', 'sellerModalClose');
+  const closeBuyer = wireModal('open-buyer-modal-btn', 'buyerModalOverlay', 'buyerModalClose');
+  const closeSeller = wireModal('open-seller-modal-btn', 'sellerModalOverlay', 'sellerModalClose');
   document.getElementById('buyerModalDoneBtn')?.addEventListener('click', closeBuyer);
   document.getElementById('sellerModalDoneBtn')?.addEventListener('click', closeSeller);
 
