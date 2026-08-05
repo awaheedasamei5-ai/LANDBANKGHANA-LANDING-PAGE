@@ -399,6 +399,13 @@ section{position:relative;}
 .inquiry-success p{color:var(--muted);font-size:14.5px;max-width:340px;margin:0 auto;}
 .enquiry-success-check{width:56px;height:56px;border-radius:50%;background:var(--brand-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
 .enquiry-success-check svg{width:28px;height:28px;color:var(--brand-dark);margin:0;}
+/* Draw-in animated checkmark used on every submission success state —
+   the circle outline traces itself, then the check strokes in right after. */
+.anim-check circle{fill:none;stroke:currentColor;stroke-width:2.5;stroke-dasharray:151;stroke-dashoffset:151;animation:anim-check-circle .5s cubic-bezier(.65,0,.45,1) forwards;}
+.anim-check path{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:anim-check-mark .35s cubic-bezier(.65,0,.45,1) .45s forwards;}
+@keyframes anim-check-circle{to{stroke-dashoffset:0;}}
+@keyframes anim-check-mark{to{stroke-dashoffset:0;}}
+@media (prefers-reduced-motion:reduce){.anim-check circle,.anim-check path{animation:none;stroke-dashoffset:0;}}
 .enquiry-success-contact{text-align:left;margin-top:28px;padding-top:24px;border-top:1px solid var(--line);}
 .enquiry-success-contact-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:14px;}
 .upload-progress{font-size:12.5px;color:var(--muted);margin-top:8px;display:none;}
@@ -556,7 +563,8 @@ section{position:relative;}
 .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--brand);outline-offset:1px;}
 .field textarea{resize:vertical;min-height:100px;}
 .form-msg{margin-top:14px;font-size:14px;font-weight:600;display:none;}
-.form-msg.ok{color:var(--brand-dark);display:block;}
+.form-msg.ok{color:var(--brand-dark);display:flex;align-items:center;gap:7px;}
+.form-msg.ok .anim-check{width:19px;height:19px;flex:none;}
 .form-msg.err{color:#B3261E;display:block;}
 @media (max-width:900px){.contact-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}}
 
@@ -1466,7 +1474,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       </div>
       <div id="buyerModalSuccess" class="inquiry-success" style="display:none;">
         <div id="buyerModalSuccessBody">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+          <svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg>
           <h3>Request received.</h3>
           <p>Thanks — our team will reach out to you shortly to help you move forward.</p>
         </div>
@@ -1572,7 +1580,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         </form>
       </div>
       <div id="sellerModalSuccess" class="inquiry-success" style="display:none;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        <svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg>
         <h3>Submission received.</h3>
         <p>Our team will verify your details and documents, then reach out before anything goes live.</p>
         <button type="button" class="btn btn-ghost" id="sellerModalDoneBtn" style="margin-top:20px;">Close</button>
@@ -1649,7 +1657,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         </form>
       </div>
       <div id="quoteModalSuccess" class="inquiry-success" style="display:none;text-align:center;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        <svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg>
         <h3>Your quotation is ready.</h3>
         <p id="quoteSummaryText"></p>
         <div class="qbtns" style="justify-content:center;margin-top:18px">
@@ -2199,6 +2207,12 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
    so it does not depend on `supabase` existing, and every block below is
    isolated with try/catch so one failure can't take down the rest of the page. */
 
+/* Inline success message with the same animated draw-in checkmark used by
+   every dedicated success panel, for forms that show their result as a
+   one-line message instead of taking over the whole form. */
+function successMsgHTML(text){
+  return `<svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg><span>${esc(text)}</span>`;
+}
 /* A single dropped request shouldn't be a hard failure for someone submitting
    a form — retry a couple of times with a short delay before giving up. */
 async function withRetry(fn, attempts = 3, delayMs = 600){
@@ -2678,7 +2692,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
       document.getElementById('buyerModalFormWrap').style.display = 'none';
       const successBody = document.getElementById('buyerModalSuccessBody');
       successBody.innerHTML = chosenPlot ? renderEnquirySentPanel(chosenPlot, data) : `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        <svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg>
         <h3>Request received.</h3>
         <p>Thanks — our team will reach out to you shortly to help you move forward.</p>`;
       document.getElementById('buyerModalSuccess').style.display = 'block';
@@ -2789,7 +2803,7 @@ document.getElementById('remoteSalesForm')?.addEventListener('submit', async (e)
       message: data.message || null
     }));
     if (error) throw error;
-    msg.textContent = "Application received — our team will call you shortly to complete your onboarding.";
+    msg.innerHTML = successMsgHTML("Application received — our team will call you shortly to complete your onboarding.");
     msg.className = 'form-msg ok';
     form.reset();
   } catch (err) {
@@ -2818,7 +2832,7 @@ document.querySelectorAll('.service-request-form').forEach(form => {
         location: data.location || null, details: data.details || null
       }));
       if (error) throw error;
-      msg.textContent = "Request received! Our team will reach out shortly.";
+      msg.innerHTML = successMsgHTML("Request received! Our team will reach out shortly.");
       msg.className = 'form-msg service-request-msg ok';
       form.reset();
     } catch (err) {
@@ -2912,7 +2926,7 @@ function renderSiteVisitSuccess(r){
   box.style.display = 'block';
   box.innerHTML = `
     <div class="sv-success-head">
-      <div class="sv-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg></div>
+      <div class="sv-check"><svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg></div>
       <div><h3 style="margin-bottom:2px">Request received!</h3><p class="hint" style="margin:0">We'll confirm your pickup time by phone or WhatsApp.</p></div>
     </div>
     <div class="sv-summary-grid">
@@ -3454,7 +3468,7 @@ function renderSiteVisitExpSuccess(r){
   box.style.display = 'block';
   box.innerHTML = `
     <div class="sv-success-head">
-      <div class="sv-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg></div>
+      <div class="sv-check"><svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg></div>
       <div><h3 style="margin-bottom:2px">Thank you!</h3><p class="hint" style="margin:0">We appreciate you taking the time to share your experience.</p></div>
     </div>
     <div class="sv-summary-grid">
@@ -4052,7 +4066,7 @@ function renderEnquirySentPanel(p, buyer){
   if (emailTo) sendBtns.push(`<a href="mailto:${esc(emailTo)}?subject=${encodeURIComponent('Enquiry about ' + (p ? p.title : 'a plot'))}&body=${encodeURIComponent(summary)}" class="btn btn-ghost">${socialIconEmail()} Send via Email</a>`);
   const contactCard = p ? (seller ? renderSellerCard(seller, p) : renderDirectContactCard(p)) : '';
   return `
-    <div class="enquiry-success-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg></div>
+    <div class="enquiry-success-check"><svg class="anim-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M14 27l7 7 17-17"/></svg></div>
     <h3>Enquiry received.</h3>
     <p>Your details are saved with our team${seller ? ", and you can send them straight to the seller below" : ", and you can reach us directly below"}.</p>
     ${sendBtns.length ? `<div class="qbtns" style="justify-content:center;margin-top:22px">${sendBtns.join('')}</div>` : ''}
@@ -4605,7 +4619,7 @@ document.getElementById('leadForm').addEventListener('submit', async (e) => {
       interest: data.interest, message: data.message || null
     }));
     if (error) throw error;
-    msg.textContent = "Thanks — we've received your message and will reach out within one business day.";
+    msg.innerHTML = successMsgHTML("Thanks — we've received your message and will reach out within one business day.");
     msg.className = 'form-msg ok';
     form.reset();
   } catch(err){
@@ -4652,7 +4666,7 @@ document.getElementById('reviewForm').addEventListener('submit', async (e) => {
       photo_url: photoUrl
     }));
     if (error) throw error;
-    msg.textContent = 'Thanks for your review — it will appear publicly once we approve it.';
+    msg.innerHTML = successMsgHTML('Thanks for your review — it will appear publicly once we approve it.');
     msg.className = 'form-msg ok';
     form.reset();
     document.getElementById('ratingValue').value = 5;
