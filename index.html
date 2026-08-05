@@ -3513,6 +3513,13 @@ async function shareSiteVisitExp(r){
 
   let dragging = false, moved = false, startX = 0, startY = 0, origLeft = 0, origTop = 0;
   function pointerDown(e){
+    // Touch devices dispatch a compatibility "click" a moment after
+    // pointerup, at the same screen coordinates as the tap. Without this,
+    // that click lands on the news overlay (which openPanel() just made
+    // visible, covering the bell) and closePanel() fires immediately after
+    // opening — the panel flashes open and shut so fast it looks like
+    // tapping the bell does nothing on mobile.
+    e.preventDefault();
     dragging = true; moved = false;
     const rect = bell.getBoundingClientRect();
     origLeft = rect.left; origTop = rect.top;
@@ -3817,7 +3824,7 @@ function renderPlotsPreview(plots){
   empty.style.display = 'none';
   const list = plots.slice().sort((a,b) => (b.featured === true) - (a.featured === true) || new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
   grid.innerHTML = list.map(p => `
-    <div class="plot-card reveal in" onclick="location.hash='#/plots'">
+    <div class="plot-card reveal in" onclick="openPlotModalById('${p.id}')">
       <div class="img-wrap">
         <img src="${esc(p.image_url || '')}" alt="${esc(p.title)}"/>
         <div class="plot-badges">
