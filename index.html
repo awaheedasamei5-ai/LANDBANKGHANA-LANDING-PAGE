@@ -335,37 +335,64 @@ section{position:relative;}
 .modal-thumb-video{width:52px;height:40px;border-radius:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 4px 10px -4px rgba(0,0,0,.4);background:var(--ink);display:flex;align-items:center;justify-content:center;flex:none;}
 .modal-thumb-video svg{width:16px;height:16px;color:#fff;}
 .modal-content{padding:28px 30px 32px;}
-.modal-price{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;color:var(--brand-dark);margin:8px 0 18px;}
-.modal-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
-.modal-facts div{background:var(--bg);border-radius:12px;padding:12px 14px;}
-.modal-facts b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;}
-.modal-facts span{font-size:14px;font-weight:600;}
-.modal-desc{font-size:14.5px;color:var(--muted);line-height:1.6;margin-bottom:22px;}
-.seller-card{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:18px;}
-.seller-head{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
-.seller-head img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--bg);flex:none;}
-.seller-head .avatar-fallback{width:38px;height:38px;border-radius:50%;background:var(--brand-light);color:var(--brand-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:13px;flex:none;}
-.seller-head img.company-logo{object-fit:contain;background:var(--brand-light);padding:6px;}
-.seller-name{font-weight:700;font-size:14px;line-height:1.3;}
-.seller-company{font-size:11.5px;color:var(--muted);line-height:1.3;}
-.seller-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px;}
-.seller-tag{display:inline-flex;align-items:center;gap:3px;height:21px;padding:0 8px;border-radius:999px;font-size:10px;font-weight:700;line-height:1;white-space:nowrap;background:var(--brand-light);color:var(--brand-dark);}
+.modal-desc{font-size:14.5px;color:var(--muted);line-height:1.6;}
+.seller-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:linear-gradient(180deg,var(--brand-light) 0%,#fff 62%);}
+.seller-head{display:flex;align-items:center;gap:11px;margin-bottom:12px;}
+.seller-head img{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#fff;flex:none;box-shadow:0 0 0 3px #fff;}
+.seller-head .avatar-fallback{width:42px;height:42px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:14px;flex:none;box-shadow:0 0 0 3px #fff;}
+.seller-head img.company-logo{object-fit:contain;background:#fff;padding:7px;}
+.seller-name{font-weight:700;font-size:14.5px;line-height:1.3;}
+.seller-company{font-size:11.5px;color:var(--muted);line-height:1.3;margin-top:1px;}
+.seller-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.seller-tag{display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 9px;border-radius:999px;font-size:10px;font-weight:700;line-height:1;white-space:nowrap;background:var(--brand-light);color:var(--brand-dark);}
 .seller-tag svg{width:9px;height:9px;flex:none;}
 .seller-tag.tag-verified{background:#DCF5E4;color:#168038;}
 .seller-tag.tag-premium{background:#FDF0CE;color:#9A6B00;}
 .seller-tag.tag-company{background:#DCEAFB;color:#155A9C;}
 .seller-tag.tag-newagent{background:#F3E8FD;color:#7B1FA2;}
-.seller-docs-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:5px;}
-.seller-docs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px;}
-.doc-pill{font-size:10.5px;height:20px;display:inline-flex;align-items:center;background:var(--bg);border:1px solid var(--line);padding:0 9px;border-radius:999px;color:var(--ink-soft);line-height:1;}
-.seller-contact{display:flex;gap:8px;margin-top:13px;}
-.seller-contact a{width:36px;height:36px;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;flex:none;}
-.seller-contact a:hover{border-color:var(--brand);color:var(--brand-dark);background:var(--brand-light);}
-.seller-contact svg{width:15px;height:15px;}
+.doc-pill{font-size:11px;height:28px;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);padding:0 12px 0 8px;border-radius:999px;color:var(--ink-soft);font-weight:600;}
+.doc-pill svg{width:12px;height:12px;color:var(--brand-dark);flex:none;}
+.seller-contact{display:flex;gap:8px;padding-top:12px;border-top:1px dashed var(--line);}
+.seller-contact a{width:38px;height:38px;border-radius:50%;background:#fff;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;flex:none;transition:.15s;}
+.seller-contact a:hover{border-color:var(--brand);color:var(--brand-dark);background:var(--brand-light);transform:translateY(-1px);}
+.seller-contact svg{width:16px;height:16px;}
 /* Inline SVGs with no explicit size collapse to 0x0 as flex children —
    .hero-ctas is new, .sp-contact-row had the same latent bug already. */
 .hero-ctas svg,.sp-contact-row svg{width:18px;height:18px;flex:none;}
-@media (max-width:700px){.modal-facts{grid-template-columns:1fr 1fr;}.modal-content{padding:22px 20px 26px;}}
+
+/* ---- plot detail view (redesigned, desktop split-pane + mobile stack) ---- */
+.plot-view-card{max-width:960px;}
+@media (min-width:900px){
+  .plot-view-card{max-height:88vh;overflow:hidden;}
+  .plot-view-card #plotModalBody{display:grid;grid-template-columns:44% 56%;height:88vh;}
+  .plot-view-card .modal-gallery{border-radius:26px 0 0 26px;aspect-ratio:auto;height:100%;}
+  .plot-view-card .plot-view-body{height:88vh;overflow-y:auto;}
+}
+.plot-view-body{padding:24px 26px 28px;}
+.plot-view-topline{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;}
+.plot-view-badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0;flex:1;}
+.plot-view-iconbtns{display:flex;gap:8px;flex:none;}
+.plot-view-iconbtns button{width:38px;height:38px;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);transition:.15s;}
+.plot-view-iconbtns button:hover{border-color:var(--brand);background:var(--brand-light);}
+.plot-view-iconbtns svg{width:17px;height:17px;}
+.plot-view-title{font-size:21px;line-height:1.3;margin-bottom:18px;}
+.plot-view-section{margin-bottom:22px;}
+.plot-view-section:last-of-type{margin-bottom:0;}
+.plot-view-section-label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:11px;}
+.plot-view-section-label svg{width:13px;height:13px;color:var(--brand);flex:none;}
+.plot-view-price{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--brand-dark);}
+.plot-facts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.plot-fact{background:var(--bg);border-radius:14px;padding:13px;display:flex;flex-direction:column;gap:9px;}
+.plot-fact-icon{width:28px;height:28px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--brand-dark);box-shadow:0 1px 2px rgba(8,25,16,.06);}
+.plot-fact-icon svg{width:14px;height:14px;}
+.plot-fact b{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;display:block;}
+.plot-fact span{font-size:13.5px;font-weight:600;line-height:1.35;display:block;margin-top:2px;}
+.plot-docs-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.plot-view-actions{display:flex;flex-direction:column;gap:10px;margin-top:24px;padding-top:22px;border-top:1px solid var(--line);}
+.plot-view-actions .btn{width:100%;}
+@media (min-width:520px){.plot-view-actions{flex-direction:row;flex-wrap:wrap;}.plot-view-actions .btn{flex:1;min-width:170px;}}
+@media (max-width:520px){.plot-facts-grid{grid-template-columns:1fr 1fr;}.plot-facts-grid>:last-child:nth-child(odd){grid-column:1/-1;}}
+@media (max-width:700px){.plot-view-body{padding:20px 18px 24px;}}
 
 /* ---------- INQUIRY MODALS (buyer/seller forms) ---------- */
 .inquiry-modal .modal-content{padding:32px 30px 30px;}
@@ -412,7 +439,8 @@ section{position:relative;}
 @keyframes anim-check-mark{to{stroke-dashoffset:0;}}
 @media (prefers-reduced-motion:reduce){.anim-check circle,.anim-check path{animation:none;stroke-dashoffset:0;}}
 .enquiry-success-contact{text-align:left;margin-top:28px;padding-top:24px;border-top:1px solid var(--line);}
-.enquiry-success-contact-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:14px;}
+.enquiry-success-contact-label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:14px;}
+.enquiry-success-contact-label svg{width:13px;height:13px;color:var(--brand);flex:none;}
 .upload-progress{font-size:12.5px;color:var(--muted);margin-top:8px;display:none;}
 .upload-progress.show{display:block;}
 .upload-progress-bar{height:6px;border-radius:999px;background:var(--line);overflow:hidden;margin-bottom:7px;}
@@ -1396,7 +1424,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
 
 <!-- ============ PLOT DETAIL MODAL ============ -->
 <div class="modal-overlay" id="plotModalOverlay">
-  <div class="modal-card">
+  <div class="modal-card plot-view-card">
     <button class="modal-close" id="plotModalClose" aria-label="Close" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
@@ -4062,12 +4090,19 @@ function isRoyalPalmPlot(p){
 }
 /* --- Company (Trulander) listings with no linked seller still need direct
    call/WhatsApp buttons — fall back to the site's own contact info. --- */
+/* Small labelled-section icons used throughout the redesigned plot view. */
+const ICON_SELLER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+const ICON_FACTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18M3 9h18"/></svg>';
+const ICON_ABOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>';
+const ICON_DOCS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7v13a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1h9z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></svg>';
+const ICON_LOCATION = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+const ICON_SIZE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h6v6H3zM15 15h6v6h-6z"/><path d="M9 9l6 6"/></svg>';
+const ICON_LANDMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 8l10 6 10-6-10-6z"/><path d="M2 16l10 6 10-6M2 8v8M22 8v8"/></svg>';
 function renderDirectContactCard(p){
   const settings = siteSettingsCache;
   if (!settings || (!settings.phone && !settings.whatsapp)) return '';
   const callNumber = toIntlPhone(settings.phone || settings.whatsapp);
   const waNumber = toIntlPhone(settings.whatsapp || settings.phone);
-  const docs = (p.document_types || []).map(d => `<span class="doc-pill">${esc(d)}</span>`).join('');
   return `
     <div class="seller-card">
       <div class="seller-head">
@@ -4077,7 +4112,6 @@ function renderDirectContactCard(p){
           <div class="seller-company">Royal Palm Enclave, Tsopoli</div>
         </div>
       </div>
-      ${docs ? `<div class="seller-docs-label">Documentation included:</div><div class="seller-docs">${docs}</div>` : ''}
       <div class="seller-contact">
         <a href="tel:+${esc(callNumber)}" aria-label="Call" title="Call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg></a>
         <a href="https://wa.me/${esc(waNumber)}?text=${encodeURIComponent('Hi, I\'m interested in "'+p.title+'" on your website.')}" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp">${socialIcon('whatsapp')}</a>
@@ -4087,9 +4121,6 @@ function renderDirectContactCard(p){
 function renderSellerCard(s, p){
   const initials = (s.name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   const tags = (s.tags||[]).map(t => `<span class="seller-tag ${tagClass(t)}">${tagIcon(t)}${esc(t)}</span>`).join('');
-  // Documentation is specific to this plot, not the seller — the same seller
-  // can list plots with entirely different documents on hand.
-  const docs = ((p && p.document_types) || []).map(d => `<span class="doc-pill">${esc(d)}</span>`).join('');
   const contacts = [];
   if (s.phone) contacts.push(`<a href="tel:+${esc(toIntlPhone(s.phone))}" aria-label="Call" title="Call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg></a>`);
   if (s.phone) contacts.push(`<a href="https://wa.me/${esc(toIntlPhone(s.phone))}" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp">${socialIcon('whatsapp')}</a>`);
@@ -4104,9 +4135,22 @@ function renderSellerCard(s, p){
         </div>
       </div>
       ${tags ? `<div class="seller-tags">${tags}</div>` : ''}
-      ${s.bio ? `<p class="modal-desc" style="margin-bottom:10px">${esc(s.bio)}</p>` : ''}
-      ${docs ? `<div class="seller-docs-label">Documentation included:</div><div class="seller-docs">${docs}</div>` : ''}
+      ${s.bio ? `<p class="modal-desc" style="margin-bottom:12px">${esc(s.bio)}</p>` : ''}
       ${contacts.length ? `<div class="seller-contact">${contacts.join('')}</div>` : ''}
+    </div>`;
+}
+/* Documents are specific to the plot, not the seller — the same seller can
+   list plots with entirely different documents on hand — so they get their
+   own labelled section on the plot view instead of living inside the
+   seller/contact card. */
+function renderPlotDocuments(p){
+  const docs = (p && p.document_types) || [];
+  if (!docs.length) return '';
+  const docIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>';
+  return `
+    <div class="plot-view-section">
+      <div class="plot-view-section-label">${ICON_DOCS}Documents included</div>
+      <div class="plot-docs-grid">${docs.map(d => `<span class="doc-pill">${docIcon}${esc(d)}</span>`).join('')}</div>
     </div>`;
 }
 /* Shared by the per-plot enquiry modal (#106) and the buyer modal's plot
@@ -4129,7 +4173,7 @@ function renderEnquirySentPanel(p, buyer){
     <p>Your details are saved with our team${seller ? ", and you can send them straight to the seller below" : ", and you can reach us directly below"}.</p>
     ${sendBtns.length ? `<div class="success-actions">${sendBtns.join('')}</div>` : ''}
     ${contactCard ? `<div class="enquiry-success-contact">
-      <div class="enquiry-success-contact-label">${seller ? 'Or reach the seller directly' : 'Or reach us directly'}</div>
+      <div class="enquiry-success-contact-label">${ICON_SELLER}${seller ? 'Or reach the seller directly' : 'Or reach us directly'}</div>
       ${contactCard}
     </div>` : ''}
   `;
@@ -4282,37 +4326,59 @@ function openPlotModalRecord(p){
         ? `<div class="modal-thumb-video" onclick="showPlotModalMedia(${i})" title="Play video" style="${m.thumbnail_url ? `background-image:url('${esc(m.thumbnail_url)}');background-size:cover;background-position:center;` : ''}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`
         : `<img src="${esc(m.url)}" onclick="showPlotModalMedia(${i})"/>`).join('')}</div>` : ''}
     </div>
-    <div class="modal-content">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">
-        <div>
+    <div class="plot-view-body">
+      <div class="plot-view-topline">
+        <div class="plot-view-badges">
           <span class="plot-status ${esc(p.status)}" style="position:static;display:inline-block">${esc(p.status)}</span>
-          ${p.featured ? '<span class="plot-featured" style="position:static;display:inline-block;margin-left:8px">Hot</span>' : ''}
-          ${p.listing_type === 'company' ? '<span class="plot-company-badge" style="position:static;display:inline-block;margin-left:8px;border:1px solid var(--line)">Trulander Listing</span>' : ''}
-          <span class="plot-type-badge" style="margin-left:8px;margin-bottom:0;vertical-align:middle">${esc(PLOT_TYPE_LABEL[p.plot_type] || 'Residential')}</span>
+          ${p.featured ? '<span class="plot-featured" style="position:static;display:inline-block">Hot</span>' : ''}
+          ${p.listing_type === 'company' ? '<span class="plot-company-badge" style="position:static;display:inline-block;border:1px solid var(--line)">Trulander Listing</span>' : ''}
+          <span class="plot-type-badge" style="margin:0;vertical-align:middle">${esc(PLOT_TYPE_LABEL[p.plot_type] || 'Residential')}</span>
         </div>
-        <div style="display:flex;gap:8px;flex:none;">
-          <button type="button" class="modal-close" style="position:static;width:36px;height:36px;" aria-label="Save plot" onclick="toggleFavoritePlot('${p.id}'); updateModalFavIcon('${p.id}')">
+        <div class="plot-view-iconbtns">
+          <button type="button" aria-label="Save plot" onclick="toggleFavoritePlot('${p.id}'); updateModalFavIcon('${p.id}')">
             <svg id="modalFavIcon" viewBox="0 0 24 24" fill="${isFavoritePlot(p.id)?'#ff5a6e':'none'}" stroke="${isFavoritePlot(p.id)?'#ff5a6e':'currentColor'}" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
           </button>
-          <button type="button" class="modal-close" style="position:static;width:36px;height:36px;" aria-label="Share plot" onclick="sharePlot('${p.id}', '${esc(p.title)}')">
+          <button type="button" aria-label="Share plot" onclick="sharePlot('${p.id}', '${esc(p.title)}')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9"/></svg>
           </button>
         </div>
       </div>
-      <h3>${esc(p.title)}</h3>
-      ${seller ? renderSellerCard(seller, p) : renderDirectContactCard(p)}
-      <div class="modal-price">${formatPrice(p)}</div>
-      <div class="modal-facts">
-        <div><b>Size</b><span>${esc(p.size)}</span></div>
-        <div><b>Location</b><span>${esc(p.location)}</span></div>
-        ${p.nearest_landmark ? `<div><b>Nearest landmark</b><span>${esc(p.nearest_landmark)}</span></div>` : '<div><b>Nearest landmark</b><span>Available on request</span></div>'}
+      <h3 class="plot-view-title">${esc(p.title)}</h3>
+
+      <div class="plot-view-section">
+        <div class="plot-view-section-label">${ICON_SELLER}${seller ? 'Listed by' : 'Contact'}</div>
+        ${seller ? renderSellerCard(seller, p) : renderDirectContactCard(p)}
       </div>
-      ${p.description ? `<p class="modal-desc">${esc(p.description)}</p>` : ''}
-      ${p.location ? `<div class="plot-map-wrap"><iframe class="plot-map-frame" src="https://www.google.com/maps?q=${encodeURIComponent(p.location)}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map showing ${esc(p.location)}"></iframe></div>` : ''}
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button type="button" class="btn btn-accent" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal();openPlotEnquiryModal('${p.id}')">Enquire About This Plot</button>
-        <a href="#/site-visit?plot=${encodeURIComponent(p.id)}" class="btn btn-ghost" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal()">Book Site Visit</a>
-        ${isRoyalPalmPlot(p) ? `<button type="button" class="btn btn-ghost" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal();openQuoteModal()">Request Quotation</button>` : ''}
+
+      <div class="plot-view-price">${formatPrice(p)}</div>
+
+      <div class="plot-view-section">
+        <div class="plot-view-section-label">${ICON_FACTS}Plot details</div>
+        <div class="plot-facts-grid">
+          <div class="plot-fact"><div class="plot-fact-icon">${ICON_SIZE}</div><b>Size</b><span>${esc(p.size)}</span></div>
+          <div class="plot-fact"><div class="plot-fact-icon">${ICON_LOCATION}</div><b>Location</b><span>${esc(p.location)}</span></div>
+          <div class="plot-fact"><div class="plot-fact-icon">${ICON_LANDMARK}</div><b>Nearest landmark</b><span>${p.nearest_landmark ? esc(p.nearest_landmark) : 'Available on request'}</span></div>
+        </div>
+      </div>
+
+      ${p.description ? `
+      <div class="plot-view-section">
+        <div class="plot-view-section-label">${ICON_ABOUT}About this plot</div>
+        <p class="modal-desc">${esc(p.description)}</p>
+      </div>` : ''}
+
+      ${renderPlotDocuments(p)}
+
+      ${p.location ? `
+      <div class="plot-view-section">
+        <div class="plot-view-section-label">${ICON_LOCATION}Location</div>
+        <div class="plot-map-wrap"><iframe class="plot-map-frame" src="https://www.google.com/maps?q=${encodeURIComponent(p.location)}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map showing ${esc(p.location)}"></iframe></div>
+      </div>` : ''}
+
+      <div class="plot-view-actions">
+        <button type="button" class="btn btn-accent" style="justify-content:center" onclick="closePlotModal();openPlotEnquiryModal('${p.id}')">Enquire About This Plot</button>
+        <a href="#/site-visit?plot=${encodeURIComponent(p.id)}" class="btn btn-ghost" style="justify-content:center" onclick="closePlotModal()">Book Site Visit</a>
+        ${isRoyalPalmPlot(p) ? `<button type="button" class="btn btn-ghost" style="justify-content:center" onclick="closePlotModal();openQuoteModal()">Request Quotation</button>` : ''}
       </div>
       <p class="form-msg" id="shareMsg" style="text-align:center"></p>
     </div>`;
