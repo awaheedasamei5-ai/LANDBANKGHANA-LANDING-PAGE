@@ -39,6 +39,10 @@ img{max-width:100%;display:block;}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-dark);background:var(--brand-light);border-radius:999px;padding:7px 16px;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:15px;padding:14px 26px;border-radius:999px;border:1px solid transparent;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease;white-space:nowrap;}
 .btn:active{transform:scale(.97);}
+/* Safety net: an icon dropped into a .btn without its own explicit size
+   (e.g. socialIcon()'s bare <svg>) otherwise falls back to the browser's
+   300x150 default replaced-element size and blows the button up. */
+.btn svg{width:18px;height:18px;flex:none;}
 .btn-primary{background:var(--ink);color:#fff;}
 .btn-primary:hover{background:var(--brand-dark);box-shadow:0 12px 28px -10px rgba(22,128,56,.55);}
 .btn-accent{background:var(--brand);color:#fff;}
@@ -4287,11 +4291,26 @@ document.getElementById('quoteForm').addEventListener('submit', async (e) => {
   msg.className = 'form-msg';
   try {
     if (!sb) throw new Error('offline');
-    if (!(numberOfPlots > 0) || numberOfPlots % 0.5 !== 0) throw new Error('Number of plots must be in half-plot steps (0.5, 1, 1.5...).');
-    const calc = calcQuotation({ numberOfPlots, creditPeriodMonths }, quoteSettingsCache);
+    // Tolerate floating-point drift from mobile number-input spinner taps
+    // (e.g. repeated +/- steps can land on 1.4999999999998 instead of 1.5) —
+    // a strict "% 0.5 !== 0" check rejects those even though they're
+    // effectively valid half-plot values.
+    const roundedToHalf = Math.round(numberOfPlots * 2) / 2;
+    if (!(numberOfPlots > 0) || Math.abs(numberOfPlots - roundedToHalf) > 1e-9) throw new Error('Number of plots must be in half-plot steps (0.5, 1, 1.5...).');
+    // quoteSettingsCache is normally warm by the time anyone reaches this form,
+    // but on a slow connection the page's initial batch load can still be in
+    // flight — fetch it directly rather than risk calcQuotation() blowing up
+    // on a null settings object (this showed up as a mobile-only failure,
+    // since mobile networks are more likely to still be loading).
+    if (!quoteSettingsCache) {
+      const { data: freshSettings } = await sb.from('quote_settings').select('*').maybeSingle();
+      if (freshSettings) quoteSettingsCache = freshSettings;
+    }
+    if (!quoteSettingsCache) throw new Error('offline');
+    const calc = calcQuotation({ numberOfPlots: roundedToHalf, creditPeriodMonths }, quoteSettingsCache);
     const insertRow = {
       name: data.name, phone: data.phone, email: data.email || null, address: data.address,
-      number_of_plots: numberOfPlots, credit_period_months: creditPeriodMonths,
+      number_of_plots: roundedToHalf, credit_period_months: creditPeriodMonths,
       full_plot_price: calc.fullPlotPrice, discount_amount: calc.discountAmount,
       interest_amount: calc.interestAmount, cost_with_interest_per_unit: calc.costWithInterestPerUnit,
       deposit_percent: calc.depositPercent, total_value: calc.totalValue,
@@ -4302,11 +4321,17 @@ document.getElementById('quoteForm').addEventListener('submit', async (e) => {
     if (error) throw error;
     lastQuoteRecord = inserted;
     document.getElementById('quoteModalFormWrap').style.display = 'none';
-    document.getElementById('quoteSummaryText').textContent = `${data.name}, your total for ${numberOfPlots} plot(s) over ${creditPeriodMonths} months is GHS ${calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2})} — a deposit of GHS ${calc.depositAmount.toLocaleString(undefined,{minimumFractionDigits:2})} and GHS ${calc.monthlyDue.toLocaleString(undefined,{minimumFractionDigits:2})}/month after that.`;
+    document.getElementById('quoteSummaryText').textContent = `${data.name}, your total for ${roundedToHalf} plot(s) over ${creditPeriodMonths} months is GHS ${calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2})} — a deposit of GHS ${calc.depositAmount.toLocaleString(undefined,{minimumFractionDigits:2})} and GHS ${calc.monthlyDue.toLocaleString(undefined,{minimumFractionDigits:2})}/month after that.`;
     document.getElementById('quoteModalSuccess').style.display = 'block';
     sendFormSMS(data.phone, renderSmsMessage('quotation_request', { name: data.name, total: calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2}) }), 'quotation_request', 'quotation_requests', inserted.id);
   } catch (err) {
-    msg.textContent = (err && err.message && err.message.includes('half-plot')) ? err.message : 'Something went wrong calculating your quotation. Please try again, or reach us directly via WhatsApp.';
+    console.error('Quotation submission failed:', err);
+    if (err && err.message && err.message.includes('half-plot')) {
+      msg.textContent = err.message;
+    } else {
+      const detail = err && err.message && err.message !== 'offline' ? ` (${err.message})` : '';
+      msg.textContent = `Something went wrong calculating your quotation${detail}. Please try again, or reach us directly via WhatsApp.`;
+    }
     msg.className = 'form-msg err';
   } finally {
     btn.disabled = false; btn.textContent = 'Calculate my quotation';

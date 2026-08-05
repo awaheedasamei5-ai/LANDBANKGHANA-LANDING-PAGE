@@ -1994,17 +1994,35 @@ async function loadSmsSettings(){
   smsSettingsForm.api_key.placeholder = data.api_key ? 'Saved — leave blank to keep it' : 'Paste your Arkesel API key';
 }
 document.getElementById('smsLogRefreshBtn').addEventListener('click', loadSmsLog);
+function smsFailureReason(providerResponse){
+  if (!providerResponse) return '';
+  const text = providerResponse.toLowerCase();
+  if (text.includes('insufficient balance')) return 'Out of SMS credit — top up your Arkesel account.';
+  if (text.includes('invalid key')) return 'Your Arkesel API key is invalid — paste the correct one in SMS notifications above.';
+  if (text.includes('sender')) return 'Sender ID issue — check your Arkesel sender ID approval.';
+  return '';
+}
 async function loadSmsLog(){
   const tbody = document.getElementById('smsLogTable');
   const { data, error } = await sb.from('sms_log').select('*').order('created_at', { ascending: false }).limit(50);
   if (error) { tbody.innerHTML = `<tr><td colspan="4">Could not load SMS log.</td></tr>`; return; }
-  tbody.innerHTML = (data || []).map(l => `
+  tbody.innerHTML = (data || []).map(l => {
+    const reason = l.status === 'failed' ? smsFailureReason(l.provider_response) : '';
+    const statusLabel = l.status === 'sent_fallback_sender' ? 'sent (fallback sender)' : (l.status || '—');
+    const title = l.status === 'sent_fallback_sender'
+      ? 'Delivered, but the custom sender ID was rejected — Arkesel used its default sender instead. Get your sender ID approved in the Arkesel dashboard to fix this.'
+      : reason;
+    return `
     <tr>
       <td>${new Date(l.created_at).toLocaleString()}</td>
       <td>${esc(l.phone || '—')}</td>
       <td>${esc(l.kind || '—')}</td>
-      <td><span class="pill ${(l.status||'').startsWith('sent')?'on':'off'}" title="${l.status==='sent_fallback_sender'?'Delivered, but the custom sender ID was rejected — Arkesel used its default sender instead. Get your sender ID approved in the Arkesel dashboard to fix this.':''}">${esc(l.status==='sent_fallback_sender' ? 'sent (fallback sender)' : (l.status || '—'))}</span></td>
-    </tr>`).join('') || '<tr><td colspan="4">No SMS activity yet.</td></tr>';
+      <td>
+        <span class="pill ${(l.status||'').startsWith('sent')?'on':'off'}" title="${esc(title)}">${esc(statusLabel)}</span>
+        ${reason ? `<div class="hint" style="margin-top:4px">${esc(reason)}</div>` : ''}
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4">No SMS activity yet.</td></tr>';
 }
 
 /* ---- SMS MESSAGE TEMPLATES ---- */
@@ -2060,7 +2078,8 @@ document.getElementById('smsTestForm').addEventListener('submit', async (e) => {
       msg.textContent = 'Sent! Check the recipient phone in a moment, then refresh the activity log below to confirm.';
       msg.className = 'form-msg ok';
     } else {
-      msg.textContent = 'The gateway reported a failure — check Recent SMS activity below for the exact error.';
+      const reason = smsFailureReason(data && data.provider_response);
+      msg.textContent = reason || 'The gateway reported a failure — check Recent SMS activity below for the exact error.';
       msg.className = 'form-msg err';
     }
     loadSmsLog();
