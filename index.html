@@ -270,7 +270,7 @@ section{position:relative;}
 .plot-card:hover{transform:translateY(-5px);box-shadow:var(--shadow);}
 .plot-card .img-wrap{position:relative;aspect-ratio:4/3;background:var(--bg);}
 .plot-card .img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
-.plot-badges{position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:1;}
+.plot-badges{position:absolute;top:12px;left:12px;right:50px;display:flex;flex-wrap:wrap;gap:6px;z-index:1;}
 .plot-status{background:var(--brand);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;}
 .plot-status.reserved{background:#E08A00;}
 .plot-status.sold{background:#6b6b6b;}
@@ -287,8 +287,9 @@ section{position:relative;}
 .plot-fav-btn.active svg{fill:#ff5a6e;transform:scale(1.1);}
 .plot-body{padding:20px;}
 .plot-body h4{font-size:16.5px;margin-bottom:8px;}
-.plot-meta{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);margin-bottom:12px;}
-.plot-meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.plot-meta{display:flex;gap:10px;font-size:13px;color:var(--muted);margin-bottom:12px;}
+.plot-meta span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.plot-meta span:last-child{text-align:right;}
 .plot-price{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;color:var(--brand-dark);}
 .plots-empty{border:1.5px dashed var(--line);border-radius:var(--radius);padding:50px 30px;text-align:center;color:var(--muted);}
 .plots-empty svg{width:34px;height:34px;color:var(--brand);margin:0 auto 14px;}
