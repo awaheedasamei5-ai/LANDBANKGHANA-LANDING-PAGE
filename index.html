@@ -2843,7 +2843,9 @@ document.getElementById('year').textContent = new Date().getFullYear();
       if (!sb) throw new Error('offline');
       const oversizedVideo = sellerVideos.getFiles().find(f => f.size > 50 * 1024 * 1024);
       if (oversizedVideo) throw new Error(`"${oversizedVideo.name}" is over 50MB — please use a smaller video file.`);
-      const { data: inserted, error } = await withRetry(() => sb.from('seller_submissions').insert({
+      const submissionId = crypto.randomUUID();
+      const { error } = await withRetry(() => sb.from('seller_submissions').insert({
+        id: submissionId,
         name: data.name, phone: data.phone, email: data.email || null,
         company_name: data.company_name || null,
         land_title: data.land_title, land_size: data.land_size || null,
@@ -2852,9 +2854,8 @@ document.getElementById('year').textContent = new Date().getFullYear();
         has_search_result: data.has_search_result === '' ? null : data.has_search_result === 'true',
         documents_held: docsHeld,
         description: data.description
-      }).select('id').single());
+      }));
       if (error) throw error;
-      const submissionId = inserted.id;
 
       const imgFiles = sellerImages.getFiles();
       const docFiles = sellerDocs.getFiles();
@@ -4338,7 +4339,9 @@ document.getElementById('quoteForm').addEventListener('submit', async (e) => {
     }
     if (!quoteSettingsCache) throw new Error('offline');
     const calc = calcQuotation({ numberOfPlots: roundedToHalf, creditPeriodMonths }, quoteSettingsCache);
+    const quotationId = crypto.randomUUID();
     const insertRow = {
+      id: quotationId,
       name: data.name, phone: data.phone, email: data.email || null, address: data.address,
       number_of_plots: roundedToHalf, credit_period_months: creditPeriodMonths,
       full_plot_price: calc.fullPlotPrice, discount_amount: calc.discountAmount,
@@ -4347,13 +4350,13 @@ document.getElementById('quoteForm').addEventListener('submit', async (e) => {
       deposit_amount: calc.depositAmount, balance: calc.balance, monthly_due: calc.monthlyDue,
       schedule: calc.schedule
     };
-    const { data: inserted, error } = await withRetry(() => sb.from('quotation_requests').insert(insertRow).select('*').single());
+    const { error } = await withRetry(() => sb.from('quotation_requests').insert(insertRow));
     if (error) throw error;
-    lastQuoteRecord = inserted;
+    lastQuoteRecord = insertRow;
     document.getElementById('quoteModalFormWrap').style.display = 'none';
     document.getElementById('quoteSummaryText').textContent = `${data.name}, your total for ${roundedToHalf} plot(s) over ${creditPeriodMonths} months is GHS ${calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2})} — a deposit of GHS ${calc.depositAmount.toLocaleString(undefined,{minimumFractionDigits:2})} and GHS ${calc.monthlyDue.toLocaleString(undefined,{minimumFractionDigits:2})}/month after that.`;
     document.getElementById('quoteModalSuccess').style.display = 'block';
-    sendFormSMS(data.phone, renderSmsMessage('quotation_request', { name: data.name, total: calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2}) }), 'quotation_request', 'quotation_requests', inserted.id);
+    sendFormSMS(data.phone, renderSmsMessage('quotation_request', { name: data.name, total: calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2}) }), 'quotation_request', 'quotation_requests', quotationId);
   } catch (err) {
     console.error('Quotation submission failed:', err);
     if (err && err.message && err.message.includes('half-plot')) {
