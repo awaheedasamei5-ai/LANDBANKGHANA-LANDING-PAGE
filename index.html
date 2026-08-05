@@ -410,6 +410,12 @@ section{position:relative;}
 .enquiry-success-contact-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:14px;}
 .upload-progress{font-size:12.5px;color:var(--muted);margin-top:8px;display:none;}
 .upload-progress.show{display:block;}
+.upload-progress-bar{height:6px;border-radius:999px;background:var(--line);overflow:hidden;margin-bottom:7px;}
+.upload-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--brand),var(--brand-dark));border-radius:999px;transition:width .3s ease;position:relative;overflow:hidden;}
+.upload-progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:upload-shimmer 1.2s linear infinite;}
+@keyframes upload-shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+.upload-progress-label{font-weight:600;color:var(--brand-dark);}
+@media (prefers-reduced-motion:reduce){.upload-progress-fill::after{animation:none;}}
 
 /* ---------- PROCESS ---------- */
 #process{padding:68px 0;background:var(--ink);color:#fff;}
@@ -1574,7 +1580,10 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
             <div class="file-list" id="sellerDocsList"></div>
           </div>
 
-          <div class="upload-progress" id="sellerUploadProgress"></div>
+          <div class="upload-progress" id="sellerUploadProgress">
+            <div class="upload-progress-bar"><div class="upload-progress-fill" id="sellerUploadFill"></div></div>
+            <div class="upload-progress-label" id="sellerUploadLabel"></div>
+          </div>
           <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" id="sellerSubmitBtn">Submit for review</button>
           <div class="form-msg" id="sellerFormMsg"></div>
         </form>
@@ -2739,23 +2748,30 @@ document.getElementById('year').textContent = new Date().getFullYear();
       const videoFiles = sellerVideos.getFiles();
       const totalFiles = imgFiles.length + docFiles.length + videoFiles.length;
       let uploaded = 0;
-      if (totalFiles) { progress.classList.add('show'); progress.textContent = `Uploading files... 0/${totalFiles}`; }
+      const setUploadProgress = (n, total) => {
+        const pct = total ? Math.round((n / total) * 100) : 0;
+        const fill = document.getElementById('sellerUploadFill');
+        const label = document.getElementById('sellerUploadLabel');
+        if (fill) fill.style.width = pct + '%';
+        if (label) label.textContent = `Uploading files... ${n}/${total} (${pct}%)`;
+      };
+      if (totalFiles) { progress.classList.add('show'); setUploadProgress(0, totalFiles); }
 
       const fileRows = [];
       for (let i = 0; i < imgFiles.length; i++) {
         const { path, url } = await uploadFile('media', imgFiles[i], `seller-submissions/${submissionId}`);
         fileRows.push({ submission_id: submissionId, kind: 'image', file_url: url, file_path: path, file_name: imgFiles[i].name, sort_order: i });
-        uploaded++; progress.textContent = `Uploading files... ${uploaded}/${totalFiles}`;
+        uploaded++; setUploadProgress(uploaded, totalFiles);
       }
       for (let i = 0; i < docFiles.length; i++) {
         const { path, url } = await uploadFile('documents', docFiles[i], `seller-submissions/${submissionId}`);
         fileRows.push({ submission_id: submissionId, kind: 'document', file_url: url, file_path: path, file_name: docFiles[i].name, sort_order: i });
-        uploaded++; progress.textContent = `Uploading files... ${uploaded}/${totalFiles}`;
+        uploaded++; setUploadProgress(uploaded, totalFiles);
       }
       for (let i = 0; i < videoFiles.length; i++) {
         const { path, url } = await uploadFile('media', videoFiles[i], `seller-submissions/${submissionId}`);
         fileRows.push({ submission_id: submissionId, kind: 'video', file_url: url, file_path: path, file_name: videoFiles[i].name, video_provider: 'file', sort_order: i });
-        uploaded++; progress.textContent = `Uploading files... ${uploaded}/${totalFiles}`;
+        uploaded++; setUploadProgress(uploaded, totalFiles);
       }
       if (fileRows.length) {
         const { error: fErr } = await withRetry(() => sb.from('seller_submission_files').insert(fileRows));
