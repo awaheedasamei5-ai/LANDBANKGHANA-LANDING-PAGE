@@ -2020,6 +2020,14 @@ const ROUTE_SECTION = {
 let pendingSharedPlotId = null;
 let pendingSiteVisitPlotId = null;
 function applyRoute(){
+  // Reassign the scroll-tracking key immediately, before anything below
+  // mutates the DOM (toggling route-hidden shrinks/grows the page and can
+  // trigger an incidental browser scroll-clamp event) — otherwise that
+  // stray event gets misattributed to the route we're leaving and
+  // silently corrupts its saved position.
+  const newRouteKey = location.hash || '#/';
+  currentRouteKey = newRouteKey;
+
   const rawHash = location.hash.replace(/^#\/?/, '').replace(/\/$/, '');
   const [hash, queryString] = rawHash.split('?');
   const isHome = hash === '';
@@ -2076,12 +2084,32 @@ function applyRoute(){
 
   // Jumping to the top makes sense when a link was clicked, but not when the
   // browser back/forward buttons brought us here — the visitor expects to
-  // land back where they were (e.g. scrolled down to Royal Palm on Home),
-  // not be thrown to the very top. popstate fires before hashchange for
-  // history navigation, so the flag it sets here is still fresh below.
-  if (!isPopStateNav) window.scrollTo(0, 0);
+  // land back where they were (e.g. scrolled down to Royal Palm on Home).
+  // The browser's own scroll restoration can't be trusted for that: every
+  // route change here toggles display:none on whole sections, so the
+  // document's total height at the moment of a back/forward navigation is
+  // usually completely different from when the position was recorded,
+  // and the native restore lands at the wrong Y (verified: it can overshoot
+  // past the real target entirely). So scroll position is tracked and
+  // restored manually per route instead, after giving the just-unhidden
+  // sections a couple of frames to finish reflowing.
+  if (isPopStateNav) {
+    const savedY = routeScrollPositions[newRouteKey];
+    // Instant, not smooth — html{scroll-behavior:smooth} would otherwise
+    // animate this over several hundred ms, and a route change mid-animation
+    // (or simply reading scrollY too soon) can leave it short of the target.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      window.scrollTo({ top: typeof savedY === 'number' ? savedY : 0, left: 0, behavior: 'instant' });
+    }));
+  } else {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }
   isPopStateNav = false;
 }
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const routeScrollPositions = {};
+let currentRouteKey = location.hash || '#/';
+window.addEventListener('scroll', () => { routeScrollPositions[currentRouteKey] = window.scrollY; }, { passive: true });
 let isPopStateNav = false;
 window.addEventListener('popstate', () => { isPopStateNav = true; });
 window.addEventListener('hashchange', applyRoute);
