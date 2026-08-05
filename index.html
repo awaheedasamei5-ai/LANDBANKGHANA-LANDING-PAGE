@@ -3427,6 +3427,7 @@ function renderDirectContactCard(p){
   if (!settings || (!settings.phone && !settings.whatsapp)) return '';
   const callNumber = toIntlPhone(settings.phone || settings.whatsapp);
   const waNumber = toIntlPhone(settings.whatsapp || settings.phone);
+  const docs = (p.document_types || []).map(d => `<span class="doc-pill">${esc(d)}</span>`).join('');
   return `
     <div class="seller-card">
       <div class="seller-head">
@@ -3436,16 +3437,19 @@ function renderDirectContactCard(p){
           <div class="seller-company">Royal Palm Enclave, Tsopoli</div>
         </div>
       </div>
+      ${docs ? `<div class="seller-docs-label">Documentation included:</div><div class="seller-docs">${docs}</div>` : ''}
       <div class="seller-contact">
         <a href="tel:+${esc(callNumber)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg> Call</a>
         <a href="https://wa.me/${esc(waNumber)}?text=${encodeURIComponent('Hi, I\'m interested in "'+p.title+'" on your website.')}" target="_blank" rel="noopener">${socialIcon('whatsapp')} WhatsApp</a>
       </div>
     </div>`;
 }
-function renderSellerCard(s){
+function renderSellerCard(s, p){
   const initials = (s.name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   const tags = (s.tags||[]).map(t => `<span class="seller-tag ${tagClass(t)}">${tagIcon(t)}${esc(t)}</span>`).join('');
-  const docs = (s.document_types||[]).map(d => `<span class="doc-pill">${esc(d)}</span>`).join('');
+  // Documentation is specific to this plot, not the seller — the same seller
+  // can list plots with entirely different documents on hand.
+  const docs = ((p && p.document_types) || []).map(d => `<span class="doc-pill">${esc(d)}</span>`).join('');
   const contacts = [];
   if (s.phone) contacts.push(`<a href="tel:+${esc(toIntlPhone(s.phone))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2z"/></svg> Call</a>`);
   if (s.phone) contacts.push(`<a href="https://wa.me/${esc(toIntlPhone(s.phone))}" target="_blank" rel="noopener">${socialIcon('whatsapp')} WhatsApp</a>`);
@@ -3514,7 +3518,7 @@ function openPlotModalRecord(p){
       </div>
       ${p.description ? `<p class="modal-desc">${esc(p.description)}</p>` : ''}
       ${p.location ? `<div class="plot-map-wrap"><iframe class="plot-map-frame" src="https://www.google.com/maps?q=${encodeURIComponent(p.location)}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map showing ${esc(p.location)}"></iframe></div>` : ''}
-      ${seller ? renderSellerCard(seller) : renderDirectContactCard(p)}
+      ${seller ? renderSellerCard(seller, p) : renderDirectContactCard(p)}
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <a href="#contact" class="btn btn-accent" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal()">Enquire About This Plot</a>
         <a href="#/site-visit?plot=${encodeURIComponent(p.id)}" class="btn btn-ghost" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal()">Book Site Visit</a>

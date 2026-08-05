@@ -521,7 +521,9 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
             </div>
             <div class="form-grid">
               <div class="field"><label>Tags (comma separated)</label><input name="tags" placeholder="Verified, Company, New Agent, Premium"/></div>
-              <div class="field"><label>Document types (comma separated)</label><input name="document_types" placeholder="Title, Certified Site Plan & Indenture, Bar-coded Site Plan & Indenture"/></div>
+              <div class="field"><label>Document types (internal reference only)</label><input name="document_types" placeholder="Title, Certified Site Plan & Indenture, Bar-coded Site Plan & Indenture"/>
+                <div class="hint">Not shown to buyers — each plot now has its own document types, set on the plot itself, since different plots from the same seller can hold different documents.</div>
+              </div>
             </div>
             <div class="field"><label>Short bio (optional)</label><textarea name="bio" rows="2" placeholder="A short line about this seller..."></textarea></div>
             <div class="form-grid">
@@ -705,6 +707,9 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
             </div>
             <div class="field"><label>Nearest landmark (optional)</label><input name="nearest_landmark" placeholder="e.g. 5 mins from the American House"/></div>
             <div class="field"><label>Description (optional)</label><textarea name="description" rows="3" placeholder="More details about this plot..."></textarea></div>
+            <div class="field"><label>Document types (comma separated)</label><input name="document_types" placeholder="Title, Certified Site Plan & Indenture, Search Report"/>
+              <div class="hint">Specific to this plot — every plot from the same seller can hold different documents, so this is never copied from the seller automatically.</div>
+            </div>
             <div class="form-grid">
               <div class="field"><label>Cover photo URL</label><input name="image_url" placeholder="https://..."/></div>
               <div class="field"><label>Or upload cover photo</label><input type="file" accept="image/*" id="plotImgFile1"/></div>
@@ -1816,6 +1821,7 @@ plotForm.addEventListener('submit', async (e) => {
   d.sort_order = parseInt(d.sort_order||'1',10);
   d.price_amount = d.price_amount ? parseFloat(d.price_amount) : null;
   d.seller_id = d.seller_id || null;
+  d.document_types = splitList(d.document_types);
   const id = d.id; delete d.id;
   const { data: saved, error } = id
     ? await sb.from('plots').update(d).eq('id', id).select('id').single()
@@ -1964,6 +1970,7 @@ function editPlot(p){
   plotForm.id.value = p.id; plotForm.listing_type.value = p.listing_type || 'third_party'; plotForm.plot_type.value = p.plot_type || 'residential'; plotForm.title.value = p.title; plotForm.size.value = p.size; plotForm.location.value = p.location;
   plotForm.price_amount.value = p.price_amount!=null?p.price_amount:''; plotForm.currency.value = p.currency||'GHS';
   plotForm.nearest_landmark.value = p.nearest_landmark||''; plotForm.description.value = p.description||'';
+  plotForm.document_types.value = (p.document_types||[]).join(', ');
   plotForm.image_url.value = p.image_url||'';
   plotForm.seller_id.value = p.seller_id||''; plotForm.status.value = p.status; plotForm.sort_order.value = p.sort_order;
   plotForm.featured.checked = p.featured; plotForm.active.checked = p.active;
@@ -2161,6 +2168,7 @@ async function approveSubmission(id){
     nearest_landmark: sub.nearest_landmark, description: sub.description,
     price_amount: sub.asking_price_amount, currency: sub.currency || 'GHS',
     image_url: images[0]?.file_url || null,
+    document_types: sub.documents_held || [],
     seller_id: sellerId, status: 'available', active: true
   }).select('id').single();
   if (pErr) return toast('Error publishing plot: ' + pErr.message);
