@@ -1402,6 +1402,12 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
               <button type="button" data-val="false">Not yet</button>
             </div>
           </div>
+          <div class="field" id="buyerPlotPickerWrap" style="display:none;">
+            <label>Which plot are you interested in? *</label>
+            <select name="chosen_plot_id" id="buyerPlotPickerSelect">
+              <option value="">Select a plot...</option>
+            </select>
+          </div>
 
           <div class="form-row">
             <div class="field"><label>Budget range (optional)</label><input type="text" name="budget_range" placeholder="e.g. GHS 50,000 - 100,000"/></div>
@@ -1421,9 +1427,11 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         </form>
       </div>
       <div id="buyerModalSuccess" class="inquiry-success" style="display:none;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
-        <h3>Request received.</h3>
-        <p>Thanks — our team will reach out to you shortly to help you move forward.</p>
+        <div id="buyerModalSuccessBody">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+          <h3>Request received.</h3>
+          <p>Thanks — our team will reach out to you shortly to help you move forward.</p>
+        </div>
         <button type="button" class="btn btn-ghost" id="buyerModalDoneBtn" style="margin-top:20px;">Close</button>
       </div>
     </div>
@@ -1535,8 +1543,35 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </div>
 </div>
 
-
-
+<!-- ============ PLOT ENQUIRY MODAL (per-plot "Enquire About This Plot") ============ -->
+<div class="modal-overlay inquiry-modal" id="plotEnquiryModalOverlay">
+  <div class="modal-card" style="max-width:560px;">
+    <button class="modal-close" id="plotEnquiryModalClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-content">
+      <div id="plotEnquiryModalFormWrap">
+        <div class="inquiry-head">
+          <span class="eyebrow">Enquire</span>
+          <h3 id="plotEnquiryModalTitle">About this plot</h3>
+          <p>Leave your details and your message goes straight to the right person — no generic contact form.</p>
+        </div>
+        <form id="plotEnquiryForm">
+          <input type="hidden" name="plot_id" id="plotEnquiryPlotId"/>
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Ama Owusu"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+          <div class="field"><label>Your message (optional)</label><textarea name="message" placeholder="Any questions about this plot..."></textarea></div>
+          <button type="submit" class="btn btn-accent" style="width:100%;justify-content:center;margin-top:6px;">Send enquiry</button>
+          <div class="form-msg" id="plotEnquiryFormMsg"></div>
+        </form>
+      </div>
+      <div id="plotEnquiryModalSuccess" class="inquiry-success" style="display:none;text-align:center;"></div>
+    </div>
+  </div>
+</div>
 
 
 <!-- ============ PROMO BANNER LIGHTBOX (click a banner to read it in full) ============ -->
@@ -2451,6 +2486,17 @@ document.getElementById('year').textContent = new Date().getFullYear();
         if (name === 'has_existing_land') {
           document.getElementById('existingLandDetailsWrap').style.display = btn.dataset.val === 'true' ? 'block' : 'none';
         }
+        if (name === 'wants_plot_recommendations') {
+          const wrap = document.getElementById('buyerPlotPickerWrap');
+          const select = document.getElementById('buyerPlotPickerSelect');
+          const showPicker = btn.dataset.val === 'true';
+          wrap.style.display = showPicker ? 'block' : 'none';
+          select.required = showPicker;
+          if (!showPicker) { select.value = ''; return; }
+          const available = (plotsCache || []).filter(p => p.status === 'available');
+          select.innerHTML = '<option value="">Select a plot...</option>' +
+            available.map(p => `<option value="${esc(p.id)}">${esc(p.title)} — ${esc(p.location)}</option>`).join('');
+        }
       });
     });
   });
@@ -2506,6 +2552,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
     msg.className = 'form-msg';
     try {
       if (!sb) throw new Error('offline');
+      const chosenPlot = data.chosen_plot_id ? (plotsCache || []).find(p => String(p.id) === data.chosen_plot_id) : null;
       const { error } = await withRetry(() => sb.from('buyer_inquiries').insert({
         name: data.name, phone: data.phone, email: data.email || null,
         has_existing_land: data.has_existing_land === '' ? null : data.has_existing_land === 'true',
@@ -2514,11 +2561,19 @@ document.getElementById('year').textContent = new Date().getFullYear();
         wants_plot_recommendations: data.wants_plot_recommendations === '' ? null : data.wants_plot_recommendations === 'true',
         budget_range: data.budget_range || null,
         preferred_contact: data.preferred_contact || 'phone',
-        message: data.message || null
+        message: data.message || null,
+        plot_id: chosenPlot ? chosenPlot.id : null,
+        source: chosenPlot ? 'plot_pick' : 'general'
       }));
       if (error) throw error;
       document.getElementById('buyerModalFormWrap').style.display = 'none';
+      const successBody = document.getElementById('buyerModalSuccessBody');
+      successBody.innerHTML = chosenPlot ? renderEnquirySentPanel(chosenPlot, data) : `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        <h3>Request received.</h3>
+        <p>Thanks — our team will reach out to you shortly to help you move forward.</p>`;
       document.getElementById('buyerModalSuccess').style.display = 'block';
+      document.getElementById('buyerPlotPickerWrap').style.display = 'none';
       buyerForm.reset();
     } catch (err) {
       msg.textContent = 'Something went wrong sending your request. Please try again, or reach us directly via WhatsApp.';
@@ -3507,6 +3562,80 @@ function renderSellerCard(s, p){
       ${contacts.length ? `<div class="seller-contact">${contacts.join('')}</div>` : ''}
     </div>`;
 }
+/* Shared by the per-plot enquiry modal (#106) and the buyer modal's plot
+   picker (#107) — routes the buyer's just-submitted details to whoever
+   actually owns the plot (the seller for third-party listings, or the
+   company for Trulander's own listings) instead of a generic contact form. */
+function renderEnquirySentPanel(p, buyer){
+  const seller = p && p.seller_id ? sellersCache[p.seller_id] : null;
+  const settings = siteSettingsCache || {};
+  const summary = `Hi, I'm ${buyer.name} (${buyer.phone}). I'm interested in "${p ? p.title : 'a plot'}"${p && p.location ? ' at ' + p.location : ''} listed on your website.${buyer.message ? ' ' + buyer.message : ''}`;
+  const waNumber = toIntlPhone(seller && seller.phone ? seller.phone : (settings.whatsapp || settings.phone || ''));
+  const emailTo = seller && seller.email ? seller.email : settings.email;
+  const sendBtns = [];
+  if (waNumber) sendBtns.push(`<a href="https://wa.me/${esc(waNumber)}?text=${encodeURIComponent(summary)}" target="_blank" rel="noopener" class="btn btn-primary">${socialIcon('whatsapp')} Send via WhatsApp</a>`);
+  if (emailTo) sendBtns.push(`<a href="mailto:${esc(emailTo)}?subject=${encodeURIComponent('Enquiry about ' + (p ? p.title : 'a plot'))}&body=${encodeURIComponent(summary)}" class="btn btn-ghost">Send via Email</a>`);
+  const contactCard = p ? (seller ? renderSellerCard(seller, p) : renderDirectContactCard(p)) : '';
+  return `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+    <h3>Enquiry received.</h3>
+    <p>Your details are saved with our team${seller ? ", and you can send them straight to the seller below" : ", and you can reach us directly below"}.</p>
+    ${sendBtns.length ? `<div class="qbtns" style="justify-content:center;margin-top:18px">${sendBtns.join('')}</div>` : ''}
+    ${contactCard ? `<div style="text-align:left;margin-top:22px">${contactCard}</div>` : ''}
+  `;
+}
+let plotEnquiryPlot = null;
+function openPlotEnquiryModal(id){
+  const p = plotsCache.find(pl => String(pl.id) === String(id));
+  if (!p) return;
+  plotEnquiryPlot = p;
+  document.getElementById('plotEnquiryPlotId').value = p.id;
+  document.getElementById('plotEnquiryModalTitle').textContent = `About "${p.title}"`;
+  document.getElementById('plotEnquiryModalFormWrap').style.display = 'block';
+  document.getElementById('plotEnquiryModalSuccess').style.display = 'none';
+  document.getElementById('plotEnquiryModalSuccess').innerHTML = '';
+  document.getElementById('plotEnquiryForm').reset();
+  document.getElementById('plotEnquiryFormMsg').textContent = '';
+  document.getElementById('plotEnquiryModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePlotEnquiryModal(){
+  document.getElementById('plotEnquiryModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('plotEnquiryModalClose').addEventListener('click', closePlotEnquiryModal);
+document.getElementById('plotEnquiryModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'plotEnquiryModalOverlay') closePlotEnquiryModal(); });
+document.getElementById('plotEnquiryForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const msg = document.getElementById('plotEnquiryFormMsg');
+  const btn = form.querySelector('button[type=submit]');
+  const data = Object.fromEntries(new FormData(form).entries());
+  const p = plotEnquiryPlot;
+  btn.disabled = true; btn.textContent = 'Sending...';
+  msg.className = 'form-msg';
+  try {
+    if (!sb) throw new Error('offline');
+    const { error } = await withRetry(() => sb.from('buyer_inquiries').insert({
+      name: data.name, phone: data.phone, email: data.email || null,
+      message: data.message || null,
+      interested_location: p ? p.location : null,
+      plot_id: p ? p.id : null,
+      source: 'plot_enquiry',
+      preferred_contact: 'phone'
+    }));
+    if (error) throw error;
+    document.getElementById('plotEnquiryModalFormWrap').style.display = 'none';
+    const successEl = document.getElementById('plotEnquiryModalSuccess');
+    successEl.innerHTML = renderEnquirySentPanel(p, data);
+    successEl.style.display = 'block';
+  } catch (err) {
+    msg.textContent = 'Something went wrong sending your enquiry. Please try again, or reach us directly via WhatsApp.';
+    msg.className = 'form-msg err';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send enquiry';
+  }
+});
 function openPlotModal(i){
   openPlotModalRecord(plotsFilteredCache[i]);
 }
@@ -3558,7 +3687,7 @@ function openPlotModalRecord(p){
       ${p.location ? `<div class="plot-map-wrap"><iframe class="plot-map-frame" src="https://www.google.com/maps?q=${encodeURIComponent(p.location)}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map showing ${esc(p.location)}"></iframe></div>` : ''}
       ${seller ? renderSellerCard(seller, p) : renderDirectContactCard(p)}
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <a href="#contact" class="btn btn-accent" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal()">Enquire About This Plot</a>
+        <button type="button" class="btn btn-accent" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal();openPlotEnquiryModal('${p.id}')">Enquire About This Plot</button>
         <a href="#/site-visit?plot=${encodeURIComponent(p.id)}" class="btn btn-ghost" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal()">Book Site Visit</a>
       </div>
       <p class="form-msg" id="shareMsg" style="text-align:center"></p>

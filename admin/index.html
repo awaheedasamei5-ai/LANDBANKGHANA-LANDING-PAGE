@@ -1951,9 +1951,11 @@ document.getElementById('plotMediaVideoFile').addEventListener('change', async (
   await addPlotMediaRow('video', url, 'file', thumbUrl);
   toast('Video uploaded');
 });
+let adminPlotsCache = [];
 async function loadPlots(){
   const { data, error } = await sb.from('plots').select('*').order('sort_order');
   if (error) return;
+  adminPlotsCache = data || [];
   document.getElementById('plotsTable').innerHTML = (data||[]).map(p => `
     <tr>
       <td>${p.image_url?`<img class="thumb" src="${esc(p.image_url)}"/>`:'—'}</td>
@@ -2216,7 +2218,8 @@ async function rejectSubmission(id){
 /* ---- BUYER INQUIRIES ---- */
 let buyersCache = [];
 document.getElementById('buyersExportBtn').addEventListener('click', () => {
-  exportCSV(buyersCache, ['name','phone','email','preferred_contact','budget_range','interested_location','has_existing_land','wants_plot_recommendations','message','status','created_at'], `buyer-inquiries-${new Date().toISOString().slice(0,10)}.csv`);
+  const rows = buyersCache.map(b => ({ ...b, plot_title: buyerPlotTitle(b) || '', source: b.source || 'general' }));
+  exportCSV(rows, ['name','phone','email','preferred_contact','budget_range','interested_location','plot_title','source','has_existing_land','wants_plot_recommendations','message','status','created_at'], `buyer-inquiries-${new Date().toISOString().slice(0,10)}.csv`);
 });
 let activeBuyerId = null;
 async function loadBuyers(){
@@ -2226,13 +2229,18 @@ async function loadBuyers(){
   renderBuyersList();
   if (activeBuyerId && buyersCache.find(b => b.id === activeBuyerId)) openBuyer(activeBuyerId);
 }
+function buyerPlotTitle(b){
+  if (!b.plot_id) return null;
+  const p = adminPlotsCache.find(pl => pl.id === b.plot_id);
+  return p ? p.title : 'Plot (deleted)';
+}
 function renderBuyersList(){
   const list = document.getElementById('buyersList');
   if (!buyersCache.length) { list.innerHTML = '<div class="inbox-empty">No inquiries yet.</div>'; return; }
   list.innerHTML = buyersCache.map(b => `
     <div class="inbox-row ${b.id===activeBuyerId?'active':''}" onclick="openBuyer('${b.id}')">
       <div class="ir-top"><span>${esc(b.name)}${b.status==='new'?' <span class="pill on" style="padding:1px 6px;font-size:10px">New</span>':''}</span><span class="ir-date">${new Date(b.created_at).toLocaleDateString()}</span></div>
-      <div class="ir-sub">${esc(b.interested_location || (b.has_existing_land ? 'Has existing land' : 'General inquiry'))}</div>
+      <div class="ir-sub">${esc(buyerPlotTitle(b) || b.interested_location || (b.has_existing_land ? 'Has existing land' : 'General inquiry'))}</div>
     </div>`).join('');
 }
 function openBuyer(id){
@@ -2241,9 +2249,11 @@ function openBuyer(id){
   const b = buyersCache.find(x => x.id === id);
   const detail = document.getElementById('buyersDetail');
   if (!b) return;
+  const plotTitle = buyerPlotTitle(b);
   detail.innerHTML = `
     <h3>${esc(b.name)}</h3>
     <p class="hint">Submitted ${new Date(b.created_at).toLocaleString()}</p>
+    ${plotTitle ? `<p class="hint" style="margin-top:-14px"><b>Re: ${esc(plotTitle)}</b> — ${b.source === 'plot_enquiry' ? 'enquired directly from this plot' : 'chose this plot in the buy-help form'}</p>` : ''}
     <div class="detail-grid">
       <div><b>Phone</b><span>${esc(b.phone)}</span></div>
       <div><b>Email</b><span>${esc(b.email||'—')}</span></div>
