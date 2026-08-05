@@ -932,8 +932,8 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       </div>
       <div class="qual-card sell reveal">
         <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
-        <h3>Do you have land you want to sell, safely and properly?</h3>
-        <p>We verify your documents, help you value it fairly, and connect you with serious, vetted buyers — no middlemen wahala.</p>
+        <h3>Do you have land you'd like to sell, safely and transparently?</h3>
+        <p>We verify your documents, help you value it fairly, and connect you directly with serious, vetted buyers — no middlemen, no complications.</p>
         <div class="qbtns">
           <button type="button" class="btn btn-primary" id="openSellerModalBtn">Yes, help me sell</button>
           <a href="#help" class="btn btn-ghost">Learn how</a>
@@ -1242,7 +1242,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <div class="stories-empty reveal">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.8 7.8L3 21l1.7-6.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
         <h4>Client stories are coming soon</h4>
-        <p>We're gathering references from recent buyers and sellers. Ask us directly and we'll happily connect you.</p>
+        <p>We're gathering references from recent buyers and sellers. Reach out directly and we'll gladly connect you.</p>
       </div>
     </div>
     <div class="review-form-wrap reveal">
@@ -1262,7 +1262,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         </div>
         <div class="field"><label>Your experience</label><textarea name="comment" required placeholder="Tell us how it went..."></textarea></div>
         <div class="field"><label>Your photo (optional)</label><input type="file" name="photo" id="reviewPhotoInput" accept="image/*"/>
-          <div class="hint">Shows next to your review so people can see it's a real person — totally optional.</div>
+          <div class="hint">Appears alongside your review so others can see it's a genuine person — entirely optional.</div>
         </div>
         <button type="submit" class="btn btn-accent">Submit Review</button>
         <p class="form-msg" id="reviewMsg"></p>
@@ -1303,7 +1303,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
           <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
           <div class="field"><label>Where are you based?</label><input type="text" name="location" placeholder="e.g. Kumasi, or Diaspora - UK"/></div>
         </div>
-        <div class="field"><label>Any sales experience? (optional)</label><input type="text" name="experience" placeholder="e.g. Real estate, insurance, none — that's fine too"/></div>
+        <div class="field"><label>Any sales experience? (optional)</label><input type="text" name="experience" placeholder="e.g. Real estate, insurance, or none at all"/></div>
         <div class="field"><label>Anything else? (optional)</label><textarea name="message" placeholder="Tell us a bit about yourself..."></textarea></div>
         <button type="submit" class="btn btn-accent btn-block">Join the Referral Program</button>
         <p class="form-msg" id="remoteSalesMsg"></p>
@@ -1800,7 +1800,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
               <option value="Ashaiman China Mall">Ashaiman China Mall</option>
               <option value="Other">Other — I'll specify below</option>
             </select>
-            <div class="hint">Just pick the closest option — we'll confirm your exact pickup point and time by phone call before the visit, so nothing gets mixed up.</div>
+            <div class="hint">Select the closest option — we'll confirm your exact pickup point and time by phone before the visit.</div>
           </div>
           <div class="field"><label>Any questions or comments for our team?</label><textarea name="visit_purpose" placeholder="Anything else we should know..."></textarea></div>
           <button type="submit" class="btn btn-accent btn-block">Submit Site Visit Request</button>
@@ -2587,7 +2587,7 @@ document.getElementById('remoteSalesForm')?.addEventListener('submit', async (e)
       message: data.message || null
     }));
     if (error) throw error;
-    msg.textContent = "You're in! Our team will call you soon to get you onboarded.";
+    msg.textContent = "Application received — our team will call you shortly to complete your onboarding.";
     msg.className = 'form-msg ok';
     form.reset();
   } catch (err) {
@@ -3461,7 +3461,7 @@ function renderSellerCard(s){
       </div>
       ${tags ? `<div class="seller-tags">${tags}</div>` : ''}
       ${s.bio ? `<p class="modal-desc" style="margin-bottom:10px">${esc(s.bio)}</p>` : ''}
-      ${docs ? `<div class="seller-docs-label">This plot comes with:</div><div class="seller-docs">${docs}</div>` : ''}
+      ${docs ? `<div class="seller-docs-label">Documentation included:</div><div class="seller-docs">${docs}</div>` : ''}
       ${contacts.length ? `<div class="seller-contact">${contacts.join('')}</div>` : ''}
     </div>`;
 }
@@ -3510,7 +3510,7 @@ function openPlotModalRecord(p){
       <div class="modal-facts">
         <div><b>Size</b><span>${esc(p.size)}</span></div>
         <div><b>Location</b><span>${esc(p.location)}</span></div>
-        ${p.nearest_landmark ? `<div><b>Nearest landmark</b><span>${esc(p.nearest_landmark)}</span></div>` : '<div><b>Nearest landmark</b><span>Ask us</span></div>'}
+        ${p.nearest_landmark ? `<div><b>Nearest landmark</b><span>${esc(p.nearest_landmark)}</span></div>` : '<div><b>Nearest landmark</b><span>Available on request</span></div>'}
       </div>
       ${p.description ? `<p class="modal-desc">${esc(p.description)}</p>` : ''}
       ${p.location ? `<div class="plot-map-wrap"><iframe class="plot-map-frame" src="https://www.google.com/maps?q=${encodeURIComponent(p.location)}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map showing ${esc(p.location)}"></iframe></div>` : ''}
