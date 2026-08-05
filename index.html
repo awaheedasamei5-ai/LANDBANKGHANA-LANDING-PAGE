@@ -1809,6 +1809,110 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <div class="sv-success" id="siteVisitSuccess" style="display:none"></div>
       </div>
     </div>
+    <p style="text-align:center;margin-top:22px;font-size:14px;color:var(--muted)">Already visited us? <a href="#/site-visit-experience" style="color:var(--brand-dark);font-weight:600">Share your experience</a>.</p>
+  </div>
+</section>
+
+<!-- ============ SITE VISIT EXPERIENCE REVIEW ============ -->
+<section id="site-visit-experience" class="site-visit-page">
+  <div class="wrap">
+    <div class="page-breadcrumb reveal"><a href="#/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home</a> / Site Visit Experience</div>
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Tell us how it went</span>
+      <h2>How was your site visit?</h2>
+      <p>Your feedback helps us improve every visit — for you and for the next person we welcome to Royal Palm Enclave.</p>
+    </div>
+    <div class="sv-grid">
+      <div class="sv-copy reveal">
+        <h3 style="margin-bottom:6px">Why we ask</h3>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> We review every response personally</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Honest feedback — good or bad — helps us do better</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg> Takes about 3 minutes</li>
+        </ul>
+      </div>
+      <div class="rs-form-card reveal">
+        <form id="siteVisitExpForm">
+          <input type="hidden" name="id"/>
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="full_name" required placeholder="e.g. Kojo Antwi"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Which site did you visit? *</label>
+              <select name="site_visited" required>
+                <option value="Royal Palm Enclave (Tsopoli)">Royal Palm Enclave (Tsopoli)</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="field"><label>Date of visit *</label><input type="date" name="visit_date" required/></div>
+          </div>
+          <div class="field"><label>How was your journey to the site? *</label>
+            <select name="journey_rating" required>
+              <option value="">Select one</option>
+              <option value="Excellent — smooth and comfortable">Excellent — smooth and comfortable</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+              <option value="Poor — there were issues">Poor — there were issues</option>
+            </select>
+          </div>
+          <div class="field"><label>What was the name of the site manager or agent who attended you?</label><input type="text" name="agent_name" placeholder="e.g. Elias"/></div>
+          <div class="field"><label>How would you rate your relationship/interaction with our site manager/agent? *</label>
+            <select name="agent_interaction_rating" required>
+              <option value="">Select one</option>
+              <option value="5">5 — Excellent</option>
+              <option value="4">4 — Good</option>
+              <option value="3">3 — Okay</option>
+              <option value="2">2 — Poor</option>
+              <option value="1">1 — Very poor</option>
+            </select>
+          </div>
+          <div class="field"><label>What did you like or dislike about how our site manager or agent handled your visit?</label><textarea name="agent_feedback" placeholder="Anything they did well, or could improve..."></textarea></div>
+          <div class="field"><label>How would you describe the land or site itself (location, environment, accessibility)? *</label>
+            <select name="site_description" required>
+              <option value="">Select one</option>
+              <option value="Exceeded expectations">Exceeded expectations</option>
+              <option value="Met expectations">Met expectations</option>
+              <option value="Below expectations">Below expectations</option>
+            </select>
+          </div>
+          <div class="field"><label>If our site was below expectation, kindly let us know why</label><textarea name="below_expectation_reason" placeholder="Only if applicable..."></textarea></div>
+          <div class="field"><label>Overall, how would you rate your site visit experience? *</label>
+            <select name="overall_rating" required>
+              <option value="">Select one</option>
+              <option value="5">5 — Excellent</option>
+              <option value="4">4 — Good</option>
+              <option value="3">3 — Okay</option>
+              <option value="2">2 — Poor</option>
+              <option value="1">1 — Very poor</option>
+            </select>
+          </div>
+          <div class="field"><label>How likely are you to recommend Trulander JSF Limited to a friend or family member? *</label>
+            <select name="recommend_likelihood" required>
+              <option value="">Select one (0 = not likely, 10 = extremely likely)</option>
+              <option value="10">10</option><option value="9">9</option><option value="8">8</option>
+              <option value="7">7</option><option value="6">6</option><option value="5">5</option>
+              <option value="4">4</option><option value="3">3</option><option value="2">2</option>
+              <option value="1">1</option><option value="0">0</option>
+            </select>
+          </div>
+          <div class="field"><label>Are you interested in proceeding with a purchase after this visit? *</label>
+            <select name="purchase_interest" required>
+              <option value="">Select one</option>
+              <option value="Yes, definitely">Yes, definitely</option>
+              <option value="Yes, but I need more time/information">Yes, but I need more time/information</option>
+              <option value="Not at this time">Not at this time</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div class="field"><label>What could we improve to better serve you and future clients?</label><textarea name="improvement_suggestions"></textarea></div>
+          <div class="field"><label>Any additional comments or suggestions?</label><textarea name="additional_comments"></textarea></div>
+          <button type="submit" class="btn btn-accent btn-block">Submit Feedback</button>
+          <p class="form-msg" id="siteVisitExpMsg"></p>
+        </form>
+        <div class="sv-success" id="siteVisitExpSuccess" style="display:none"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1895,6 +1999,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
         <ul>
           <li><a href="#remote-sales">Earn With Us</a></li>
           <li><a href="#process">Our Process</a></li>
+          <li><a href="#/site-visit-experience">Site Visit Experience</a></li>
           <li><a href="seller/index.html">Seller Login</a></li>
           <li><a href="admin/index.html">Staff Login</a></li>
         </ul>
@@ -2000,7 +2105,7 @@ const DESKTOP_HOME_SECTIONS = ['home','promo','qualify','about','royal-palm','pl
 const MOBILE_HOME_SECTIONS = ['home','promo','qualify','plots-preview','contact'];
 const isMobileNav = () => window.matchMedia('(max-width:760px)').matches;
 function currentHomeSections(){ return isMobileNav() ? MOBILE_HOME_SECTIONS : DESKTOP_HOME_SECTIONS; }
-const ROUTABLE_SECTIONS = DESKTOP_HOME_SECTIONS.concat(['plots','services','service-surveyor','service-legal','service-documentation','service-help','site-visit']);
+const ROUTABLE_SECTIONS = DESKTOP_HOME_SECTIONS.concat(['plots','services','service-surveyor','service-legal','service-documentation','service-help','site-visit','site-visit-experience']);
 const ROUTE_SECTION = {
   'royal-palm': 'royal-palm',
   // About Us is the "everything about the company" destination — folds in
@@ -2015,6 +2120,7 @@ const ROUTE_SECTION = {
   'plots': 'plots',
   'refer-earn': 'remote-sales',
   'site-visit': 'site-visit',
+  'site-visit-experience': 'site-visit-experience',
   'contact': 'contact'
 };
 let pendingSharedPlotId = null;
@@ -2752,6 +2858,127 @@ async function shareSiteVisitRequest(r){
     const file = new File([blob], 'Site-Visit-Request.pdf', { type: 'application/pdf' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], title: 'Site Visit Request', text: summaryText });
+      return;
+    }
+  } catch (err) { /* fall through to text share below */ }
+  const waUrl = 'https://wa.me/?text=' + encodeURIComponent(summaryText);
+  window.open(waUrl, '_blank', 'noopener');
+  if (msg) { msg.textContent = 'Opened WhatsApp with your details ready to send.'; msg.className = 'form-msg ok'; }
+}
+
+/* --- Site Visit Experience Review: submit/edit + client-side PDF download + WhatsApp share --- */
+const SITE_VISIT_EXP_FIELDS = [
+  ['full_name', 'Full Name'], ['phone', 'Phone Number'], ['site_visited', 'Site Visited'],
+  ['visit_date', 'Date of Visit'], ['journey_rating', 'Journey to the Site'],
+  ['agent_name', 'Site Manager / Agent'], ['agent_interaction_rating', 'Agent Interaction Rating (1-5)'],
+  ['agent_feedback', 'Feedback on Agent'], ['site_description', 'Site Description'],
+  ['below_expectation_reason', 'Reason (if below expectation)'], ['overall_rating', 'Overall Experience Rating (1-5)'],
+  ['recommend_likelihood', 'Likelihood to Recommend (0-10)'], ['purchase_interest', 'Interested in Purchasing?'],
+  ['improvement_suggestions', 'Suggestions for Improvement'], ['additional_comments', 'Additional Comments']
+];
+const SITE_VISIT_EXP_NUMERIC_FIELDS = ['agent_interaction_rating', 'overall_rating', 'recommend_likelihood'];
+let siteVisitExpLastRecord = null;
+const siteVisitExpForm = document.getElementById('siteVisitExpForm');
+siteVisitExpForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('siteVisitExpMsg');
+  const btn = siteVisitExpForm.querySelector('button[type=submit]');
+  const data = Object.fromEntries(new FormData(siteVisitExpForm).entries());
+  const editingId = data.id || null;
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.textContent = editingId ? 'Saving...' : 'Submitting...';
+  msg.className = 'form-msg';
+  try {
+    if (!sb) throw new Error('offline');
+    const payload = {};
+    SITE_VISIT_EXP_FIELDS.forEach(([key]) => {
+      const raw = data[key];
+      if (raw === undefined) return;
+      payload[key] = raw === '' ? null : (SITE_VISIT_EXP_NUMERIC_FIELDS.includes(key) ? Number(raw) : raw);
+    });
+    let record;
+    if (editingId) {
+      const { error } = await withRetry(() => sb.from('site_visit_experiences').update(payload).eq('id', editingId));
+      if (error) throw error;
+      record = { ...siteVisitExpLastRecord, ...payload, id: editingId };
+    } else {
+      const id = crypto.randomUUID();
+      const { error } = await withRetry(() => sb.from('site_visit_experiences').insert({ ...payload, id }));
+      if (error) throw error;
+      record = { ...payload, id, status: 'new', created_at: new Date().toISOString() };
+    }
+    siteVisitExpLastRecord = record;
+    renderSiteVisitExpSuccess(record);
+  } catch (err) {
+    console.error('Site visit experience submission failed:', err);
+    const detail = err && err.message && err.message !== 'offline' ? ` (${err.message})` : '';
+    msg.textContent = `Something went wrong submitting your feedback${detail}. Please try again, or reach us directly via WhatsApp.`;
+    msg.className = 'form-msg err';
+  } finally {
+    btn.disabled = false; btn.textContent = originalLabel;
+  }
+});
+function renderSiteVisitExpSuccess(r){
+  siteVisitExpForm.style.display = 'none';
+  const box = document.getElementById('siteVisitExpSuccess');
+  box.style.display = 'block';
+  box.innerHTML = `
+    <div class="sv-success-head">
+      <div class="sv-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg></div>
+      <div><h3 style="margin-bottom:2px">Thank you!</h3><p class="hint" style="margin:0">We appreciate you taking the time to share your experience.</p></div>
+    </div>
+    <div class="sv-summary-grid">
+      ${SITE_VISIT_EXP_FIELDS.map(([key,label]) => `<div><b>${esc(label)}</b><span>${esc(r[key] ?? '—')}</span></div>`).join('')}
+    </div>
+    <div class="sv-actions">
+      <button type="button" class="btn btn-accent" id="svExpDownloadBtn">Download PDF</button>
+      <button type="button" class="btn btn-ghost" id="svExpShareBtn">Share via WhatsApp</button>
+      <button type="button" class="btn btn-ghost" id="svExpEditBtn">Edit Details</button>
+    </div>
+    <p class="form-msg" id="svExpActionMsg"></p>`;
+  document.getElementById('svExpDownloadBtn').addEventListener('click', () => downloadSiteVisitExpPDF(r));
+  document.getElementById('svExpShareBtn').addEventListener('click', () => shareSiteVisitExp(r));
+  document.getElementById('svExpEditBtn').addEventListener('click', () => editSiteVisitExp(r));
+}
+function editSiteVisitExp(r){
+  document.getElementById('siteVisitExpSuccess').style.display = 'none';
+  siteVisitExpForm.style.display = 'block';
+  siteVisitExpForm.id.value = r.id;
+  SITE_VISIT_EXP_FIELDS.forEach(([key]) => { if (siteVisitExpForm[key]) siteVisitExpForm[key].value = r[key] ?? ''; });
+  siteVisitExpForm.querySelector('button[type=submit]').textContent = 'Save Changes';
+  siteVisitExpForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+async function buildSiteVisitExpPDF(r){
+  return buildBrandedFormPDF({
+    title: 'Site Visit Experience Review',
+    subtitle: 'Trulander JSF Limited — Royal Palm Enclave, Tsopoli',
+    fields: SITE_VISIT_EXP_FIELDS,
+    record: r,
+    footerNote: 'Thank you for helping us improve every visit.'
+  });
+}
+async function downloadSiteVisitExpPDF(r){
+  const btn = document.getElementById('svExpDownloadBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Preparing PDF...'; }
+  try {
+    const doc = await buildSiteVisitExpPDF(r);
+    doc.save(`Site-Visit-Experience-${(r.full_name||'feedback').replace(/[^a-z0-9]+/gi,'-')}.pdf`);
+  } catch (err) {
+    const msg = document.getElementById('svExpActionMsg');
+    if (msg) { msg.textContent = 'Could not generate the PDF — please try again.'; msg.className = 'form-msg err'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Download PDF'; }
+  }
+}
+async function shareSiteVisitExp(r){
+  const summaryText = `Site Visit Experience Review — Trulander JSF Limited\n` + SITE_VISIT_EXP_FIELDS.map(([key,label]) => `${label}: ${r[key] ?? '—'}`).join('\n');
+  const msg = document.getElementById('svExpActionMsg');
+  try {
+    const doc = await buildSiteVisitExpPDF(r);
+    const blob = doc.output('blob');
+    const file = new File([blob], 'Site-Visit-Experience.pdf', { type: 'application/pdf' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Site Visit Experience Review', text: summaryText });
       return;
     }
   } catch (err) { /* fall through to text share below */ }

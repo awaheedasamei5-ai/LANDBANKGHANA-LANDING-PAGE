@@ -208,6 +208,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="remotesales">Remote Sales Force</button>
       <button class="nav-item" data-panel="servicerequests">Service Requests</button>
       <button class="nav-item" data-panel="sitevisits">Site Visit Requests</button>
+      <button class="nav-item" data-panel="sitevisitexp">Site Visit Experience</button>
       <button class="nav-item" data-panel="reviews">Reviews</button>
       <button class="nav-item" data-panel="leads">Leads</button>
     </div>
@@ -636,6 +637,29 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
           <div class="inbox">
             <div class="inbox-list" id="siteVisitsList"></div>
             <div class="inbox-detail" id="siteVisitsDetail"><div class="inbox-empty">Select a request to view its details.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SITE VISIT EXPERIENCE REVIEW -->
+      <div class="panel" id="panel-sitevisitexp">
+        <div class="panel-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h3 style="margin:0">Site visit experience reviews</h3>
+            <button type="button" class="btn btn-ghost" id="siteVisitExpExportBtn">Download All (CSV)</button>
+          </div>
+          <p class="desc">Post-visit feedback submitted after a site visit — journey, agent interaction, overall rating, and purchase interest.</p>
+          <div class="field" style="max-width:220px;margin-bottom:16px">
+            <label>Filter by status</label>
+            <select id="siteVisitExpStatusFilter">
+              <option value="">All statuses</option>
+              <option value="new">New</option>
+              <option value="reviewed">Reviewed</option>
+            </select>
+          </div>
+          <div class="inbox">
+            <div class="inbox-list" id="siteVisitExpList"></div>
+            <div class="inbox-detail" id="siteVisitExpDetail"><div class="inbox-empty">Select a review to view its details.</div></div>
           </div>
         </div>
       </div>
@@ -1243,7 +1267,7 @@ if (mobileNavSelect) {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteCopy();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteVisitExp(); loadSiteCopy();
 }
 
 /* ---- BANNERS ---- */
@@ -2560,6 +2584,94 @@ document.getElementById('siteVisitExportBtn').addEventListener('click', () => {
   const filenameSuffix = dateFilter || new Date().toISOString().slice(0,10);
   exportCSV(rows, cols, `site-visit-requests-${filenameSuffix}.csv`);
 });
+
+/* ---- SITE VISIT EXPERIENCE REVIEW ---- */
+let siteVisitExpCache = [];
+let activeSiteVisitExpId = null;
+const SITE_VISIT_EXP_FIELDS_ADMIN = [
+  ['phone', 'Phone Number'], ['site_visited', 'Site Visited'], ['visit_date', 'Date of Visit'],
+  ['journey_rating', 'Journey to the Site'], ['agent_name', 'Site Manager / Agent'],
+  ['agent_interaction_rating', 'Agent Interaction Rating (1-5)'], ['agent_feedback', 'Feedback on Agent'],
+  ['site_description', 'Site Description'], ['below_expectation_reason', 'Reason (if below expectation)'],
+  ['overall_rating', 'Overall Experience Rating (1-5)'], ['recommend_likelihood', 'Likelihood to Recommend (0-10)'],
+  ['purchase_interest', 'Interested in Purchasing?'], ['improvement_suggestions', 'Suggestions for Improvement'],
+  ['additional_comments', 'Additional Comments']
+];
+document.getElementById('siteVisitExpExportBtn').addEventListener('click', () => {
+  const cols = ['full_name'].concat(SITE_VISIT_EXP_FIELDS_ADMIN.map(([key]) => key)).concat(['status','created_at']);
+  exportCSV(siteVisitExpCache, cols, `site-visit-experience-${new Date().toISOString().slice(0,10)}.csv`);
+});
+async function loadSiteVisitExp(){
+  const { data, error } = await sb.from('site_visit_experiences').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  siteVisitExpCache = data || [];
+  renderSiteVisitExpList();
+  if (activeSiteVisitExpId && siteVisitExpCache.find(r => r.id === activeSiteVisitExpId)) openSiteVisitExp(activeSiteVisitExpId);
+}
+function renderSiteVisitExpList(){
+  const list = document.getElementById('siteVisitExpList');
+  const statusFilter = document.getElementById('siteVisitExpStatusFilter').value;
+  const rows = statusFilter ? siteVisitExpCache.filter(r => r.status === statusFilter) : siteVisitExpCache;
+  if (!rows.length) { list.innerHTML = '<div class="inbox-empty">No reviews yet.</div>'; return; }
+  list.innerHTML = rows.map(r => `
+    <div class="inbox-row ${r.id===activeSiteVisitExpId?'active':''}" onclick="openSiteVisitExp('${r.id}')">
+      <div class="ir-top"><span>${esc(r.full_name)}${r.status==='new'?' <span class="pill on" style="padding:1px 6px;font-size:10px">New</span>':''}</span><span class="ir-date">${new Date(r.created_at).toLocaleDateString()}</span></div>
+      <div class="ir-sub">Overall ${esc(r.overall_rating ?? '—')}/5 · Recommend ${esc(r.recommend_likelihood ?? '—')}/10 · ${esc(r.purchase_interest || 'No purchase-interest answer')}</div>
+    </div>`).join('');
+}
+document.getElementById('siteVisitExpStatusFilter').addEventListener('change', renderSiteVisitExpList);
+function openSiteVisitExp(id){
+  activeSiteVisitExpId = id;
+  renderSiteVisitExpList();
+  const r = siteVisitExpCache.find(x => x.id === id);
+  const detail = document.getElementById('siteVisitExpDetail');
+  if (!r) return;
+  detail.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+      <h3>${esc(r.full_name)}</h3>
+      <button type="button" class="btn" id="svExpPdfBtn">Download PDF</button>
+    </div>
+    <p class="hint">Reviewed ${new Date(r.created_at).toLocaleString()}</p>
+    <div class="detail-grid">
+      ${SITE_VISIT_EXP_FIELDS_ADMIN.map(([key,label]) => `<div><b>${esc(label)}</b><span>${esc(r[key] ?? '—')}</span></div>`).join('')}
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <a class="btn btn-ghost" href="tel:+${esc(toIntlPhone(r.phone))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc(toIntlPhone(r.phone))}" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+      <label class="hint" style="margin:0">Status</label>
+      <select onchange="updateSiteVisitExpStatus('${r.id}',this.value)">
+        <option value="new" ${r.status==='new'?'selected':''}>New</option>
+        <option value="reviewed" ${r.status==='reviewed'?'selected':''}>Reviewed</option>
+      </select>
+    </div>`;
+  document.getElementById('svExpPdfBtn').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true; btn.textContent = 'Preparing...';
+    try {
+      const doc = await buildBrandedFormPDF({
+        title: 'Site Visit Experience Review',
+        subtitle: 'Trulander JSF Limited — Royal Palm Enclave, Tsopoli',
+        fields: [['full_name','Full Name']].concat(SITE_VISIT_EXP_FIELDS_ADMIN),
+        record: r,
+        footerNote: 'Thank you for helping us improve every visit.'
+      });
+      doc.save(`Site-Visit-Experience-${(r.full_name||'feedback').replace(/[^a-z0-9]+/gi,'-')}.pdf`);
+    } catch (err) {
+      toast('Could not generate the PDF — please try again.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Download PDF';
+    }
+  });
+}
+async function updateSiteVisitExpStatus(id, status){
+  const { error } = await sb.from('site_visit_experiences').update({ status }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  const r = siteVisitExpCache.find(x => x.id === id); if (r) r.status = status;
+  renderSiteVisitExpList();
+  toast('Status updated');
+}
 
 /* ---- shared delete ---- */
 async function deleteRow(table, id, reload, col){
