@@ -1127,37 +1127,37 @@ async function buildQuotationPDF(r){
   const paintPage = () => { doc.setFillColor(244, 250, 246); doc.rect(0, 0, pageW, pageH, 'F'); };
   paintPage();
 
-  const logoSize = 30;
+  const logoSize = 22;
   doc.setFillColor(...brandDark);
   doc.rect(margin, margin, logoSize, logoSize, 'F');
   const logoUrl = await loadAdminLogoDataUrl();
-  if (logoUrl) { try { doc.addImage(logoUrl, 'PNG', margin + 4, margin + 4, logoSize - 8, logoSize - 8); } catch (e) {} }
-  const textX = margin + logoSize + 10;
+  if (logoUrl) { try { doc.addImage(logoUrl, 'PNG', margin + 3, margin + 3, logoSize - 6, logoSize - 6); } catch (e) {} }
+  const textX = margin + logoSize + 8;
   doc.setTextColor(...ink);
-  doc.setFont('times', 'bold'); doc.setFontSize(22);
-  doc.text('Trulander JSF Limited', textX, margin + 12);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  doc.setFont('times', 'bold'); doc.setFontSize(17);
+  doc.text('Trulander JSF Limited', textX, margin + 9);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
   doc.setTextColor(...muted);
-  doc.text('P.O Box CO3644, Tema, Accra-Ghana', textX, margin + 20);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text('P.O Box CO3644, Tema, Accra-Ghana', textX, margin + 15.5);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
   doc.setTextColor(...ink);
-  doc.text('Quotation with Payment', pageW - margin, margin + 8, { align: 'right' });
-  doc.text('Plan Schedule', pageW - margin, margin + 13, { align: 'right' });
+  doc.text('Quotation with Payment', pageW - margin, margin + 6, { align: 'right' });
+  doc.text('Plan Schedule', pageW - margin, margin + 11, { align: 'right' });
 
-  let y = margin + logoSize + 14;
-  const leftX = margin, leftValX = margin + 34;
-  const rightX = pageW * 0.53, rightValX = rightX + 46;
-  const rowH = 6.6;
+  let y = margin + logoSize + 9;
+  const leftX = margin, leftValX = margin + 32;
+  const rightX = pageW * 0.53, rightValX = rightX + 44;
+  const rowH = 5.6;
   const infoLine = (x, valX, yy, label, value, highlight) => {
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...brandDark);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...brandDark);
     doc.text(label, x, yy);
-    doc.setFont('helvetica', highlight ? 'bold' : 'normal'); doc.setFontSize(9);
+    doc.setFont('helvetica', highlight ? 'bold' : 'normal'); doc.setFontSize(8.5);
     doc.setTextColor(...(highlight ? accent : ink));
     doc.text(String(value), valX, yy);
   };
   let ly = y;
   infoLine(leftX, leftValX, ly, 'Customer Name', r.name || '—'); ly += rowH;
-  infoLine(leftX, leftValX, ly, 'Address', r.address || '—'); ly += rowH * 1.7;
+  infoLine(leftX, leftValX, ly, 'Address', r.address || '—'); ly += rowH * 1.4;
   infoLine(leftX, leftValX, ly, 'Contact', r.phone || '—'); ly += rowH;
   infoLine(leftX, leftValX, ly, 'Payment Plan', r.deposit_percent + '%'); ly += rowH;
 
@@ -1171,7 +1171,7 @@ async function buildQuotationPDF(r){
   infoLine(rightX, rightValX, ry, 'Cost with Interest', money(r.cost_with_interest_per_unit)); ry += rowH;
   infoLine(rightX, rightValX, ry, 'Total', money(r.total_value)); ry += rowH;
 
-  y = Math.max(ly, ry) + 10;
+  y = Math.max(ly, ry) + 6;
 
   const summaryCols = [
     { label: 'Total Value(GHS)', value: 'GHS ' + Number(r.total_value).toLocaleString(undefined, { maximumFractionDigits: 0 }) },
@@ -1181,56 +1181,69 @@ async function buildQuotationPDF(r){
   ];
   const scW = tableW / summaryCols.length;
   doc.setFillColor(...brandDark);
-  doc.rect(margin, y, tableW, 8, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255, 255, 255);
-  summaryCols.forEach((c, i) => doc.text(c.label, margin + i * scW + 4, y + 5.5));
-  y += 8;
+  doc.rect(margin, y, tableW, 7, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(255, 255, 255);
+  summaryCols.forEach((c, i) => doc.text(c.label, margin + i * scW + 4, y + 5));
+  y += 7;
   doc.setFillColor(...brandLight);
-  doc.rect(margin, y, tableW, 9, 'F');
+  doc.rect(margin, y, tableW, 8, 'F');
   summaryCols.forEach((c, i) => {
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
     doc.setTextColor(...(c.highlight ? accent : ink));
-    doc.text(c.value, margin + i * scW + 4, y + 6);
+    doc.text(c.value, margin + i * scW + 4, y + 5.5);
   });
-  y += 9 + 12;
+  y += 8 + 7;
+  const tableStartY = y;
+
+  const noteColW = tableW * 0.55;
+  doc.setFontSize(7);
+  const noteParagraphs = (settings.terms_text || '').split('\n').filter(Boolean);
+  const noteLineCount = noteParagraphs.reduce((total, n) => total + doc.splitTextToSize(n.trim(), noteColW).length, 0);
+  const notesBlockH = 5 + noteLineCount * 3.3;
+  const totalsBlockH = 11 + 8 + 8;
+  const gapAfterTable = 7;
+  const gapBeforeOffer = 9;
+  const offerBlockH = 9 + 9 + 6;
+  const footerReserve = 20;
+  const reservedAfterTable = gapAfterTable + Math.max(notesBlockH, totalsBlockH) + gapBeforeOffer + offerBlockH + footerReserve;
 
   const cols = [
     { label: 'Month', w: 0.16 }, { label: 'Opening Balance', w: 0.3 },
     { label: 'Monthly Payment', w: 0.28 }, { label: 'Closing Balance', w: 0.26 }
   ];
-  const schedRowH = 7.5;
+  const scheduleRows = r.schedule || [];
+  const availableForTable = pageH - tableStartY - reservedAfterTable;
+  const schedRowH = Math.max(4.4, Math.min(7.2, availableForTable / (scheduleRows.length + 1)));
+  const schedFontSize = schedRowH < 5.4 ? 6.5 : schedRowH < 6.2 ? 7.5 : 8.5;
   const drawHeader = () => {
     doc.setFillColor(...brandDark);
     doc.rect(margin, y, tableW, schedRowH, 'F');
     let cx = margin;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255, 255, 255);
-    cols.forEach(c => { doc.text(c.label, cx + 4, y + 5); cx += tableW * c.w; });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(schedFontSize); doc.setTextColor(255, 255, 255);
+    cols.forEach(c => { doc.text(c.label, cx + 4, y + schedRowH / 2 + 1.5); cx += tableW * c.w; });
     y += schedRowH;
   };
   drawHeader();
-  (r.schedule || []).forEach((row, i) => {
-    if (y + schedRowH > pageH - 60) { doc.addPage(); paintPage(); y = 20; drawHeader(); }
+  scheduleRows.forEach((row, i) => {
     doc.setFillColor(...(i % 2 === 0 ? [255, 255, 255] : brandLight));
     doc.rect(margin, y, tableW, schedRowH, 'F');
     let cx = margin;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...ink);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(schedFontSize); doc.setTextColor(...ink);
     const vals = [Number(row.month).toFixed(2), money(row.opening), money(row.payment), money(row.closing)];
-    cols.forEach((c, ci) => { doc.text(vals[ci], cx + 4, y + 5); cx += tableW * c.w; });
+    cols.forEach((c, ci) => { doc.text(vals[ci], cx + 4, y + schedRowH / 2 + 1.5); cx += tableW * c.w; });
     y += schedRowH;
   });
-  y += 12;
+  y += gapAfterTable;
 
-  if (y > pageH - 70) { doc.addPage(); paintPage(); y = 20; }
   const notesStartY = y;
-  const noteColW = tableW * 0.55;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...ink);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(...ink);
   doc.text('Note:', margin, y);
-  y += 5;
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...muted);
-  (settings.terms_text || '').split('\n').filter(Boolean).forEach(n => {
+  y += 4.6;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...muted);
+  noteParagraphs.forEach(n => {
     const lines = doc.splitTextToSize(n.trim(), noteColW);
     doc.text(lines, margin, y);
-    y += lines.length * 3.8;
+    y += lines.length * 3.3;
   });
 
   const totalsX = margin + noteColW + 10;
@@ -1241,23 +1254,22 @@ async function buildQuotationPDF(r){
     ['Total Invoice Amount', money(r.total_value)]
   ];
   totalsRows.forEach(([label, value], i) => {
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...ink);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...ink);
     doc.text(label, totalsX, ty);
     doc.text(value, pageW - margin, ty, { align: 'right' });
     ty += i === 0 ? 11 : 8;
   });
-  y = Math.max(y, ty) + 14;
+  y = Math.max(y, ty) + gapBeforeOffer;
 
-  if (y > pageH - 40) { doc.addPage(); paintPage(); y = 20; }
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...ink);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...ink);
   doc.text('Offer Acceptance', margin, y);
-  y += 10;
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  y += 9;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
   doc.text('Name......................................................', margin, y);
   doc.text('Signature............................................', margin + 78, y);
   doc.text('Date .............................', margin + 148, y);
-  y += 10;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+  y += 9;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
   doc.text('Note: We offer to deliver all Land Indentures and Certified Site plan within 3 weeks after Full payment', margin, y);
 
   const footY = pageH - 14;
