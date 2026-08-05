@@ -209,6 +209,7 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
       <button class="nav-item" data-panel="servicerequests">Service Requests</button>
       <button class="nav-item" data-panel="sitevisits">Site Visit Requests</button>
       <button class="nav-item" data-panel="sitevisitexp">Site Visit Experience</button>
+      <button class="nav-item" data-panel="quotations">Quotations</button>
       <button class="nav-item" data-panel="reviews">Reviews</button>
       <button class="nav-item" data-panel="leads">Leads</button>
     </div>
@@ -666,6 +667,47 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
         </div>
       </div>
 
+      <!-- QUOTATIONS -->
+      <div class="panel" id="panel-quotations">
+        <div class="panel-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h3 style="margin:0">Quotation requests</h3>
+            <button type="button" class="btn btn-ghost" id="quotationsExportBtn">Download All (CSV)</button>
+          </div>
+          <p class="desc">Royal Palm Enclave quotation requests, each with the exact calculation snapshot from when it was submitted.</p>
+          <div class="inbox">
+            <div class="inbox-list" id="quotationsList"></div>
+            <div class="inbox-detail" id="quotationsDetail"><div class="inbox-empty">Select a quotation to view its details.</div></div>
+          </div>
+        </div>
+        <div class="panel-card">
+          <h3>Quotation settings</h3>
+          <p class="desc">Drives every new quotation calculation and the PDF template text. Changing these does not alter quotations already sent — each one keeps the numbers it was calculated with.</p>
+          <form id="quoteSettingsForm">
+            <div class="form-grid">
+              <div class="field"><label>Full plot price (GHS)</label><input name="full_plot_price" type="number" step="0.01" min="0" required/></div>
+              <div class="field"><label>Deposit (%)</label><input name="deposit_percent" type="number" step="0.01" min="0" max="100" required/></div>
+            </div>
+            <div class="field"><label>Default discount (GHS)</label><input name="default_discount" type="number" step="0.01" min="0" required/>
+              <div class="hint">Applied automatically to every new quotation. Keep at 0 unless there's a market-wide promotion running.</div>
+            </div>
+            <p class="hint" style="margin-top:14px;margin-bottom:6px">Interest per full plot, by credit period — a half-plot request is automatically charged half.</p>
+            <div class="form-grid">
+              <div class="field"><label>3 months (GHS)</label><input name="interest_3mo" type="number" step="0.01" min="0" required/></div>
+              <div class="field"><label>6 months (GHS)</label><input name="interest_6mo" type="number" step="0.01" min="0" required/></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>9 months (GHS)</label><input name="interest_9mo" type="number" step="0.01" min="0" required/></div>
+              <div class="field"><label>12 months (GHS)</label><input name="interest_12mo" type="number" step="0.01" min="0" required/></div>
+            </div>
+            <div class="field"><label>PDF intro text</label><textarea name="intro_text" rows="2"></textarea></div>
+            <div class="field"><label>PDF terms &amp; conditions text</label><textarea name="terms_text" rows="3"></textarea></div>
+            <div class="field"><label>PDF footer text</label><input name="footer_text"/></div>
+            <button class="btn btn-accent" type="submit">Save quotation settings</button>
+          </form>
+        </div>
+      </div>
+
       <!-- PLOTS -->
       <div class="panel" id="panel-plots">
         <div class="panel-card">
@@ -931,6 +973,146 @@ async function buildBrandedFormPDF({ title, subtitle, fields, record, footerNote
   if (settings.email) contactBits.push(settings.email);
   doc.text(contactBits.join('   ·   ') || 'Trulander JSF Limited', 14, pageH - 16);
   doc.text(footerNote || '', 14, pageH - 10);
+  doc.text('Generated ' + new Date().toLocaleDateString(), pageW - 14, pageH - 10, { align: 'right' });
+
+  return doc;
+}
+/* Re-derives the same navy/amortization-table PDF the public quotation form
+   generates, so admin can re-download any past request's PDF on demand.
+   Kept in sync with buildQuotationPDF in the public index.html. */
+async function buildQuotationPDF(r){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
+  const navy = [17, 34, 64], ink = [20, 26, 38], muted = [100, 110, 128], lineCol = [222, 227, 236], cardBg = [244, 246, 250], stripe = [237, 241, 247];
+  const settings = adminQuoteSettingsCache || {};
+
+  doc.setFillColor(...navy);
+  doc.rect(0, 0, pageW, 34, 'F');
+  const logoUrl = await loadAdminLogoDataUrl();
+  let textX = 14;
+  if (logoUrl) {
+    try { doc.addImage(logoUrl, 'PNG', 14, 7, 20, 20); textX = 40; } catch (e) {}
+  }
+  doc.setTextColor(255, 255, 255);
+  doc.setFont(undefined, 'bold'); doc.setFontSize(18);
+  doc.text('QUOTATION', textX, 17);
+  doc.setFont(undefined, 'normal'); doc.setFontSize(10);
+  doc.text('Royal Palm Enclave, Tsopoli', textX, 25);
+  doc.setFontSize(9);
+  const refId = String(r.id || '').slice(0, 8).toUpperCase();
+  doc.text('Ref: ' + (refId || '—'), pageW - 14, 13, { align: 'right' });
+  doc.text('Date: ' + new Date(r.request_date || Date.now()).toLocaleDateString(), pageW - 14, 20, { align: 'right' });
+
+  let y = 46;
+  doc.setTextColor(...ink);
+  doc.setFont(undefined, 'normal'); doc.setFontSize(10.5);
+  if (settings.intro_text) {
+    const introLines = doc.splitTextToSize(settings.intro_text, pageW - 28);
+    doc.text(introLines, 14, y);
+    y += introLines.length * 5.4 + 6;
+  }
+
+  doc.setFont(undefined, 'bold'); doc.setFontSize(8.5);
+  doc.setTextColor(...muted);
+  doc.text('QUOTED TO', 14, y);
+  y += 6;
+  doc.setFont(undefined, 'normal'); doc.setFontSize(10.5);
+  doc.setTextColor(...ink);
+  doc.text(String(r.name || '—'), 14, y); y += 5.6;
+  doc.text(doc.splitTextToSize(String(r.address || '—'), (pageW - 28) / 2), 14, y); y += 5.6;
+  doc.text(String(r.phone || '—') + (r.email ? '   ·   ' + r.email : ''), 14, y);
+  y += 12;
+
+  const infoRow = (cols) => {
+    doc.setFillColor(...cardBg);
+    doc.roundedRect(14, y, pageW - 28, 20, 3, 3, 'F');
+    const colW = (pageW - 28) / cols.length;
+    cols.forEach((c, i) => {
+      const x = 14 + i * colW + 6;
+      doc.setFont(undefined, 'bold'); doc.setFontSize(7.5); doc.setTextColor(...muted);
+      doc.text(c.label.toUpperCase(), x, y + 7);
+      doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(...ink);
+      doc.text(c.value, x, y + 15);
+    });
+    y += 25;
+  };
+  infoRow([
+    { label: 'No of Plots', value: String(r.number_of_plots) },
+    { label: 'Original Plot Price', value: 'GHS ' + Number(r.full_plot_price).toLocaleString(undefined,{minimumFractionDigits:2}) },
+    { label: 'Discount', value: 'GHS ' + Number(r.discount_amount).toLocaleString(undefined,{minimumFractionDigits:2}) }
+  ]);
+  infoRow([
+    { label: 'Interest', value: 'GHS ' + Number(r.interest_amount).toLocaleString(undefined,{minimumFractionDigits:2}) },
+    { label: 'Cost With Interest', value: 'GHS ' + Number(r.cost_with_interest_per_unit).toLocaleString(undefined,{minimumFractionDigits:2}) },
+    { label: 'Payment Plan', value: r.deposit_percent + '% Deposit / ' + r.credit_period_months + ' Months' }
+  ]);
+
+  doc.setFillColor(...navy);
+  doc.roundedRect(14, y, pageW - 28, 30, 3, 3, 'F');
+  const summaryCols = [
+    { label: 'Total Value', value: Number(r.total_value) },
+    { label: 'Deposit', value: Number(r.deposit_amount) },
+    { label: 'Balance', value: Number(r.balance) },
+    { label: 'Monthly Due', value: Number(r.monthly_due) }
+  ];
+  const sw = (pageW - 28) / summaryCols.length;
+  summaryCols.forEach((c, i) => {
+    const x = 14 + i * sw + 6;
+    doc.setFont(undefined, 'bold'); doc.setFontSize(7.5); doc.setTextColor(200, 210, 225);
+    doc.text(c.label.toUpperCase(), x, y + 10);
+    doc.setFont(undefined, 'bold'); doc.setFontSize(12); doc.setTextColor(255,255,255);
+    doc.text('GHS ' + c.value.toLocaleString(undefined,{minimumFractionDigits:2}), x, y + 21);
+  });
+  y += 40;
+
+  doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(...ink);
+  doc.text('Payment Schedule', 14, y);
+  y += 8;
+  const cols = [
+    { label: 'Month', w: 0.16 }, { label: 'Opening Balance', w: 0.3 },
+    { label: 'Monthly Payment', w: 0.28 }, { label: 'Closing Balance', w: 0.26 }
+  ];
+  const tableW = pageW - 28;
+  const rowH = 8;
+  const drawHeader = () => {
+    doc.setFillColor(...navy);
+    doc.rect(14, y, tableW, rowH, 'F');
+    let cx = 14;
+    doc.setFont(undefined, 'bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
+    cols.forEach(c => { doc.text(c.label, cx + 4, y + 5.5); cx += tableW * c.w; });
+    y += rowH;
+  };
+  drawHeader();
+  (r.schedule || []).forEach((row, i) => {
+    if (y + rowH > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); y = 20; drawHeader(); }
+    doc.setFillColor(...(i % 2 === 0 ? [255,255,255] : stripe));
+    doc.rect(14, y, tableW, rowH, 'F');
+    let cx = 14;
+    doc.setFont(undefined, 'normal'); doc.setFontSize(8.5); doc.setTextColor(...ink);
+    const vals = [String(row.month), 'GHS ' + row.opening.toLocaleString(undefined,{minimumFractionDigits:2}), 'GHS ' + row.payment.toLocaleString(undefined,{minimumFractionDigits:2}), 'GHS ' + row.closing.toLocaleString(undefined,{minimumFractionDigits:2})];
+    cols.forEach((c, ci) => { doc.text(vals[ci], cx + 4, y + 5.5); cx += tableW * c.w; });
+    y += rowH;
+  });
+
+  y += 14;
+  if (y > doc.internal.pageSize.getHeight() - 50) { doc.addPage(); y = 20; }
+  if (settings.terms_text) {
+    doc.setFont(undefined, 'italic'); doc.setFontSize(8.5); doc.setTextColor(...muted);
+    const termLines = doc.splitTextToSize(settings.terms_text, pageW - 28);
+    doc.text(termLines, 14, y);
+    y += termLines.length * 4.6 + 14;
+  }
+  doc.setDrawColor(...lineCol);
+  doc.line(14, y, 74, y);
+  doc.setFont(undefined, 'normal'); doc.setFontSize(8.5); doc.setTextColor(...muted);
+  doc.text('Authorized Signature', 14, y + 5);
+
+  const pageH = doc.internal.pageSize.getHeight();
+  doc.setDrawColor(...lineCol);
+  doc.line(14, pageH - 16, pageW - 14, pageH - 16);
+  doc.setFontSize(8);
+  doc.text(settings.footer_text || 'Trulander JSF Limited', 14, pageH - 10);
   doc.text('Generated ' + new Date().toLocaleDateString(), pageW - 14, pageH - 10, { align: 'right' });
 
   return doc;
@@ -1272,7 +1454,7 @@ if (mobileNavSelect) {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteVisitExp(); loadSiteCopy();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteVisitExp(); loadSiteCopy(); loadQuotations(); loadQuoteSettings();
 }
 
 /* ---- BANNERS ---- */
@@ -2695,6 +2877,128 @@ async function updateSiteVisitExpStatus(id, status){
   const r = siteVisitExpCache.find(x => x.id === id); if (r) r.status = status;
   renderSiteVisitExpList();
   toast('Status updated');
+}
+
+/* ---- QUOTATIONS ---- */
+let quotationsCache = [];
+let activeQuotationId = null;
+document.getElementById('quotationsExportBtn').addEventListener('click', () => {
+  const cols = ['name','phone','email','address','number_of_plots','credit_period_months','discount_amount','interest_amount','total_value','deposit_amount','balance','monthly_due','status','created_at'];
+  exportCSV(quotationsCache, cols, `quotation-requests-${new Date().toISOString().slice(0,10)}.csv`);
+});
+async function loadQuotations(){
+  const { data, error } = await sb.from('quotation_requests').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  quotationsCache = data || [];
+  renderQuotationsList();
+  if (activeQuotationId && quotationsCache.find(r => r.id === activeQuotationId)) openQuotation(activeQuotationId);
+}
+function renderQuotationsList(){
+  const list = document.getElementById('quotationsList');
+  if (!quotationsCache.length) { list.innerHTML = '<div class="inbox-empty">No quotation requests yet.</div>'; return; }
+  list.innerHTML = quotationsCache.map(r => `
+    <div class="inbox-row ${r.id===activeQuotationId?'active':''}" onclick="openQuotation('${r.id}')">
+      <div class="ir-top"><span>${esc(r.name)}${r.status==='new'?' <span class="pill on" style="padding:1px 6px;font-size:10px">New</span>':''}</span><span class="ir-date">${new Date(r.created_at).toLocaleDateString()}</span></div>
+      <div class="ir-sub">${esc(r.number_of_plots)} plot(s) · ${esc(r.credit_period_months)} months · GHS ${Number(r.total_value).toLocaleString(undefined,{minimumFractionDigits:2})}</div>
+    </div>`).join('');
+}
+function openQuotation(id){
+  activeQuotationId = id;
+  renderQuotationsList();
+  const r = quotationsCache.find(x => x.id === id);
+  const detail = document.getElementById('quotationsDetail');
+  if (!r) return;
+  detail.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+      <h3>${esc(r.name)}</h3>
+      <button type="button" class="btn" id="quotePdfBtn">Download PDF</button>
+    </div>
+    <p class="hint">Requested ${new Date(r.created_at).toLocaleString()}</p>
+    <div class="detail-grid">
+      <div><b>Phone</b><span>${esc(r.phone)}</span></div>
+      <div><b>Email</b><span>${esc(r.email||'—')}</span></div>
+      <div style="grid-column:1/-1"><b>Address</b><span>${esc(r.address)}</span></div>
+      <div><b>Number of plots</b><span>${esc(r.number_of_plots)}</span></div>
+      <div><b>Credit period</b><span>${esc(r.credit_period_months)} months</span></div>
+      <div><b>Original plot price</b><span>GHS ${Number(r.full_plot_price).toLocaleString(undefined,{minimumFractionDigits:2})}</span></div>
+      <div><b>Discount</b><span>GHS ${Number(r.discount_amount).toLocaleString(undefined,{minimumFractionDigits:2})}</span></div>
+      <div><b>Interest</b><span>GHS ${Number(r.interest_amount).toLocaleString(undefined,{minimumFractionDigits:2})}</span></div>
+      <div><b>Cost with interest</b><span>GHS ${Number(r.cost_with_interest_per_unit).toLocaleString(undefined,{minimumFractionDigits:2})}</span></div>
+      <div><b>Total value</b><span>GHS ${Number(r.total_value).toLocaleString(undefined,{minimumFractionDigits:2})}</span></div>
+      <div><b>Deposit (${esc(r.deposit_percent)}%)</b><span>GHS ${Number(r.deposit_amount).toLocaleString(undefined,{minimumFractionDigits:2})}</span></div>
+      <div><b>Balance</b><span>GHS ${Number(r.balance).toLocaleString(undefined,{minimumFractionDigits:2})}</span></div>
+      <div><b>Monthly due</b><span>GHS ${Number(r.monthly_due).toLocaleString(undefined,{minimumFractionDigits:2})}</span></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <a class="btn btn-ghost" href="tel:+${esc(toIntlPhone(r.phone))}">Call</a>
+      <a class="btn btn-ghost" href="https://wa.me/${esc(toIntlPhone(r.phone))}" target="_blank" rel="noopener">WhatsApp</a>
+      ${r.email?`<a class="btn btn-ghost" href="${gmailComposeHref(r.email)}" target="_blank" rel="noopener">Email</a>`:''}
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+      <label class="hint" style="margin:0">Status</label>
+      <select onchange="updateQuotationStatus('${r.id}',this.value)">
+        <option value="new" ${r.status==='new'?'selected':''}>New</option>
+        <option value="read" ${r.status==='read'?'selected':''}>Read</option>
+        <option value="contacted" ${r.status==='contacted'?'selected':''}>Contacted</option>
+        <option value="closed" ${r.status==='closed'?'selected':''}>Closed</option>
+      </select>
+    </div>`;
+  document.getElementById('quotePdfBtn').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true; btn.textContent = 'Preparing...';
+    try {
+      const doc = await buildQuotationPDF(r);
+      doc.save(`Quotation-${(r.name||'request').replace(/[^a-z0-9]+/gi,'-')}.pdf`);
+    } catch (err) {
+      toast('Could not generate the PDF — please try again.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Download PDF';
+    }
+  });
+  if (r.status === 'new') updateQuotationStatus(r.id, 'read', true);
+}
+async function updateQuotationStatus(id, status, silent){
+  const { error } = await sb.from('quotation_requests').update({ status }).eq('id', id);
+  if (error) return toast('Error: ' + error.message);
+  const r = quotationsCache.find(x => x.id === id); if (r) r.status = status;
+  renderQuotationsList();
+  if (!silent) toast('Status updated');
+}
+
+/* ---- QUOTATION SETTINGS ---- */
+let adminQuoteSettingsCache = null;
+const quoteSettingsForm = document.getElementById('quoteSettingsForm');
+quoteSettingsForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(quoteSettingsForm).entries());
+  const payload = {
+    id: true,
+    full_plot_price: Number(d.full_plot_price), deposit_percent: Number(d.deposit_percent),
+    default_discount: Number(d.default_discount),
+    interest_3mo: Number(d.interest_3mo), interest_6mo: Number(d.interest_6mo),
+    interest_9mo: Number(d.interest_9mo), interest_12mo: Number(d.interest_12mo),
+    intro_text: d.intro_text || '', terms_text: d.terms_text || '', footer_text: d.footer_text || '',
+    updated_at: new Date().toISOString()
+  };
+  const { error } = await sb.from('quote_settings').upsert(payload);
+  if (error) return toast('Error: ' + error.message);
+  toast('Quotation settings saved');
+  loadQuoteSettings();
+});
+async function loadQuoteSettings(){
+  const { data } = await sb.from('quote_settings').select('*').maybeSingle();
+  if (!data) return;
+  adminQuoteSettingsCache = data;
+  quoteSettingsForm.full_plot_price.value = data.full_plot_price;
+  quoteSettingsForm.deposit_percent.value = data.deposit_percent;
+  quoteSettingsForm.default_discount.value = data.default_discount;
+  quoteSettingsForm.interest_3mo.value = data.interest_3mo;
+  quoteSettingsForm.interest_6mo.value = data.interest_6mo;
+  quoteSettingsForm.interest_9mo.value = data.interest_9mo;
+  quoteSettingsForm.interest_12mo.value = data.interest_12mo;
+  quoteSettingsForm.intro_text.value = data.intro_text || '';
+  quoteSettingsForm.terms_text.value = data.terms_text || '';
+  quoteSettingsForm.footer_text.value = data.footer_text || '';
 }
 
 /* ---- shared delete ---- */
