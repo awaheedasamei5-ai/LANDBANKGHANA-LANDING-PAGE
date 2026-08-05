@@ -426,6 +426,28 @@ img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;}
             <button class="btn btn-accent" type="submit">Save contact info</button>
           </form>
         </div>
+        <div class="panel-card">
+          <h3>SMS notifications</h3>
+          <p class="desc">Automatically texts customers a thank-you message when they submit any form, and sends daily reminders counting down to a confirmed site visit date. Uses <a href="https://sms.arkesel.com" target="_blank" rel="noopener">Arkesel</a> — sign up for a free account, grab your API key from their dashboard, and paste it below to switch this on.</p>
+          <form id="smsSettingsForm">
+            <label style="font-size:13px;display:flex;gap:8px;align-items:center;margin-bottom:14px"><input type="checkbox" name="enabled"/> Enabled (start sending real texts)</label>
+            <div class="form-grid">
+              <div class="field"><label>Arkesel API key</label><input name="api_key" type="password" placeholder="Paste your Arkesel API key"/></div>
+              <div class="field"><label>Sender ID</label><input name="sender_id" placeholder="Trulander" maxlength="11"/>
+                <div class="hint">Max 11 characters, must be pre-approved in your Arkesel account.</div>
+              </div>
+            </div>
+            <button class="btn btn-accent" type="submit">Save SMS settings</button>
+          </form>
+        </div>
+        <div class="panel-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h3 style="margin:0">Recent SMS activity</h3>
+            <button type="button" class="btn btn-ghost" id="smsLogRefreshBtn">Refresh</button>
+          </div>
+          <p class="desc">The last 50 texts the system attempted to send, most recent first.</p>
+          <table><thead><tr><th>When</th><th>Phone</th><th>Type</th><th>Status</th></tr></thead><tbody id="smsLogTable"></tbody></table>
+        </div>
       </div>
 
       <!-- PAGE CONTENT (field-based editing) -->
@@ -1617,7 +1639,7 @@ if (mobileNavSelect) {
 /* ============ GENERIC CRUD HELPERS ============ */
 async function loadAll(){
   loadBanners(); loadPhotos(); loadStats(); loadClients(); loadSocial(); loadSettings(); loadNews(); loadTeam();
-  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteVisitExp(); loadSiteCopy(); loadQuotations(); loadQuoteSettings(); loadRoyalPalmMedia();
+  await loadSellers(); loadPlots(); loadReviews(); loadLeads(); loadSubmissions(); loadBuyers(); loadRemoteSales(); loadServiceRequests(); loadSiteVisits(); loadSiteVisitExp(); loadSiteCopy(); loadQuotations(); loadQuoteSettings(); loadRoyalPalmMedia(); loadSmsSettings(); loadSmsLog();
 }
 
 /* ---- BANNERS ---- */
@@ -1935,6 +1957,40 @@ async function loadSettings(){
   settingsForm.urgent_phone.value = data.urgent_phone||'';
   settingsForm.referral_bonus_amount.value = data.referral_bonus_amount ?? '';
   settingsForm.referral_bonus_currency.value = data.referral_bonus_currency || 'GHS';
+}
+
+/* ---- SMS SETTINGS ---- */
+const smsSettingsForm = document.getElementById('smsSettingsForm');
+smsSettingsForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(smsSettingsForm).entries());
+  const payload = { id: true, enabled: !!d.enabled, sender_id: d.sender_id || 'Trulander', updated_at: new Date().toISOString() };
+  if (d.api_key) payload.api_key = d.api_key;
+  const { error } = await sb.from('sms_settings').upsert(payload);
+  if (error) return toast('Error: ' + error.message);
+  toast('SMS settings saved');
+  loadSmsSettings();
+});
+async function loadSmsSettings(){
+  const { data } = await sb.from('sms_settings').select('*').eq('id', true).maybeSingle();
+  if (!data) return;
+  smsSettingsForm.enabled.checked = !!data.enabled;
+  smsSettingsForm.sender_id.value = data.sender_id || 'Trulander';
+  smsSettingsForm.api_key.value = '';
+  smsSettingsForm.api_key.placeholder = data.api_key ? 'Saved — leave blank to keep it' : 'Paste your Arkesel API key';
+}
+document.getElementById('smsLogRefreshBtn').addEventListener('click', loadSmsLog);
+async function loadSmsLog(){
+  const tbody = document.getElementById('smsLogTable');
+  const { data, error } = await sb.from('sms_log').select('*').order('created_at', { ascending: false }).limit(50);
+  if (error) { tbody.innerHTML = `<tr><td colspan="4">Could not load SMS log.</td></tr>`; return; }
+  tbody.innerHTML = (data || []).map(l => `
+    <tr>
+      <td>${new Date(l.created_at).toLocaleString()}</td>
+      <td>${esc(l.phone || '—')}</td>
+      <td>${esc(l.kind || '—')}</td>
+      <td><span class="pill ${l.status==='sent'?'on':'off'}">${esc(l.status || '—')}</span></td>
+    </tr>`).join('') || '<tr><td colspan="4">No SMS activity yet.</td></tr>';
 }
 
 /* ---- PAGE CONTENT (field-based editing) ---- */
@@ -2478,11 +2534,12 @@ async function openSubmission(id){
         <span>${esc(f.file_name)}</span>
         <button class="btn dl-btn" type="button" onclick="downloadDocument('${esc(f.file_path)}','${esc(f.file_name)}')">Download</button>
       </div>`).join('') : '<p class="hint" style="margin-bottom:16px">No documents attached.</p>'}
-    <div style="display:flex;gap:10px;margin-top:18px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
       ${sub.status==='pending' ? `
         <button class="btn btn-accent" type="button" onclick="approveSubmission('${sub.id}')">Approve &amp; publish as Hot Plot</button>
         <button class="btn btn-danger" type="button" onclick="rejectSubmission('${sub.id}')">Reject</button>
       ` : sub.status==='approved' ? `<span class="hint">Published as a Hot Plot.</span>` : `<span class="hint">Rejected — not published.</span>`}
+      <button class="btn btn-danger" type="button" onclick="deleteRow('seller_submissions','${sub.id}',loadSubmissions)">Delete</button>
     </div>`;
 }
 async function approveSubmission(id){
@@ -2623,6 +2680,7 @@ function openBuyer(id){
         <option value="contacted" ${b.status==='contacted'?'selected':''}>Contacted</option>
         <option value="closed" ${b.status==='closed'?'selected':''}>Closed</option>
       </select>
+      <button class="btn btn-danger" type="button" style="margin-left:auto" onclick="deleteRow('buyer_inquiries','${b.id}',loadBuyers)">Delete</button>
     </div>`;
   if (b.status === 'new') updateBuyerStatus(b.id, 'read', true);
 }
@@ -2686,6 +2744,7 @@ function openRemoteSales(id){
         <option value="onboarded" ${r.status==='onboarded'?'selected':''}>Onboarded</option>
         <option value="closed" ${r.status==='closed'?'selected':''}>Closed</option>
       </select>
+      <button class="btn btn-danger" type="button" style="margin-left:auto" onclick="deleteRow('remote_sales_applications','${r.id}',loadRemoteSales)">Delete</button>
     </div>`;
   if (r.status === 'new') updateRemoteSalesStatus(r.id, 'read', true);
 }
@@ -2751,6 +2810,7 @@ function openServiceRequest(id){
         <option value="contacted" ${r.status==='contacted'?'selected':''}>Contacted</option>
         <option value="closed" ${r.status==='closed'?'selected':''}>Closed</option>
       </select>
+      <button class="btn btn-danger" type="button" style="margin-left:auto" onclick="deleteRow('service_requests','${r.id}',loadServiceRequests)">Delete</button>
     </div>`;
   if (r.status === 'new') updateServiceRequestStatus(r.id, 'read', true);
 }
@@ -2768,7 +2828,7 @@ let activeSiteVisitId = null;
 const SITE_VISIT_FIELDS_ADMIN = [
   ['contact', 'Phone Number'], ['residential_address', 'Residential Address / Location'],
   ['plot_interest', 'Plot Size'], ['visit_day', 'Requested Slot'], ['pickup_location', 'Pick-up Location'],
-  ['accompaniment_count', 'Accompanying'], ['visit_purpose', 'Questions / Comments']
+  ['accompaniment_count', 'Accompanying'], ['transportation_mode', 'Transportation'], ['visit_purpose', 'Questions / Comments']
 ];
 async function loadSiteVisits(){
   const { data, error } = await sb.from('site_visit_requests').select('*').order('created_at', { ascending: false });
@@ -2875,6 +2935,7 @@ function openSiteVisit(id){
         <option value="completed" ${r.status==='completed'?'selected':''}>Completed</option>
         <option value="cancelled" ${r.status==='cancelled'?'selected':''}>Cancelled</option>
       </select>
+      <button class="btn btn-danger" type="button" style="margin-left:auto" onclick="deleteRow('site_visit_requests','${r.id}',loadSiteVisits)">Delete</button>
     </div>
     <form id="siteVisitNotesForm">
       <div class="field"><label>Confirmed visit date</label><input type="date" name="confirmed_visit_date" value="${esc(confirmedDateValue)}"/>
@@ -2941,7 +3002,7 @@ function sendSiteVisitWhatsApp(id, kind){
   window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
 }
 document.getElementById('siteVisitExportBtn').addEventListener('click', () => {
-  const cols = ['full_name','contact','residential_address','plot_interest','visit_day','pickup_location','accompaniment_count','visit_purpose','confirmed_visit_date','status','created_at'];
+  const cols = ['full_name','contact','residential_address','plot_interest','visit_day','pickup_location','accompaniment_count','transportation_mode','visit_purpose','confirmed_visit_date','status','created_at'];
   const dateFilter = document.getElementById('siteVisitDateFilter').value;
   const rows = currentSiteVisitFilteredRows();
   const filenameSuffix = dateFilter || new Date().toISOString().slice(0,10);
@@ -3008,6 +3069,7 @@ function openSiteVisitExp(id){
         <option value="new" ${r.status==='new'?'selected':''}>New</option>
         <option value="reviewed" ${r.status==='reviewed'?'selected':''}>Reviewed</option>
       </select>
+      <button class="btn btn-danger" type="button" style="margin-left:auto" onclick="deleteRow('site_visit_experiences','${r.id}',loadSiteVisitExp)">Delete</button>
     </div>`;
   document.getElementById('svExpPdfBtn').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
@@ -3099,6 +3161,7 @@ function openQuotation(id){
         <option value="contacted" ${r.status==='contacted'?'selected':''}>Contacted</option>
         <option value="closed" ${r.status==='closed'?'selected':''}>Closed</option>
       </select>
+      <button class="btn btn-danger" type="button" style="margin-left:auto" onclick="deleteRow('quotation_requests','${r.id}',loadQuotations)">Delete</button>
     </div>`;
   document.getElementById('quotePdfBtn').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
@@ -3240,6 +3303,33 @@ async function deleteRow(table, id, reload, col){
   if (error) return toast('Error: ' + error.message);
   toast('Deleted'); reload();
 }
+
+/* --- auto-reload when a new version is deployed --- */
+(function () {
+  let knownTag = null;
+  function isUserBusy(){
+    const ae = document.activeElement;
+    if (ae && ['INPUT', 'TEXTAREA', 'SELECT'].includes(ae.tagName)) return true;
+    return false;
+  }
+  let pendingReload = false;
+  function tryReload(){
+    if (isUserBusy()) { pendingReload = true; return; }
+    location.reload();
+  }
+  async function checkForUpdate(){
+    try {
+      const res = await fetch(location.pathname, { method: 'HEAD', cache: 'no-store' });
+      const tag = res.headers.get('etag') || res.headers.get('last-modified');
+      if (!tag) return;
+      if (knownTag === null) { knownTag = tag; return; }
+      if (tag !== knownTag) { knownTag = tag; tryReload(); }
+    } catch (e) { /* offline or blocked — just try again next interval */ }
+  }
+  setInterval(checkForUpdate, 3 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
+  document.addEventListener('focusout', () => { if (pendingReload) { pendingReload = false; setTimeout(tryReload, 500); } });
+})();
 </script>
 </body>
 </html>
