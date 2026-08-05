@@ -2066,8 +2066,16 @@ function applyRoute(){
     if (plotsCache.length) { openPlotModalById(pendingSharedPlotId); pendingSharedPlotId = null; }
   }
 
-  window.scrollTo(0, 0);
+  // Jumping to the top makes sense when a link was clicked, but not when the
+  // browser back/forward buttons brought us here — the visitor expects to
+  // land back where they were (e.g. scrolled down to Royal Palm on Home),
+  // not be thrown to the very top. popstate fires before hashchange for
+  // history navigation, so the flag it sets here is still fresh below.
+  if (!isPopStateNav) window.scrollTo(0, 0);
+  isPopStateNav = false;
 }
+let isPopStateNav = false;
+window.addEventListener('popstate', () => { isPopStateNav = true; });
 window.addEventListener('hashchange', applyRoute);
 // A phone rotated or resized across the mobile breakpoint should re-evaluate
 // which sections belong on Home, without needing a manual refresh.
