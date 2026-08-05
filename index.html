@@ -328,6 +328,7 @@ section{position:relative;}
 .modal-gallery{position:relative;aspect-ratio:16/9;background:var(--bg);border-radius:26px 26px 0 0;overflow:hidden;}
 .modal-gallery img.main{width:100%;height:100%;object-fit:cover;display:block;}
 #modalMainVideoWrap{width:100%;height:100%;align-items:center;justify-content:center;background:#000;}
+.video-loading{color:rgba(255,255,255,.7);font-size:13px;}
 #modalMainVideoWrap iframe,#modalMainVideoWrap video{width:100%;height:100%;border:0;}
 .modal-thumbs{position:absolute;bottom:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 24px);}
 .modal-thumbs img{width:52px;height:40px;object-fit:cover;border-radius:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 4px 10px -4px rgba(0,0,0,.4);}
@@ -3183,7 +3184,8 @@ function openPlotModalRecord(p){
   if (first && first.kind === 'video') showPlotModalMedia(0);
   document.getElementById('plotModalOverlay').classList.add('open');
 }
-function showPlotModalMedia(i){
+let plotModalMediaRequestId = 0;
+async function showPlotModalMedia(i){
   const m = plotModalMediaList[i];
   if (!m) return;
   const img = document.getElementById('modalMainImg');
@@ -3195,12 +3197,16 @@ function showPlotModalMedia(i){
     if (m.video_provider === 'file') {
       videoWrap.innerHTML = `<video src="${esc(m.url)}" controls playsinline></video>`;
     } else {
-      const embedUrl = buildVideoEmbedUrl(m.video_provider || 'youtube', m.url);
+      const requestId = ++plotModalMediaRequestId;
+      videoWrap.innerHTML = `<div class="video-loading">Loading video…</div>`;
+      const embedUrl = await resolveVideoEmbedUrl(m.video_provider || 'youtube', m.url);
+      if (requestId !== plotModalMediaRequestId) return; // a newer thumbnail click superseded this one
       videoWrap.innerHTML = embedUrl
         ? `<iframe src="${esc(embedUrl)}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen scrolling="no"></iframe>`
         : `<a href="${esc(m.url)}" target="_blank" rel="noopener" class="btn btn-accent">Watch on original page</a>`;
     }
   } else {
+    plotModalMediaRequestId++; // abandon any in-flight video resolution
     videoWrap.style.display = 'none';
     videoWrap.innerHTML = '';
     img.style.display = 'block';
@@ -3370,9 +3376,6 @@ function buildVideoEmbedUrl(provider, url){
   }
   if (provider === 'tiktok') {
     const m = url.match(/\/video\/(\d+)/);
-    // Short share links (vm.tiktok.com/..., tiktok.com/t/...) don't carry a
-    // numeric video id and can't be resolved client-side — send those to
-    // TikTok directly rather than showing a broken embed.
     return m ? `https://www.tiktok.com/embed/v2/${m[1]}` : null;
   }
   if (provider === 'facebook') {
@@ -3381,6 +3384,28 @@ function buildVideoEmbedUrl(provider, url){
   if (provider === 'instagram') {
     const base = url.split('?')[0].replace(/\/$/, '');
     return `${base}/embed`;
+  }
+  return null;
+}
+// TikTok share links from the app (vm.tiktok.com/..., tiktok.com/t/...) carry
+// no numeric video id, so the synchronous path above can't build an embed URL
+// for them — that's what was sending those videos to an external redirect
+// instead of playing on the site. TikTok's own oEmbed endpoint resolves the
+// short link server-side and returns the canonical URL (with the id) in its
+// response, so fall back to that before giving up.
+async function resolveVideoEmbedUrl(provider, url){
+  const sync = buildVideoEmbedUrl(provider, url);
+  if (sync) return sync;
+  if (provider === 'tiktok') {
+    try {
+      const res = await fetch('https://www.tiktok.com/oembed?url=' + encodeURIComponent(url));
+      if (res.ok) {
+        const data = await res.json();
+        const source = data.html || data.embed_product_id || '';
+        const m = String(source).match(/\/video\/(\d+)/) || String(data.embed_product_id || '').match(/(\d+)/);
+        if (m && m[1]) return `https://www.tiktok.com/embed/v2/${m[1]}`;
+      }
+    } catch (e) { /* network/CORS failure — caller falls back to the external link */ }
   }
   return null;
 }
@@ -3411,7 +3436,8 @@ function openGalleryLightbox(i){
   document.getElementById('galleryLightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-function renderGalleryLightbox(){
+let galleryLightboxRequestId = 0;
+async function renderGalleryLightbox(){
   const g = galleryItemsCache[galleryLightboxIndex];
   if (!g) return;
   const img = document.getElementById('galleryLightboxImg');
@@ -3422,13 +3448,17 @@ function renderGalleryLightbox(){
     if (g.video_provider === 'file') {
       videoWrap.innerHTML = `<video src="${esc(g.video_url)}" controls autoplay playsinline></video>`;
     } else {
-      const embedUrl = buildVideoEmbedUrl(g.video_provider, g.video_url);
+      const requestId = ++galleryLightboxRequestId;
       const vertical = g.video_provider === 'tiktok' || g.video_provider === 'instagram';
+      videoWrap.innerHTML = `<div class="video-loading">Loading video…</div>`;
+      const embedUrl = await resolveVideoEmbedUrl(g.video_provider, g.video_url);
+      if (requestId !== galleryLightboxRequestId) return;
       videoWrap.innerHTML = embedUrl
         ? `<iframe src="${esc(embedUrl)}" class="${vertical?'embed-vertical':'embed-horizontal'}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen scrolling="no"></iframe>`
         : `<a href="${esc(g.video_url)}" target="_blank" rel="noopener" class="btn btn-accent">Watch on original page</a>`;
     }
   } else {
+    galleryLightboxRequestId++;
     videoWrap.style.display = 'none';
     videoWrap.innerHTML = '';
     img.style.display = 'block';
