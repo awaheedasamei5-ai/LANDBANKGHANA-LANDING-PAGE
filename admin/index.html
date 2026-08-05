@@ -993,143 +993,164 @@ async function buildBrandedFormPDF({ title, subtitle, fields, record, footerNote
 
   return doc;
 }
-/* Re-derives the same navy/amortization-table PDF the public quotation form
-   generates, so admin can re-download any past request's PDF on demand.
-   Kept in sync with buildQuotationPDF in the public index.html. */
+/* Mirrors the real "Trulander JSF Limited — Quotation with Payment Plan
+   Schedule" template line for line (customer info list, summary bar, striped
+   amortization table, numbered notes + totals recap, offer-acceptance line,
+   thank-you footer) — recolored to the site's green brand instead of the
+   reference document's navy. Kept in sync with buildQuotationPDF in the
+   public index.html. */
 async function buildQuotationPDF(r){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
-  const navy = [17, 34, 64], ink = [20, 26, 38], muted = [100, 110, 128], lineCol = [222, 227, 236], cardBg = [244, 246, 250], stripe = [237, 241, 247];
+  const pageH = doc.internal.pageSize.getHeight();
+  const brandDark = [22, 128, 56], brandLight = [220, 245, 228];
+  const ink = [20, 26, 38], muted = [100, 110, 128], accent = [176, 42, 42];
   const settings = adminQuoteSettingsCache || {};
+  const margin = 14;
+  const tableW = pageW - margin * 2;
+  const money = (n) => 'GHS ' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2 });
+  const paintPage = () => { doc.setFillColor(244, 250, 246); doc.rect(0, 0, pageW, pageH, 'F'); };
+  paintPage();
 
-  doc.setFillColor(...navy);
-  doc.rect(0, 0, pageW, 34, 'F');
+  const logoSize = 30;
+  doc.setFillColor(...brandDark);
+  doc.rect(margin, margin, logoSize, logoSize, 'F');
   const logoUrl = await loadAdminLogoDataUrl();
-  let textX = 14;
-  if (logoUrl) {
-    try { doc.addImage(logoUrl, 'PNG', 14, 7, 20, 20); textX = 40; } catch (e) {}
-  }
-  doc.setTextColor(255, 255, 255);
-  doc.setFont(undefined, 'bold'); doc.setFontSize(18);
-  doc.text('QUOTATION', textX, 17);
-  doc.setFont(undefined, 'normal'); doc.setFontSize(10);
-  doc.text('Royal Palm Enclave, Tsopoli', textX, 25);
-  doc.setFontSize(9);
-  const refId = String(r.id || '').slice(0, 8).toUpperCase();
-  doc.text('Ref: ' + (refId || '—'), pageW - 14, 13, { align: 'right' });
-  doc.text('Date: ' + new Date(r.request_date || Date.now()).toLocaleDateString(), pageW - 14, 20, { align: 'right' });
-
-  let y = 46;
+  if (logoUrl) { try { doc.addImage(logoUrl, 'PNG', margin + 4, margin + 4, logoSize - 8, logoSize - 8); } catch (e) {} }
+  const textX = margin + logoSize + 10;
   doc.setTextColor(...ink);
-  doc.setFont(undefined, 'normal'); doc.setFontSize(10.5);
-  if (settings.intro_text) {
-    const introLines = doc.splitTextToSize(settings.intro_text, pageW - 28);
-    doc.text(introLines, 14, y);
-    y += introLines.length * 5.4 + 6;
-  }
-
-  doc.setFont(undefined, 'bold'); doc.setFontSize(8.5);
+  doc.setFont('times', 'bold'); doc.setFontSize(22);
+  doc.text('Trulander JSF Limited', textX, margin + 12);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
   doc.setTextColor(...muted);
-  doc.text('QUOTED TO', 14, y);
-  y += 6;
-  doc.setFont(undefined, 'normal'); doc.setFontSize(10.5);
+  doc.text('P.O Box CO3644, Tema, Accra-Ghana', textX, margin + 20);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
   doc.setTextColor(...ink);
-  doc.text(String(r.name || '—'), 14, y); y += 5.6;
-  doc.text(doc.splitTextToSize(String(r.address || '—'), (pageW - 28) / 2), 14, y); y += 5.6;
-  doc.text(String(r.phone || '—') + (r.email ? '   ·   ' + r.email : ''), 14, y);
-  y += 12;
+  doc.text('Quotation with Payment', pageW - margin, margin + 8, { align: 'right' });
+  doc.text('Plan Schedule', pageW - margin, margin + 13, { align: 'right' });
 
-  const infoRow = (cols) => {
-    doc.setFillColor(...cardBg);
-    doc.roundedRect(14, y, pageW - 28, 20, 3, 3, 'F');
-    const colW = (pageW - 28) / cols.length;
-    cols.forEach((c, i) => {
-      const x = 14 + i * colW + 6;
-      doc.setFont(undefined, 'bold'); doc.setFontSize(7.5); doc.setTextColor(...muted);
-      doc.text(c.label.toUpperCase(), x, y + 7);
-      doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(...ink);
-      doc.text(c.value, x, y + 15);
-    });
-    y += 25;
+  let y = margin + logoSize + 14;
+  const leftX = margin, leftValX = margin + 34;
+  const rightX = pageW * 0.53, rightValX = rightX + 46;
+  const rowH = 6.6;
+  const infoLine = (x, valX, yy, label, value, highlight) => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...brandDark);
+    doc.text(label, x, yy);
+    doc.setFont('helvetica', highlight ? 'bold' : 'normal'); doc.setFontSize(9);
+    doc.setTextColor(...(highlight ? accent : ink));
+    doc.text(String(value), valX, yy);
   };
-  infoRow([
-    { label: 'No of Plots', value: String(r.number_of_plots) },
-    { label: 'Original Plot Price', value: 'GHS ' + Number(r.full_plot_price).toLocaleString(undefined,{minimumFractionDigits:2}) },
-    { label: 'Discount', value: 'GHS ' + Number(r.discount_amount).toLocaleString(undefined,{minimumFractionDigits:2}) }
-  ]);
-  infoRow([
-    { label: 'Interest', value: 'GHS ' + Number(r.interest_amount).toLocaleString(undefined,{minimumFractionDigits:2}) },
-    { label: 'Cost With Interest', value: 'GHS ' + Number(r.cost_with_interest_per_unit).toLocaleString(undefined,{minimumFractionDigits:2}) },
-    { label: 'Payment Plan', value: r.deposit_percent + '% Deposit / ' + r.credit_period_months + ' Months' }
-  ]);
+  let ly = y;
+  infoLine(leftX, leftValX, ly, 'Customer Name', r.name || '—'); ly += rowH;
+  infoLine(leftX, leftValX, ly, 'Address', r.address || '—'); ly += rowH * 1.7;
+  infoLine(leftX, leftValX, ly, 'Contact', r.phone || '—'); ly += rowH;
+  infoLine(leftX, leftValX, ly, 'Payment Plan', r.deposit_percent + '%'); ly += rowH;
 
-  doc.setFillColor(...navy);
-  doc.roundedRect(14, y, pageW - 28, 30, 3, 3, 'F');
+  let ry = y;
+  infoLine(rightX, rightValX, ry, 'Date:', new Date(r.request_date || Date.now()).toLocaleDateString()); ry += rowH;
+  infoLine(rightX, rightValX, ry, 'Credit Period months', r.credit_period_months, true); ry += rowH;
+  infoLine(rightX, rightValX, ry, 'No of Plots', r.number_of_plots, true); ry += rowH;
+  infoLine(rightX, rightValX, ry, 'Original Plot Price', money(r.full_plot_price)); ry += rowH;
+  infoLine(rightX, rightValX, ry, 'Discount', money(r.discount_amount)); ry += rowH;
+  infoLine(rightX, rightValX, ry, 'Interest', money(r.interest_amount)); ry += rowH;
+  infoLine(rightX, rightValX, ry, 'Cost with Interest', money(r.cost_with_interest_per_unit)); ry += rowH;
+  infoLine(rightX, rightValX, ry, 'Total', money(r.total_value)); ry += rowH;
+
+  y = Math.max(ly, ry) + 10;
+
   const summaryCols = [
-    { label: 'Total Value', value: Number(r.total_value) },
-    { label: 'Deposit', value: Number(r.deposit_amount) },
-    { label: 'Balance', value: Number(r.balance) },
-    { label: 'Monthly Due', value: Number(r.monthly_due) }
+    { label: 'Total Value(GHS)', value: 'GHS ' + Number(r.total_value).toLocaleString(undefined, { maximumFractionDigits: 0 }) },
+    { label: 'Deposit', value: money(r.deposit_amount), highlight: true },
+    { label: 'Balance', value: money(r.balance) },
+    { label: 'Monthly Due', value: money(r.monthly_due) }
   ];
-  const sw = (pageW - 28) / summaryCols.length;
-  summaryCols.forEach((c, i) => {
-    const x = 14 + i * sw + 6;
-    doc.setFont(undefined, 'bold'); doc.setFontSize(7.5); doc.setTextColor(200, 210, 225);
-    doc.text(c.label.toUpperCase(), x, y + 10);
-    doc.setFont(undefined, 'bold'); doc.setFontSize(12); doc.setTextColor(255,255,255);
-    doc.text('GHS ' + c.value.toLocaleString(undefined,{minimumFractionDigits:2}), x, y + 21);
-  });
-  y += 40;
-
-  doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(...ink);
-  doc.text('Payment Schedule', 14, y);
+  const scW = tableW / summaryCols.length;
+  doc.setFillColor(...brandDark);
+  doc.rect(margin, y, tableW, 8, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255, 255, 255);
+  summaryCols.forEach((c, i) => doc.text(c.label, margin + i * scW + 4, y + 5.5));
   y += 8;
+  doc.setFillColor(...brandLight);
+  doc.rect(margin, y, tableW, 9, 'F');
+  summaryCols.forEach((c, i) => {
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
+    doc.setTextColor(...(c.highlight ? accent : ink));
+    doc.text(c.value, margin + i * scW + 4, y + 6);
+  });
+  y += 9 + 12;
+
   const cols = [
     { label: 'Month', w: 0.16 }, { label: 'Opening Balance', w: 0.3 },
     { label: 'Monthly Payment', w: 0.28 }, { label: 'Closing Balance', w: 0.26 }
   ];
-  const tableW = pageW - 28;
-  const rowH = 8;
+  const schedRowH = 7.5;
   const drawHeader = () => {
-    doc.setFillColor(...navy);
-    doc.rect(14, y, tableW, rowH, 'F');
-    let cx = 14;
-    doc.setFont(undefined, 'bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
-    cols.forEach(c => { doc.text(c.label, cx + 4, y + 5.5); cx += tableW * c.w; });
-    y += rowH;
+    doc.setFillColor(...brandDark);
+    doc.rect(margin, y, tableW, schedRowH, 'F');
+    let cx = margin;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255, 255, 255);
+    cols.forEach(c => { doc.text(c.label, cx + 4, y + 5); cx += tableW * c.w; });
+    y += schedRowH;
   };
   drawHeader();
   (r.schedule || []).forEach((row, i) => {
-    if (y + rowH > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); y = 20; drawHeader(); }
-    doc.setFillColor(...(i % 2 === 0 ? [255,255,255] : stripe));
-    doc.rect(14, y, tableW, rowH, 'F');
-    let cx = 14;
-    doc.setFont(undefined, 'normal'); doc.setFontSize(8.5); doc.setTextColor(...ink);
-    const vals = [String(row.month), 'GHS ' + row.opening.toLocaleString(undefined,{minimumFractionDigits:2}), 'GHS ' + row.payment.toLocaleString(undefined,{minimumFractionDigits:2}), 'GHS ' + row.closing.toLocaleString(undefined,{minimumFractionDigits:2})];
-    cols.forEach((c, ci) => { doc.text(vals[ci], cx + 4, y + 5.5); cx += tableW * c.w; });
-    y += rowH;
+    if (y + schedRowH > pageH - 60) { doc.addPage(); paintPage(); y = 20; drawHeader(); }
+    doc.setFillColor(...(i % 2 === 0 ? [255, 255, 255] : brandLight));
+    doc.rect(margin, y, tableW, schedRowH, 'F');
+    let cx = margin;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...ink);
+    const vals = [Number(row.month).toFixed(2), money(row.opening), money(row.payment), money(row.closing)];
+    cols.forEach((c, ci) => { doc.text(vals[ci], cx + 4, y + 5); cx += tableW * c.w; });
+    y += schedRowH;
+  });
+  y += 12;
+
+  if (y > pageH - 70) { doc.addPage(); paintPage(); y = 20; }
+  const notesStartY = y;
+  const noteColW = tableW * 0.55;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...ink);
+  doc.text('Note:', margin, y);
+  y += 5;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...muted);
+  (settings.terms_text || '').split('\n').filter(Boolean).forEach(n => {
+    const lines = doc.splitTextToSize(n.trim(), noteColW);
+    doc.text(lines, margin, y);
+    y += lines.length * 3.8;
   });
 
-  y += 14;
-  if (y > doc.internal.pageSize.getHeight() - 50) { doc.addPage(); y = 20; }
-  if (settings.terms_text) {
-    doc.setFont(undefined, 'italic'); doc.setFontSize(8.5); doc.setTextColor(...muted);
-    const termLines = doc.splitTextToSize(settings.terms_text, pageW - 28);
-    doc.text(termLines, 14, y);
-    y += termLines.length * 4.6 + 14;
-  }
-  doc.setDrawColor(...lineCol);
-  doc.line(14, y, 74, y);
-  doc.setFont(undefined, 'normal'); doc.setFontSize(8.5); doc.setTextColor(...muted);
-  doc.text('Authorized Signature', 14, y + 5);
+  const totalsX = margin + noteColW + 10;
+  let ty = notesStartY;
+  const totalsRows = [
+    ['Total Monthly Payments', money(r.balance)],
+    ['Advance Payment', money(r.deposit_amount)],
+    ['Total Invoice Amount', money(r.total_value)]
+  ];
+  totalsRows.forEach(([label, value], i) => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...ink);
+    doc.text(label, totalsX, ty);
+    doc.text(value, pageW - margin, ty, { align: 'right' });
+    ty += i === 0 ? 11 : 8;
+  });
+  y = Math.max(y, ty) + 14;
 
-  const pageH = doc.internal.pageSize.getHeight();
-  doc.setDrawColor(...lineCol);
-  doc.line(14, pageH - 16, pageW - 14, pageH - 16);
-  doc.setFontSize(8);
-  doc.text(settings.footer_text || 'Trulander JSF Limited', 14, pageH - 10);
-  doc.text('Generated ' + new Date().toLocaleDateString(), pageW - 14, pageH - 10, { align: 'right' });
+  if (y > pageH - 40) { doc.addPage(); paintPage(); y = 20; }
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...ink);
+  doc.text('Offer Acceptance', margin, y);
+  y += 10;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  doc.text('Name......................................................', margin, y);
+  doc.text('Signature............................................', margin + 78, y);
+  doc.text('Date .............................', margin + 148, y);
+  y += 10;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+  doc.text('Note: We offer to deliver all Land Indentures and Certified Site plan within 3 weeks after Full payment', margin, y);
+
+  const footY = pageH - 14;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...brandDark);
+  doc.text('Thank you for your business!', pageW / 2, footY, { align: 'center' });
+  doc.setFontSize(8); doc.setTextColor(...muted);
+  doc.text(settings.footer_text || '', pageW / 2, footY + 5, { align: 'center' });
 
   return doc;
 }
