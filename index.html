@@ -1050,6 +1050,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       <div class="rp-cta reveal">
         <button type="button" class="btn btn-accent" id="rpSiteVisitBtn">Book a Free Site Visit</button>
         <a href="#/plots?q=Royal%20Palm" class="btn btn-ghost">Browse Available Plots</a>
+        <button type="button" class="btn btn-ghost" onclick="openQuoteModal()">Request Quotation</button>
       </div>
     </div>
   </div>
@@ -1573,6 +1574,55 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </div>
 </div>
 
+<!-- ============ QUOTATION REQUEST MODAL (Royal Palm Enclave only) ============ -->
+<div class="modal-overlay inquiry-modal" id="quoteModalOverlay">
+  <div class="modal-card" style="max-width:600px;">
+    <button class="modal-close" id="quoteModalClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-content">
+      <div id="quoteModalFormWrap">
+        <div class="inquiry-head">
+          <span class="eyebrow">Royal Palm Enclave</span>
+          <h3>Request a quotation</h3>
+          <p>Tell us how many plots and your preferred payment plan — we'll calculate your full quotation and generate a PDF instantly.</p>
+        </div>
+        <form id="quoteForm">
+          <div class="form-row">
+            <div class="field"><label>Full name *</label><input type="text" name="name" required placeholder="e.g. Ama Owusu"/></div>
+            <div class="field"><label>Phone number *</label><input type="tel" name="phone" required placeholder="e.g. 024 000 0000"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="you@email.com"/></div>
+            <div class="field"><label>Address *</label><input type="text" name="address" required placeholder="Your residential address"/></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Number of plots *</label><input type="number" name="number_of_plots" required min="0.5" step="0.5" value="1" placeholder="e.g. 1.5"/><div class="hint">In half-plot steps — 0.5 = half plot, 1 = full plot, 1.5 = full + half...</div></div>
+            <div class="field"><label>Credit period (payment plan) *</label>
+              <select name="credit_period_months" required>
+                <option value="3">3 months</option>
+                <option value="6">6 months</option>
+                <option value="9">9 months</option>
+                <option value="12" selected>12 months</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-accent" style="width:100%;justify-content:center;margin-top:6px;">Calculate my quotation</button>
+          <div class="form-msg" id="quoteFormMsg"></div>
+        </form>
+      </div>
+      <div id="quoteModalSuccess" class="inquiry-success" style="display:none;text-align:center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        <h3>Your quotation is ready.</h3>
+        <p id="quoteSummaryText"></p>
+        <div class="qbtns" style="justify-content:center;margin-top:18px">
+          <button type="button" class="btn btn-primary" id="quoteDownloadBtn">Download PDF</button>
+          <button type="button" class="btn btn-ghost" id="quoteModalDoneBtn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ============ PROMO BANNER LIGHTBOX (click a banner to read it in full) ============ -->
 <div class="gallery-lightbox" id="promoLightbox">
@@ -2959,6 +3009,189 @@ async function shareSiteVisitRequest(r){
   if (msg) { msg.textContent = 'Opened WhatsApp with your details ready to send.'; msg.className = 'form-msg ok'; }
 }
 
+/* --- Royal Palm Quotation Request: calculator + branded PDF (amortization schedule) --- */
+function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
+/* Interest is a flat per-full-plot amount for the chosen credit period (not
+   per half-plot) — number_of_plots already expresses size in full-plot
+   equivalents (0.5 = half plot), so multiplying the per-unit cost by it
+   naturally halves the interest too. Verified against the reference
+   quotation (1.5 plots, 12mo, discount 5,000): cost-with-interest per unit
+   46,000 = 48,000 - 5,000 + 3,000; total 69,000 = 46,000 x 1.5; deposit
+   20,700 = 69,000 x 30%; balance 48,300; monthly due 4,025 = 48,300 / 12 —
+   all match exactly. */
+function calcQuotation({ numberOfPlots, creditPeriodMonths, discountAmount }, settings){
+  const s = settings || quoteSettingsCache;
+  const fullPlotPrice = Number(s.full_plot_price);
+  const depositPercent = Number(s.deposit_percent);
+  const interestAmount = Number(s['interest_' + creditPeriodMonths + 'mo']);
+  const discount = discountAmount != null ? Number(discountAmount) : Number(s.default_discount || 0);
+  const costWithInterestPerUnit = fullPlotPrice - discount + interestAmount;
+  const totalValue = round2(costWithInterestPerUnit * numberOfPlots);
+  const depositAmount = round2(totalValue * (depositPercent / 100));
+  const balance = round2(totalValue - depositAmount);
+  const monthlyDue = round2(balance / creditPeriodMonths);
+  const schedule = [];
+  let opening = balance;
+  for (let m = 1; m <= creditPeriodMonths; m++){
+    // last installment absorbs whatever cents remain from rounding, so the
+    // schedule always sums to exactly `balance` instead of drifting off by
+    // a few pesewas over a long credit period.
+    const payment = m === creditPeriodMonths ? round2(opening) : monthlyDue;
+    const closing = round2(opening - payment);
+    schedule.push({ month: m, opening: round2(opening), payment, closing });
+    opening = closing;
+  }
+  return {
+    fullPlotPrice, discountAmount: discount, interestAmount, costWithInterestPerUnit,
+    depositPercent, totalValue, depositAmount, balance, monthlyDue, schedule
+  };
+}
+async function buildQuotationPDF(r){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
+  const navy = [17, 34, 64], navyDark = [10, 20, 38], ink = [20, 26, 38], muted = [100, 110, 128], lineCol = [222, 227, 236], cardBg = [244, 246, 250], stripe = [237, 241, 247];
+  const settings = quoteSettingsCache || {};
+
+  doc.setFillColor(...navy);
+  doc.rect(0, 0, pageW, 34, 'F');
+  const logoUrl = await loadLogoDataUrl('assets/trulander-logo.png');
+  let textX = 14;
+  if (logoUrl) {
+    try { doc.addImage(logoUrl, 'PNG', 14, 7, 20, 20); textX = 40; } catch (e) {}
+  }
+  doc.setTextColor(255, 255, 255);
+  doc.setFont(undefined, 'bold'); doc.setFontSize(18);
+  doc.text('QUOTATION', textX, 17);
+  doc.setFont(undefined, 'normal'); doc.setFontSize(10);
+  doc.text('Royal Palm Enclave, Tsopoli', textX, 25);
+  doc.setFontSize(9);
+  const refId = String(r.id || '').slice(0, 8).toUpperCase();
+  doc.text('Ref: ' + (refId || '—'), pageW - 14, 13, { align: 'right' });
+  doc.text('Date: ' + new Date(r.request_date || Date.now()).toLocaleDateString(), pageW - 14, 20, { align: 'right' });
+
+  let y = 46;
+  doc.setTextColor(...ink);
+  doc.setFont(undefined, 'normal'); doc.setFontSize(10.5);
+  if (settings.intro_text) {
+    const introLines = doc.splitTextToSize(settings.intro_text, pageW - 28);
+    doc.text(introLines, 14, y);
+    y += introLines.length * 5.4 + 6;
+  }
+
+  doc.setFont(undefined, 'bold'); doc.setFontSize(8.5);
+  doc.setTextColor(...muted);
+  doc.text('QUOTED TO', 14, y);
+  y += 6;
+  doc.setFont(undefined, 'normal'); doc.setFontSize(10.5);
+  doc.setTextColor(...ink);
+  doc.text(String(r.name || '—'), 14, y); y += 5.6;
+  doc.text(doc.splitTextToSize(String(r.address || '—'), (pageW - 28) / 2), 14, y); y += 5.6;
+  doc.text(String(r.phone || '—') + (r.email ? '   ·   ' + r.email : ''), 14, y);
+  y += 12;
+
+  const infoRow = (label, value, cols) => {
+    const colW = (pageW - 28) / cols.length;
+    doc.setFillColor(...cardBg);
+    doc.roundedRect(14, y, pageW - 28, 20, 3, 3, 'F');
+    cols.forEach((c, i) => {
+      const x = 14 + i * colW + 6;
+      doc.setFont(undefined, 'bold'); doc.setFontSize(7.5); doc.setTextColor(...muted);
+      doc.text(c.label.toUpperCase(), x, y + 7);
+      doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(...ink);
+      doc.text(c.value, x, y + 15);
+    });
+    y += 25;
+  };
+  infoRow(null, null, [
+    { label: 'No of Plots', value: String(r.number_of_plots) },
+    { label: 'Original Plot Price', value: 'GHS ' + Number(r.full_plot_price).toLocaleString(undefined,{minimumFractionDigits:2}) },
+    { label: 'Discount', value: 'GHS ' + Number(r.discount_amount).toLocaleString(undefined,{minimumFractionDigits:2}) }
+  ]);
+  infoRow(null, null, [
+    { label: 'Interest', value: 'GHS ' + Number(r.interest_amount).toLocaleString(undefined,{minimumFractionDigits:2}) },
+    { label: 'Cost With Interest', value: 'GHS ' + Number(r.cost_with_interest_per_unit).toLocaleString(undefined,{minimumFractionDigits:2}) },
+    { label: 'Payment Plan', value: r.deposit_percent + '% Deposit / ' + r.credit_period_months + ' Months' }
+  ]);
+
+  doc.setFillColor(...navy);
+  doc.roundedRect(14, y, pageW - 28, 30, 3, 3, 'F');
+  const summaryCols = [
+    { label: 'Total Value', value: Number(r.total_value) },
+    { label: 'Deposit', value: Number(r.deposit_amount) },
+    { label: 'Balance', value: Number(r.balance) },
+    { label: 'Monthly Due', value: Number(r.monthly_due) }
+  ];
+  const sw = (pageW - 28) / summaryCols.length;
+  summaryCols.forEach((c, i) => {
+    const x = 14 + i * sw + 6;
+    doc.setFont(undefined, 'bold'); doc.setFontSize(7.5); doc.setTextColor(200, 210, 225);
+    doc.text(c.label.toUpperCase(), x, y + 10);
+    doc.setFont(undefined, 'bold'); doc.setFontSize(12); doc.setTextColor(255,255,255);
+    doc.text('GHS ' + c.value.toLocaleString(undefined,{minimumFractionDigits:2}), x, y + 21);
+  });
+  y += 40;
+
+  doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(...ink);
+  doc.text('Payment Schedule', 14, y);
+  y += 8;
+  const cols = [
+    { label: 'Month', w: 0.16 }, { label: 'Opening Balance', w: 0.3 },
+    { label: 'Monthly Payment', w: 0.28 }, { label: 'Closing Balance', w: 0.26 }
+  ];
+  const tableW = pageW - 28;
+  const rowH = 8;
+  doc.setFillColor(...navy);
+  doc.rect(14, y, tableW, rowH, 'F');
+  let cx = 14;
+  doc.setFont(undefined, 'bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
+  cols.forEach(c => { doc.text(c.label, cx + 4, y + 5.5); cx += tableW * c.w; });
+  y += rowH;
+
+  (r.schedule || []).forEach((row, i) => {
+    if (y + rowH > doc.internal.pageSize.getHeight() - 30) {
+      doc.addPage(); y = 20;
+      doc.setFillColor(...navy);
+      doc.rect(14, y, tableW, rowH, 'F');
+      cx = 14;
+      doc.setFont(undefined, 'bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
+      cols.forEach(c => { doc.text(c.label, cx + 4, y + 5.5); cx += tableW * c.w; });
+      y += rowH;
+    }
+    doc.setFillColor(...(i % 2 === 0 ? [255,255,255] : stripe));
+    doc.rect(14, y, tableW, rowH, 'F');
+    cx = 14;
+    doc.setFont(undefined, 'normal'); doc.setFontSize(8.5); doc.setTextColor(...ink);
+    const vals = [String(row.month), 'GHS ' + row.opening.toLocaleString(undefined,{minimumFractionDigits:2}), 'GHS ' + row.payment.toLocaleString(undefined,{minimumFractionDigits:2}), 'GHS ' + row.closing.toLocaleString(undefined,{minimumFractionDigits:2})];
+    cols.forEach((c, ci) => { doc.text(vals[ci], cx + 4, y + 5.5); cx += tableW * c.w; });
+    y += rowH;
+  });
+  doc.setDrawColor(...lineCol);
+  doc.rect(14, y - rowH * (r.schedule || []).length - rowH, tableW, rowH * ((r.schedule || []).length + 1));
+
+  y += 14;
+  if (y > doc.internal.pageSize.getHeight() - 50) { doc.addPage(); y = 20; }
+  if (settings.terms_text) {
+    doc.setFont(undefined, 'italic'); doc.setFontSize(8.5); doc.setTextColor(...muted);
+    const termLines = doc.splitTextToSize(settings.terms_text, pageW - 28);
+    doc.text(termLines, 14, y);
+    y += termLines.length * 4.6 + 14;
+  }
+  doc.setDrawColor(...lineCol);
+  doc.line(14, y, 74, y);
+  doc.setFont(undefined, 'normal'); doc.setFontSize(8.5); doc.setTextColor(...muted);
+  doc.text('Authorized Signature', 14, y + 5);
+
+  const pageH = doc.internal.pageSize.getHeight();
+  doc.setDrawColor(...lineCol);
+  doc.line(14, pageH - 16, pageW - 14, pageH - 16);
+  doc.setFontSize(8);
+  doc.text(settings.footer_text || 'Trulander JSF Limited', 14, pageH - 10);
+  doc.text('Generated ' + new Date().toLocaleDateString(), pageW - 14, pageH - 10, { align: 'right' });
+
+  return doc;
+}
+
 /* --- Site Visit Experience Review: submit/edit + client-side PDF download + WhatsApp share --- */
 const SITE_VISIT_EXP_FIELDS = [
   ['full_name', 'Full Name'], ['phone', 'Phone Number'], ['site_visited', 'Site Visited'],
@@ -3166,7 +3399,7 @@ try {
 async function loadContent(){
   if (!sb) return;
   try{
-    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}, {data:copyRows}, {data:plotMediaData}] = await Promise.all([
+    const [{data:banners}, {data:promoBanners}, {data:stats}, {data:clientsData}, {data:social}, {data:settings}, {data:images}, {data:newsItems}, {data:plotsData}, {data:sellersData}, {data:reviewsData}, {data:copyRows}, {data:plotMediaData}, {data:quoteSettingsData}] = await Promise.all([
       sb.from('banners').select('*').eq('kind','hero').eq('active',true).order('sort_order').limit(1),
       sb.from('banners').select('*').eq('kind','promo').eq('active',true).order('sort_order'),
       sb.from('stats').select('*').eq('active',true).order('sort_order'),
@@ -3179,8 +3412,10 @@ async function loadContent(){
       sb.from('sellers').select('*').eq('active',true),
       sb.from('reviews').select('*').eq('approved',true).order('created_at',{ascending:false}),
       sb.from('site_copy').select('*'),
-      sb.from('plot_media').select('*').order('sort_order')
+      sb.from('plot_media').select('*').order('sort_order'),
+      sb.from('quote_settings').select('*').maybeSingle()
     ]);
+    if (quoteSettingsData) quoteSettingsCache = quoteSettingsData;
 
     if (copyRows && copyRows.length) {
       copyRows.forEach(({ key, value }) => {
@@ -3322,6 +3557,15 @@ async function loadContent(){
 let sellersCache = {};
 let plotMediaCache = {};
 let siteSettingsCache = null;
+/* Falls back to the same values as the quote_settings table default row,
+   so the calculator still works correctly if the fetch fails or is slow. */
+let quoteSettingsCache = {
+  full_plot_price: 48000, deposit_percent: 30, default_discount: 0,
+  interest_3mo: 750, interest_6mo: 1500, interest_9mo: 2250, interest_12mo: 3000,
+  intro_text: 'Thank you for your interest in Royal Palm Enclave. Please find below your personalized quotation.',
+  terms_text: 'This quotation is valid for 14 days from the date above. Prices and payment plans are subject to change without notice. A deposit is required to secure your plot(s) and lock in this payment plan.',
+  footer_text: 'Trulander JSF Limited — Royal Palm Enclave, Tsopoli'
+};
 function formatPrice(p){
   return p.price_amount != null ? `${esc(p.currency||'GHS')} ${Number(p.price_amount).toLocaleString()}` : 'Price on request';
 }
@@ -3513,6 +3757,12 @@ function tagClass(tag){
   if (t === 'new agent') return 'tag-newagent';
   return '';
 }
+/* Same "title or location mentions Royal Palm" match used by the Plots page
+   search box (?q=Royal%20Palm) — Royal Palm plots aren't a separate table
+   or flag, just plots whose location is Royal Palm Enclave, Tsopoli. */
+function isRoyalPalmPlot(p){
+  return /royal palm/i.test(`${p.title || ''} ${p.location || ''}`);
+}
 /* --- Company (Trulander) listings with no linked seller still need direct
    call/WhatsApp buttons — fall back to the site's own contact info. --- */
 function renderDirectContactCard(p){
@@ -3636,6 +3886,74 @@ document.getElementById('plotEnquiryForm').addEventListener('submit', async (e) 
     btn.disabled = false; btn.textContent = 'Send enquiry';
   }
 });
+
+/* --- Quotation Request (Royal Palm Enclave) --- */
+let lastQuoteRecord = null;
+function openQuoteModal(){
+  document.getElementById('quoteModalFormWrap').style.display = 'block';
+  document.getElementById('quoteModalSuccess').style.display = 'none';
+  document.getElementById('quoteForm').reset();
+  document.getElementById('quoteFormMsg').textContent = '';
+  document.getElementById('quoteModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeQuoteModal(){
+  document.getElementById('quoteModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('quoteModalClose').addEventListener('click', closeQuoteModal);
+document.getElementById('quoteModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'quoteModalOverlay') closeQuoteModal(); });
+document.getElementById('quoteModalDoneBtn').addEventListener('click', closeQuoteModal);
+document.getElementById('quoteForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const msg = document.getElementById('quoteFormMsg');
+  const btn = form.querySelector('button[type=submit]');
+  const data = Object.fromEntries(new FormData(form).entries());
+  const numberOfPlots = parseFloat(data.number_of_plots);
+  const creditPeriodMonths = parseInt(data.credit_period_months, 10);
+  btn.disabled = true; btn.textContent = 'Calculating...';
+  msg.className = 'form-msg';
+  try {
+    if (!sb) throw new Error('offline');
+    if (!(numberOfPlots > 0) || numberOfPlots % 0.5 !== 0) throw new Error('Number of plots must be in half-plot steps (0.5, 1, 1.5...).');
+    const calc = calcQuotation({ numberOfPlots, creditPeriodMonths }, quoteSettingsCache);
+    const insertRow = {
+      name: data.name, phone: data.phone, email: data.email || null, address: data.address,
+      number_of_plots: numberOfPlots, credit_period_months: creditPeriodMonths,
+      full_plot_price: calc.fullPlotPrice, discount_amount: calc.discountAmount,
+      interest_amount: calc.interestAmount, cost_with_interest_per_unit: calc.costWithInterestPerUnit,
+      deposit_percent: calc.depositPercent, total_value: calc.totalValue,
+      deposit_amount: calc.depositAmount, balance: calc.balance, monthly_due: calc.monthlyDue,
+      schedule: calc.schedule
+    };
+    const { data: inserted, error } = await withRetry(() => sb.from('quotation_requests').insert(insertRow).select('*').single());
+    if (error) throw error;
+    lastQuoteRecord = inserted;
+    document.getElementById('quoteModalFormWrap').style.display = 'none';
+    document.getElementById('quoteSummaryText').textContent = `${data.name}, your total for ${numberOfPlots} plot(s) over ${creditPeriodMonths} months is GHS ${calc.totalValue.toLocaleString(undefined,{minimumFractionDigits:2})} — a deposit of GHS ${calc.depositAmount.toLocaleString(undefined,{minimumFractionDigits:2})} and GHS ${calc.monthlyDue.toLocaleString(undefined,{minimumFractionDigits:2})}/month after that.`;
+    document.getElementById('quoteModalSuccess').style.display = 'block';
+  } catch (err) {
+    msg.textContent = (err && err.message && err.message.includes('half-plot')) ? err.message : 'Something went wrong calculating your quotation. Please try again, or reach us directly via WhatsApp.';
+    msg.className = 'form-msg err';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Calculate my quotation';
+  }
+});
+document.getElementById('quoteDownloadBtn').addEventListener('click', async () => {
+  if (!lastQuoteRecord) return;
+  const btn = document.getElementById('quoteDownloadBtn');
+  btn.disabled = true; btn.textContent = 'Preparing PDF...';
+  try {
+    const doc = await buildQuotationPDF(lastQuoteRecord);
+    doc.save(`Quotation-${(lastQuoteRecord.name||'request').replace(/[^a-z0-9]+/gi,'-')}.pdf`);
+  } catch (err) {
+    /* PDF generation failure is non-fatal — the request is already saved */
+  } finally {
+    btn.disabled = false; btn.textContent = 'Download PDF';
+  }
+});
+
 function openPlotModal(i){
   openPlotModalRecord(plotsFilteredCache[i]);
 }
@@ -3689,6 +4007,7 @@ function openPlotModalRecord(p){
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button type="button" class="btn btn-accent" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal();openPlotEnquiryModal('${p.id}')">Enquire About This Plot</button>
         <a href="#/site-visit?plot=${encodeURIComponent(p.id)}" class="btn btn-ghost" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal()">Book Site Visit</a>
+        ${isRoyalPalmPlot(p) ? `<button type="button" class="btn btn-ghost" style="flex:1;min-width:180px;justify-content:center" onclick="closePlotModal();openQuoteModal()">Request Quotation</button>` : ''}
       </div>
       <p class="form-msg" id="shareMsg" style="text-align:center"></p>
     </div>`;
