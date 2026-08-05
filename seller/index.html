@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Trulander JSF Limited — Seller Portal</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" type="image/png" href="../assets/trulander-logo.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#22A54C;--brand-dark:#168038;--brand-light:#DCF5E4;
+  --ink:#081910;--bg:#F6FBF8;--card:#ffffff;--line:#E1EEE6;--muted:#5C6E64;--radius:16px;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;}
+a{color:inherit;}
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:11px 20px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;text-decoration:none;}
+.btn-accent{background:var(--brand);color:#fff;border-color:var(--brand);}
+.btn-sm{padding:7px 13px;font-size:12.5px;}
+.btn:disabled{opacity:.6;cursor:default;}
+.btn-loading{position:relative;padding-left:38px;}
+.btn-loading::before{content:'';position:absolute;left:14px;top:50%;width:15px;height:15px;margin-top:-7.5px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:btnSpin .7s linear infinite;}
+.btn:not(.btn-accent).btn-loading::before{border-color:rgba(8,25,16,.2);border-top-color:var(--ink);}
+@keyframes btnSpin{to{transform:rotate(360deg);}}
+
+/* ---- auth screen ---- */
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-card{width:100%;max-width:400px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:36px;box-shadow:0 20px 50px -25px rgba(8,25,16,.25);text-align:center;}
+.auth-card img{width:60px;margin:0 auto 14px;}
+.auth-card form{text-align:left;margin-top:22px;}
+.auth-tabs{display:flex;gap:6px;background:var(--bg);border-radius:999px;padding:4px;margin-top:18px;}
+.auth-tab{flex:1;text-align:center;padding:9px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;color:var(--muted);}
+.auth-tab.active{background:#fff;color:var(--brand-dark);box-shadow:0 4px 10px -4px rgba(0,0,0,.15);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;padding:12px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-family:inherit;font-size:14px;}
+.auth-msg{font-size:13.5px;margin-top:10px;color:#B3261E;display:none;}
+.auth-msg.show{display:block;}
+.auth-msg.ok{color:var(--brand-dark);}
+
+/* ---- dashboard ---- */
+#dash{display:none;}
+#dash.show{display:block;}
+header.topbar{background:#fff;border-bottom:1px solid var(--line);padding:16px 0;position:sticky;top:0;z-index:5;}
+.topbar .row{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;}
+.brand img{width:38px;}
+.brand-sub{font-size:12px;color:var(--muted);font-weight:500;}
+.shell{max-width:1100px;margin:0 auto;padding:28px 20px 80px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:26px;}
+.side{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;height:fit-content;position:sticky;top:80px;}
+.side button{display:flex;width:100%;text-align:left;padding:11px 14px;border:none;background:none;border-radius:10px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;margin-bottom:2px;}
+.side button.active{background:var(--brand-light);color:var(--brand-dark);}
+.panel{display:none;}
+.panel.active{display:block;}
+.panel-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:20px;}
+.panel-card h3{font-size:17px;margin-bottom:4px;}
+.panel-card .desc{font-size:13px;color:var(--muted);margin-bottom:18px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top;}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.pill.on{background:var(--brand-light);color:var(--brand-dark);}
+.pill.off{background:#f1f1f1;color:#888;}
+.pill.warn{background:#FDF0CE;color:#9A6B00;}
+.pill.bad{background:#FBE2E1;color:#B3261E;}
+.empty-row{text-align:center;color:var(--muted);padding:28px 10px;}
+img.thumb{width:44px;height:44px;object-fit:cover;border-radius:8px;}
+.file-thumb-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.file-thumb-grid img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line);}
+.mobile-nav-select{display:none;}
+@media(max-width:800px){
+  .shell{grid-template-columns:minmax(0,1fr);padding:16px 12px 60px;}
+  .side{position:static;padding:8px;}
+  .side button.nav-item{display:none;}
+  .mobile-nav-select{display:block;width:100%;padding:13px 16px;border-radius:12px;border:1px solid var(--line);background:var(--brand-light);color:var(--brand-dark);font-family:inherit;font-weight:700;font-size:14px;}
+  .panel-card{padding:18px;}
+  table{font-size:12.5px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  th,td{padding:8px 6px;}
+}
+
+/* ---- chats ---- */
+.chats-shell{display:grid;grid-template-columns:280px 1fr;gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;min-height:460px;}
+.chats-list{border-right:1px solid var(--line);max-height:640px;overflow-y:auto;}
+.chats-row{padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer;}
+.chats-row:hover{background:var(--bg);}
+.chats-row.active{background:var(--brand-light);}
+.chats-row .cr-top{display:flex;justify-content:space-between;gap:8px;font-weight:700;font-size:13.5px;}
+.chats-row .cr-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.chats-empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13.5px;}
+.chat-thread{display:flex;flex-direction:column;height:640px;}
+.chat-thread-head{padding:16px 20px;border-bottom:1px solid var(--line);flex:none;}
+.chat-thread-head .cth-name{font-weight:700;font-size:14.5px;}
+.chat-thread-head .cth-sub{font-size:12px;color:var(--muted);}
+.chat-thread-head .cth-contact{display:flex;gap:8px;margin-top:8px;}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px;background:var(--bg);}
+.chat-bubble{max-width:72%;padding:9px 13px;border-radius:16px;font-size:13.5px;line-height:1.45;word-wrap:break-word;}
+.chat-bubble.seller{align-self:flex-end;background:var(--brand);color:#fff;border-bottom-right-radius:4px;}
+.chat-bubble.buyer{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px;}
+.chat-bubble img{max-width:100%;border-radius:10px;display:block;margin-bottom:4px;cursor:pointer;}
+.chat-bubble-time{font-size:10px;opacity:.65;display:block;margin-top:3px;}
+.chat-input-row{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid var(--line);flex:none;background:#fff;}
+.chat-input-row input[type=text]{flex:1;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-family:inherit;font-size:13.5px;background:var(--bg);min-width:0;}
+.chat-attach-btn{width:36px;height:36px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;color:var(--muted);}
+.chat-attach-btn svg{width:17px;height:17px;}
+.chat-send-btn{width:36px;height:36px;border-radius:50%;background:var(--brand);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;}
+.chat-send-btn svg{width:16px;height:16px;}
+.chat-send-btn:disabled{opacity:.5;cursor:default;}
+@media(max-width:800px){
+  .chats-shell{grid-template-columns:1fr;}
+  .chats-list{border-right:none;border-bottom:1px solid var(--line);max-height:220px;}
+  .chat-thread{height:520px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== AUTH SCREEN ===================== -->
+<div id="authScreen">
+  <div class="auth-card">
+    <img src="../assets/trulander-logo.png" alt="Trulander JSF Limited"/>
+    <h2>Seller Portal</h2>
+    <p style="font-size:13.5px;color:var(--muted);margin-top:6px;">For approved Trulander JSF Limited plot sellers to manage listings, submissions, site visits, and buyer chats.</p>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabSignIn">Sign In</div>
+      <div class="auth-tab" id="tabSignUp">Create Account</div>
+    </div>
+    <form id="signinForm">
+      <div class="field"><label>Email</label><input type="email" name="email" required/></div>
+      <div class="field"><label>Password</label><input type="password" name="password" required/></div>
+      <button class="btn btn-accent" style="width:100%;justify-content:center" type="submit">Sign in</button>
+    </form>
+    <form id="signupForm" style="display:none">
+      <div class="field"><label>Email (must match the email on your plot submission)</label><input type="email" name="email" required/></div>
+      <div class="field"><label>Choose a password</label><input type="password" name="password" minlength="6" required/></div>
+      <button class="btn btn-accent" style="width:100%;justify-content:center" type="submit">Create account</button>
+    </form>
+    <p class="hint" style="font-size:12px;color:var(--muted);margin-top:16px">Use the same email you submitted your plot with. Not a seller yet? <a href="../index.html#/services" style="color:var(--brand-dark);font-weight:600">Submit your plot here</a> first.</p>
+    <p class="auth-msg" id="authMsg"></p>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<div id="dash">
+  <header class="topbar">
+    <div class="row">
+      <div class="brand"><img src="../assets/trulander-logo.png" alt=""/> <div>Seller Portal<div class="brand-sub" id="sellerNameLabel"></div></div></div>
+      <div style="display:flex;gap:10px">
+        <a class="btn" href="../index.html" target="_blank">View site ↗</a>
+        <button class="btn" id="changePasswordBtn">Change Password</button>
+        <button class="btn" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="modal-overlay" id="changePasswordOverlay" style="position:fixed;inset:0;background:rgba(8,25,16,.55);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;">
+    <div class="panel-card" style="max-width:400px;width:100%;background:#fff;">
+      <h3>Change your password</h3>
+      <form id="changePasswordForm">
+        <div class="field"><label>New password</label><input type="password" name="password" minlength="6" required/></div>
+        <div class="field"><label>Confirm new password</label><input type="password" name="confirm" minlength="6" required/></div>
+        <p class="auth-msg" id="changePasswordMsg"></p>
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="btn btn-accent" type="submit">Save new password</button>
+          <button class="btn" type="button" id="changePasswordCancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="side">
+      <select class="mobile-nav-select" id="mobileNavSelect" aria-label="Choose section"></select>
+      <button class="nav-item active" data-panel="plots">My Plots</button>
+      <button class="nav-item" data-panel="submissions">My Submissions</button>
+      <button class="nav-item" data-panel="visits">Site Visit Requests</button>
+      <button class="nav-item" data-panel="chats">Chats</button>
+    </div>
+
+    <div class="content">
+      <!-- MY PLOTS -->
+      <div class="panel active" id="panel-plots">
+        <div class="panel-card">
+          <h3>My Plots</h3>
+          <p class="desc">Live listings linked to your seller profile on the Trulander JSF Limited site.</p>
+          <table><thead><tr><th>Title</th><th>Size</th><th>Location</th><th>Status</th><th>Price</th><th></th></tr></thead><tbody id="myPlotsTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- MY SUBMISSIONS -->
+      <div class="panel" id="panel-submissions">
+        <div class="panel-card">
+          <h3>My Submissions</h3>
+          <p class="desc">Plots you've submitted for review. Once approved by Trulander JSF Limited, they'll appear under My Plots and go live on the site.</p>
+          <div id="mySubmissionsList"></div>
+        </div>
+      </div>
+
+      <!-- SITE VISIT REQUESTS -->
+      <div class="panel" id="panel-visits">
+        <div class="panel-card">
+          <h3>Site Visit Requests</h3>
+          <p class="desc">Buyers who requested a site visit for one of your plots.</p>
+          <table><thead><tr><th>Name</th><th>Contact</th><th>Plot</th><th>Visit Day</th><th>Status</th></tr></thead><tbody id="myVisitsTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- CHATS -->
+      <div class="panel" id="panel-chats">
+        <div class="panel-card">
+          <h3>Chats</h3>
+          <p class="desc">Direct messages from buyers interested in your plots.</p>
+          <div class="chats-shell">
+            <div class="chats-list" id="chatsList"></div>
+            <div id="chatThreadWrap">
+              <div class="chats-empty">Select a conversation to view messages.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+let sb = null;
+try {
+  sb = supabase.createClient(window.LANDBANK_SUPABASE_URL, window.LANDBANK_SUPABASE_ANON_KEY);
+} catch (e) { console.error('Supabase init failed:', e); }
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function withRetry(fn, attempts = 3, delayMs = 700){
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try { return await fn(); } catch (err) { lastErr = err; }
+    if (i < attempts - 1) await new Promise(r => setTimeout(r, delayMs));
+  }
+  throw lastErr;
+}
+
+let mySeller = null;
+
+/* ============ AUTH ============ */
+const signinForm = document.getElementById('signinForm');
+const signupForm = document.getElementById('signupForm');
+const authMsg = document.getElementById('authMsg');
+const tabSignIn = document.getElementById('tabSignIn');
+const tabSignUp = document.getElementById('tabSignUp');
+
+function showAuthMsg(text, ok){ authMsg.textContent = text; authMsg.className = 'auth-msg show' + (ok?' ok':''); }
+function requireSb(){
+  if (!sb) { showAuthMsg('Could not connect to the server. Check your internet connection and reload the page.'); return false; }
+  return true;
+}
+tabSignIn.addEventListener('click', () => {
+  tabSignIn.classList.add('active'); tabSignUp.classList.remove('active');
+  signinForm.style.display = 'block'; signupForm.style.display = 'none';
+  authMsg.classList.remove('show');
+});
+tabSignUp.addEventListener('click', () => {
+  tabSignUp.classList.add('active'); tabSignIn.classList.remove('active');
+  signupForm.style.display = 'block'; signinForm.style.display = 'none';
+  authMsg.classList.remove('show');
+});
+
+signinForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!requireSb()) return;
+  const btn = signinForm.querySelector('button[type=submit]');
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.classList.add('btn-loading'); btn.textContent = 'Signing in...';
+  authMsg.classList.remove('show');
+  try {
+    const d = Object.fromEntries(new FormData(signinForm).entries());
+    const { error } = await sb.auth.signInWithPassword({ email: d.email, password: d.password });
+    if (error) { showAuthMsg(error.message); return; }
+    btn.textContent = 'Loading your dashboard...';
+    await checkSession();
+  } catch (err) {
+    showAuthMsg('Something went wrong signing in. Check your connection and try again.');
+  } finally {
+    btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = originalLabel;
+  }
+});
+
+signupForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!requireSb()) return;
+  const btn = signupForm.querySelector('button[type=submit]');
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.classList.add('btn-loading'); btn.textContent = 'Creating account...';
+  authMsg.classList.remove('show');
+  try {
+    const d = Object.fromEntries(new FormData(signupForm).entries());
+    const { data, error } = await sb.auth.signUp({ email: d.email, password: d.password });
+    if (error) { showAuthMsg(error.message); return; }
+    if (data.session) {
+      btn.textContent = 'Loading your dashboard...';
+      await checkSession();
+    } else {
+      showAuthMsg('Account created! Check your email to confirm it, then sign in.', true);
+      tabSignIn.click();
+    }
+  } catch (err) {
+    showAuthMsg('Something went wrong creating your account. Check your connection and try again.');
+  } finally {
+    btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = originalLabel;
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+
+const changePasswordOverlay = document.getElementById('changePasswordOverlay');
+const changePasswordForm = document.getElementById('changePasswordForm');
+const changePasswordMsg = document.getElementById('changePasswordMsg');
+function showChangePasswordMsg(text, ok){
+  changePasswordMsg.textContent = text;
+  changePasswordMsg.style.display = 'block';
+  changePasswordMsg.style.color = ok ? '#168038' : '#B3261E';
+}
+document.getElementById('changePasswordBtn').addEventListener('click', () => {
+  changePasswordForm.reset();
+  changePasswordMsg.style.display = 'none';
+  changePasswordOverlay.style.display = 'flex';
+});
+document.getElementById('changePasswordCancel').addEventListener('click', () => changePasswordOverlay.style.display = 'none');
+changePasswordOverlay.addEventListener('click', (e) => { if (e.target.id === 'changePasswordOverlay') changePasswordOverlay.style.display = 'none'; });
+changePasswordForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(changePasswordForm).entries());
+  if (d.password !== d.confirm) return showChangePasswordMsg('Passwords do not match.');
+  const btn = changePasswordForm.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  const { error } = await sb.auth.updateUser({ password: d.password });
+  btn.disabled = false; btn.textContent = 'Save new password';
+  if (error) return showChangePasswordMsg(error.message);
+  showChangePasswordMsg('Password updated.', true);
+  setTimeout(() => changePasswordOverlay.style.display = 'none', 1200);
+});
+
+async function checkSession(){
+  if (!sb) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+
+  await sb.from('sellers').update({ user_id: session.user.id })
+    .is('user_id', null).ilike('email', session.user.email).then(() => {}, () => {});
+
+  let row, error;
+  try {
+    ({ data: row, error } = await withRetry(() =>
+      sb.from('sellers').select('*').eq('user_id', session.user.id).maybeSingle()
+    ));
+  } catch (err) {
+    showAuthMsg("Signed in, but couldn't verify your seller account after several tries — your session is still active, so just click Sign in again, or reload the page.");
+    return;
+  }
+  if (error || !row) {
+    await sb.auth.signOut();
+    showAuthMsg('This account is signed in but is not linked to an approved seller profile. Make sure you used the same email as your plot submission, or contact Trulander JSF Limited to get set up.');
+    return;
+  }
+
+  mySeller = row;
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('dash').classList.add('show');
+  document.getElementById('sellerNameLabel').textContent = row.name || row.company_name || '';
+  loadAll();
+}
+checkSession();
+
+/* ============ NAV ============ */
+const navItems = document.querySelectorAll('.nav-item');
+const panels = document.querySelectorAll('.panel');
+const mobileSelect = document.getElementById('mobileNavSelect');
+navItems.forEach(btn => btn.dataset.label = btn.textContent);
+mobileSelect.innerHTML = Array.from(navItems).map(b => `<option value="${b.dataset.panel}">${esc(b.dataset.label)}</option>`).join('');
+function activatePanel(name){
+  navItems.forEach(b => b.classList.toggle('active', b.dataset.panel === name));
+  panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  mobileSelect.value = name;
+}
+navItems.forEach(b => b.addEventListener('click', () => activatePanel(b.dataset.panel)));
+mobileSelect.addEventListener('change', () => activatePanel(mobileSelect.value));
+
+/* ============ LOAD DATA ============ */
+async function loadAll(){
+  await Promise.all([loadMyPlots(), loadMySubmissions(), loadMyVisits(), loadMyChats()]);
+}
+
+async function loadMyPlots(){
+  const tbody = document.getElementById('myPlotsTable');
+  const { data, error } = await sb.from('plots').select('*').eq('seller_id', mySeller.id).order('created_at', { ascending: false });
+  if (error) { tbody.innerHTML = `<tr><td colspan="6" class="empty-row">Couldn't load your plots.</td></tr>`; return; }
+  tbody.innerHTML = (data && data.length) ? data.map(p => `
+    <tr>
+      <td>${esc(p.title)}</td>
+      <td>${esc(p.size)}</td>
+      <td>${esc(p.location)}</td>
+      <td><span class="pill ${p.status === 'available' ? 'on' : (p.status === 'sold' ? 'bad' : 'warn')}">${esc(p.status)}</span></td>
+      <td>${esc(p.currency || 'GHS')} ${p.price_amount ? Number(p.price_amount).toLocaleString() : '—'}</td>
+      <td><a class="btn btn-sm" href="../index.html#/plots/${encodeURIComponent(p.id)}" target="_blank">View ↗</a></td>
+    </tr>`).join('') : `<tr><td colspan="6" class="empty-row">No plots linked to your account yet.</td></tr>`;
+}
+
+function submissionStatusPill(status){
+  if (status === 'approved') return `<span class="pill on">Approved — live on site</span>`;
+  if (status === 'rejected') return `<span class="pill bad">Not approved</span>`;
+  return `<span class="pill warn">Pending review</span>`;
+}
+async function loadMySubmissions(){
+  const wrap = document.getElementById('mySubmissionsList');
+  const { data, error } = await sb.from('seller_submissions').select('*').order('created_at', { ascending: false });
+  if (error) { wrap.innerHTML = `<div class="empty-row">Couldn't load your submissions.</div>`; return; }
+  if (!data || !data.length) { wrap.innerHTML = `<div class="empty-row">You haven't submitted a plot yet.</div>`; return; }
+
+  const ids = data.map(s => s.id);
+  const { data: files } = await sb.from('seller_submission_files').select('*').in('submission_id', ids);
+  const filesBySubmission = {};
+  (files || []).forEach(f => { (filesBySubmission[f.submission_id] = filesBySubmission[f.submission_id] || []).push(f); });
+
+  wrap.innerHTML = data.map(s => {
+    const subFiles = (filesBySubmission[s.id] || []).filter(f => f.kind === 'image');
+    return `
+    <div class="panel-card" style="margin-bottom:14px;padding:18px;">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start;">
+        <div>
+          <b style="font-size:14.5px;">${esc(s.land_title)}</b>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:2px;">${esc(s.land_location)} · Submitted ${new Date(s.created_at).toLocaleDateString()}</div>
+        </div>
+        ${submissionStatusPill(s.status)}
+      </div>
+      ${s.description ? `<p style="font-size:13px;color:var(--muted);margin:10px 0 0;">${esc(s.description)}</p>` : ''}
+      ${subFiles.length ? `<div class="file-thumb-grid">${subFiles.map(f => `<img src="${esc(f.file_url)}" alt=""/>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function loadMyVisits(){
+  const tbody = document.getElementById('myVisitsTable');
+  const { data, error } = await sb.from('site_visit_requests').select('*, plots(title)').order('created_at', { ascending: false });
+  if (error) { tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Couldn't load site visit requests.</td></tr>`; return; }
+  tbody.innerHTML = (data && data.length) ? data.map(v => `
+    <tr>
+      <td>${esc(v.full_name)}</td>
+      <td>${esc(v.contact)}</td>
+      <td>${esc((v.plots && v.plots.title) || '—')}</td>
+      <td>${esc(v.visit_day || '—')}</td>
+      <td><span class="pill ${v.status === 'completed' ? 'on' : (v.status === 'cancelled' ? 'bad' : 'warn')}">${esc(v.status)}</span></td>
+    </tr>`).join('') : `<tr><td colspan="5" class="empty-row">No site visit requests for your plots yet.</td></tr>`;
+}
+
+/* ============ CHATS ============ */
+let myConversations = [];
+let activeConversation = null;
+let activeChatChannel = null;
+let sellerPendingImage = null;
+
+async function loadMyChats(){
+  const list = document.getElementById('chatsList');
+  const { data, error } = await sb.from('conversations').select('*, plots(title)').eq('seller_id', mySeller.id).order('last_message_at', { ascending: false });
+  if (error) { list.innerHTML = `<div class="chats-empty">Couldn't load chats.</div>`; return; }
+  myConversations = data || [];
+  if (!myConversations.length) { list.innerHTML = `<div class="chats-empty">No buyer chats yet.</div>`; return; }
+  list.innerHTML = myConversations.map(c => `
+    <div class="chats-row" data-id="${esc(c.id)}">
+      <div class="cr-top"><span>${esc(c.buyer_name)}</span></div>
+      <div class="cr-sub">${esc((c.plots && c.plots.title) || 'Plot')} · ${new Date(c.last_message_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+    </div>`).join('');
+  list.querySelectorAll('.chats-row').forEach(row => row.addEventListener('click', () => openChatThread(row.dataset.id)));
+}
+
+function chatBubbleHtml(m){
+  const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const img = m.image_url ? `<img src="${esc(m.image_url)}" onclick="window.open('${esc(m.image_url)}','_blank')" alt="attachment"/>` : '';
+  const body = m.body ? `<div>${esc(m.body)}</div>` : '';
+  return `<div class="chat-bubble ${esc(m.sender_type)}">${img}${body}<span class="chat-bubble-time">${time}</span></div>`;
+}
+
+async function openChatThread(convoId){
+  const convo = myConversations.find(c => String(c.id) === String(convoId));
+  if (!convo) return;
+  activeConversation = convo;
+  document.querySelectorAll('.chats-row').forEach(r => r.classList.toggle('active', r.dataset.id === String(convoId)));
+
+  const wrap = document.getElementById('chatThreadWrap');
+  wrap.innerHTML = `
+    <div class="chat-thread">
+      <div class="chat-thread-head">
+        <div class="cth-name">${esc(convo.buyer_name)}</div>
+        <div class="cth-sub">${esc((convo.plots && convo.plots.title) || 'Plot')}</div>
+        <div class="cth-contact">
+          ${convo.buyer_contact ? `<a class="btn btn-sm" href="tel:+${esc(toIntlPhone(convo.buyer_contact))}">Call</a><a class="btn btn-sm" href="https://wa.me/${esc(toIntlPhone(convo.buyer_contact))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
+        </div>
+      </div>
+      <div class="chat-msgs" id="chatMsgsWrap"><div class="chats-empty">Loading messages…</div></div>
+      <form class="chat-input-row" id="sellerChatForm">
+        <label class="chat-attach-btn" title="Attach image">
+          <input type="file" id="sellerChatImageInput" accept="image/*" hidden/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </label>
+        <input type="text" id="sellerChatTextInput" placeholder="Type a reply..." autocomplete="off"/>
+        <button type="submit" class="chat-send-btn" aria-label="Send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </button>
+      </form>
+    </div>`;
+
+  document.getElementById('sellerChatForm').addEventListener('submit', sendSellerMessage);
+  document.getElementById('sellerChatImageInput').addEventListener('change', (e) => { sellerPendingImage = e.target.files[0] || null; });
+
+  const { data, error } = await sb.from('messages').select('*').eq('conversation_id', convo.id).order('created_at', { ascending: true });
+  const msgsWrap = document.getElementById('chatMsgsWrap');
+  if (error) { msgsWrap.innerHTML = `<div class="chats-empty">Couldn't load messages.</div>`; }
+  else { msgsWrap.innerHTML = (data && data.length) ? data.map(chatBubbleHtml).join('') : `<div class="chats-empty">No messages yet.</div>`; msgsWrap.scrollTop = msgsWrap.scrollHeight; }
+
+  if (activeChatChannel) { sb.removeChannel(activeChatChannel); activeChatChannel = null; }
+  activeChatChannel = sb.channel('seller-chat-' + convo.id)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: 'conversation_id=eq.' + convo.id }, (payload) => {
+      const w = document.getElementById('chatMsgsWrap');
+      if (!w) return;
+      const empty = w.querySelector('.chats-empty');
+      if (empty) w.innerHTML = '';
+      w.insertAdjacentHTML('beforeend', chatBubbleHtml(payload.new));
+      w.scrollTop = w.scrollHeight;
+    })
+    .subscribe();
+}
+
+async function uploadChatImage(convoId, file){
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const path = `chat/${convoId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+  const { error } = await sb.storage.from('media').upload(path, file, { upsert: false });
+  if (error) throw error;
+  const { data } = sb.storage.from('media').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+async function sendSellerMessage(e){
+  e.preventDefault();
+  if (!activeConversation) return;
+  const input = document.getElementById('sellerChatTextInput');
+  const text = input.value.trim();
+  const image = sellerPendingImage;
+  if (!text && !image) return;
+  const sendBtn = e.target.querySelector('.chat-send-btn');
+  sendBtn.disabled = true;
+  try {
+    let imageUrl = null;
+    if (image) imageUrl = await uploadChatImage(activeConversation.id, image);
+    const { error } = await sb.from('messages').insert({
+      conversation_id: activeConversation.id, sender_type: 'seller',
+      body: text || null, image_url: imageUrl
+    });
+    if (error) throw error;
+    await sb.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', activeConversation.id);
+    input.value = '';
+    sellerPendingImage = null;
+    document.getElementById('sellerChatImageInput').value = '';
+  } catch (err) {
+    console.error('Send message failed:', err);
+    alert('Message failed to send. Please check your connection and try again.');
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+function toIntlPhone(phone){
+  let digits = (phone || '').replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('0')) digits = '233' + digits.slice(1);
+  else if (!digits.startsWith('233')) digits = '233' + digits;
+  return digits;
+}
+</script>
+</body>
+</html>
