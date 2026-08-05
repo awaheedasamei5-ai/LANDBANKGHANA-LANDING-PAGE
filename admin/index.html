@@ -1989,7 +1989,7 @@ async function loadSmsLog(){
       <td>${new Date(l.created_at).toLocaleString()}</td>
       <td>${esc(l.phone || '—')}</td>
       <td>${esc(l.kind || '—')}</td>
-      <td><span class="pill ${l.status==='sent'?'on':'off'}">${esc(l.status || '—')}</span></td>
+      <td><span class="pill ${(l.status||'').startsWith('sent')?'on':'off'}" title="${l.status==='sent_fallback_sender'?'Delivered, but the custom sender ID was rejected — Arkesel used its default sender instead. Get your sender ID approved in the Arkesel dashboard to fix this.':''}">${esc(l.status==='sent_fallback_sender' ? 'sent (fallback sender)' : (l.status || '—'))}</span></td>
     </tr>`).join('') || '<tr><td colspan="4">No SMS activity yet.</td></tr>';
 }
 
