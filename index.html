@@ -636,7 +636,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
   radial-gradient(ellipse 600px 500px at 100% 30%, rgba(34,165,76,.18), transparent 60%),
   linear-gradient(180deg, #0B2417 0%, var(--ink) 60%);
   z-index:0;}
-.rp-hero::after{content:'';position:absolute;inset:0;background-image:url('assets/photos/process.jpg');background-size:cover;background-position:center 30%;opacity:.16;mix-blend-mode:luminosity;z-index:0;}
+.rp-hero::after{content:'';position:absolute;inset:0;background-image:url('assets/photos/process.webp');background-size:cover;background-position:center 30%;opacity:.16;mix-blend-mode:luminosity;z-index:0;}
 .rp-hero .wrap{position:relative;z-index:1;}
 #royal-palm .rp-hero .eyebrow{background:rgba(255,255,255,.1);color:var(--brand);}
 #royal-palm .rp-hero .sec-head p{color:rgba(255,255,255,.65);}
@@ -938,7 +938,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
       </div>
     </div>
     <div class="hero-visual reveal">
-      <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.png" alt="Trulander JSF Limited helps you own land safely"/>
+      <img id="heroPhotoImg" class="hero-photo" src="assets/photos/hero-person.webp" alt="Trulander JSF Limited helps you own land safely" width="1200" height="801" fetchpriority="high"/>
       <svg class="hero-flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <linearGradient id="heroFlowGradient" x1="0" y1="0" x2="1" y2="0">
@@ -1026,7 +1026,7 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
   </div>
   <div class="wrap about-grid">
     <div class="about-card reveal" id="aboutCard">
-      <img class="about-photo" id="aboutPhotoImg" src="assets/photos/about.jpg" alt="A Trulander JSF Limited team member"/>
+      <img class="about-photo" id="aboutPhotoImg" src="assets/photos/about.webp" alt="A Trulander JSF Limited team member" loading="lazy"/>
       <div class="about-overlay"></div>
       <div class="about-card-content">
         <button type="button" class="about-quotes" id="aboutQuotes" aria-label="Quote slideshow — click to pause and read"></button>
@@ -4857,13 +4857,18 @@ document.getElementById('reviewForm').addEventListener('submit', async (e) => {
 /* --- auto-reload when a new version is deployed --- */
 (function () {
   let knownTag = null;
+  let pendingReload = false;
+  // Every modal/overlay on the site (plot detail, enquiry, quote, site
+  // visit, gallery lightbox, promo lightbox, phone preview, mobile nav
+  // panel, news panel) shares the .open toggle on a common wrapper class —
+  // checking those directly is far more reliable than guessing at id
+  // patterns, and covers every current and future overlay for free.
   function isUserBusy(){
     const ae = document.activeElement;
     if (ae && ['INPUT', 'TEXTAREA', 'SELECT'].includes(ae.tagName)) return true;
-    if (document.querySelector('[id*="Overlay"].open, [id*="Modal"].open, [id*="Panel"].open, [id*="Lightbox"].open, .client-popover.open')) return true;
+    if (document.querySelector('.modal-overlay.open, .mobile-panel.open, .client-popover.open, .phone-preview-overlay.open, .upload-progress.show')) return true;
     return false;
   }
-  let pendingReload = false;
   function tryReload(){
     if (isUserBusy()) { pendingReload = true; return; }
     location.reload();
@@ -4878,8 +4883,13 @@ document.getElementById('reviewForm').addEventListener('submit', async (e) => {
     } catch (e) { /* offline or blocked — just try again next interval */ }
   }
   setInterval(checkForUpdate, 3 * 60 * 1000);
+  // A reload deferred while the visitor was busy shouldn't wait solely on
+  // 'focusout' -- that event never fires if they were never in a text
+  // field to begin with (e.g. just browsing with a modal open). Re-check
+  // readiness on a short interval instead so it applies the moment things
+  // go idle, without ever cutting off an in-progress interaction.
+  setInterval(() => { if (pendingReload && !isUserBusy()) { pendingReload = false; location.reload(); } }, 10000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
-  document.addEventListener('focusout', () => { if (pendingReload) { pendingReload = false; setTimeout(tryReload, 500); } });
 })();
 </script>
 </body>

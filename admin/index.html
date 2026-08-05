@@ -3425,8 +3425,11 @@ async function deleteRow(table, id, reload, col){
     } catch (e) { /* offline or blocked — just try again next interval */ }
   }
   setInterval(checkForUpdate, 3 * 60 * 1000);
+  // A reload deferred while mid-edit shouldn't wait solely on 'focusout' --
+  // that never fires if focus was never in a field. Re-check on a short
+  // interval instead so it applies the moment things go idle.
+  setInterval(() => { if (pendingReload && !isUserBusy()) { pendingReload = false; location.reload(); } }, 10000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
-  document.addEventListener('focusout', () => { if (pendingReload) { pendingReload = false; setTimeout(tryReload, 500); } });
 })();
 </script>
 </body>
