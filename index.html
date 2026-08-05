@@ -1478,8 +1478,14 @@ body.is-subpage section#royal-palm .rp-hero{padding-top:130px;}
           </div>
 
           <div class="field">
-            <label>Video links (optional)</label>
-            <textarea name="video_links" rows="2" placeholder="Paste one video link per line — YouTube, TikTok, Facebook, or Instagram"></textarea>
+            <label>Video (optional)</label>
+            <div class="file-drop" id="sellerVideosDrop">
+              <input type="file" id="sellerVideosInput" accept="video/*" multiple/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l5-3v10l-5-3"/><rect x="1" y="6" width="14" height="12" rx="2"/></svg>
+              <div class="fd-label">Click to upload a walk-through video</div>
+              <div class="fd-sub">MP4 or MOV, up to 50MB per file</div>
+            </div>
+            <div class="file-list" id="sellerVideosList"></div>
             <div class="hint">A walk-through video helps buyers see exactly what they're buying.</div>
           </div>
 
@@ -2455,6 +2461,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
   }
   const sellerImages = setupFilePicker('sellerImagesDrop', 'sellerImagesInput', 'sellerImagesList', true);
   const sellerDocs = setupFilePicker('sellerDocsDrop', 'sellerDocsInput', 'sellerDocsList', false);
+  const sellerVideos = setupFilePicker('sellerVideosDrop', 'sellerVideosInput', 'sellerVideosList', false);
 
   async function uploadFile(bucket, file, prefix){
     const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
@@ -2511,6 +2518,8 @@ document.getElementById('year').textContent = new Date().getFullYear();
     msg.className = 'form-msg';
     try {
       if (!sb) throw new Error('offline');
+      const oversizedVideo = sellerVideos.getFiles().find(f => f.size > 50 * 1024 * 1024);
+      if (oversizedVideo) throw new Error(`"${oversizedVideo.name}" is over 50MB — please use a smaller video file.`);
       const { data: inserted, error } = await withRetry(() => sb.from('seller_submissions').insert({
         name: data.name, phone: data.phone, email: data.email || null,
         company_name: data.company_name || null,
@@ -2526,8 +2535,8 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
       const imgFiles = sellerImages.getFiles();
       const docFiles = sellerDocs.getFiles();
-      const videoLinks = (data.video_links || '').split('\n').map(s => s.trim()).filter(Boolean);
-      const totalFiles = imgFiles.length + docFiles.length;
+      const videoFiles = sellerVideos.getFiles();
+      const totalFiles = imgFiles.length + docFiles.length + videoFiles.length;
       let uploaded = 0;
       if (totalFiles) { progress.classList.add('show'); progress.textContent = `Uploading files... 0/${totalFiles}`; }
 
@@ -2542,9 +2551,11 @@ document.getElementById('year').textContent = new Date().getFullYear();
         fileRows.push({ submission_id: submissionId, kind: 'document', file_url: url, file_path: path, file_name: docFiles[i].name, sort_order: i });
         uploaded++; progress.textContent = `Uploading files... ${uploaded}/${totalFiles}`;
       }
-      videoLinks.forEach((link, i) => {
-        fileRows.push({ submission_id: submissionId, kind: 'video', file_url: link, file_path: null, file_name: null, sort_order: i });
-      });
+      for (let i = 0; i < videoFiles.length; i++) {
+        const { path, url } = await uploadFile('media', videoFiles[i], `seller-submissions/${submissionId}`);
+        fileRows.push({ submission_id: submissionId, kind: 'video', file_url: url, file_path: path, file_name: videoFiles[i].name, video_provider: 'file', sort_order: i });
+        uploaded++; progress.textContent = `Uploading files... ${uploaded}/${totalFiles}`;
+      }
       if (fileRows.length) {
         const { error: fErr } = await withRetry(() => sb.from('seller_submission_files').insert(fileRows));
         if (fErr) throw fErr;
@@ -2553,10 +2564,14 @@ document.getElementById('year').textContent = new Date().getFullYear();
       document.getElementById('sellerModalFormWrap').style.display = 'none';
       document.getElementById('sellerModalSuccess').style.display = 'block';
       sellerForm.reset();
-      sellerImages.reset(); sellerDocs.reset();
+      sellerImages.reset(); sellerDocs.reset(); sellerVideos.reset();
     } catch (err) {
       progress.classList.remove('show');
-      msg.textContent = 'Something went wrong submitting your land details. Please try again, or reach us directly via WhatsApp.';
+      if (err && err.message && err.message.includes('50MB')) {
+        msg.textContent = err.message;
+      } else {
+        msg.textContent = 'Something went wrong submitting your land details. Please try again, or reach us directly via WhatsApp.';
+      }
       msg.className = 'form-msg err';
     } finally {
       btn.disabled = false; btn.textContent = 'Submit for review';

@@ -2150,8 +2150,14 @@ async function approveSubmission(id){
   const images = files.filter(f => f.kind === 'image');
   const videos = files.filter(f => f.kind === 'video');
 
+  // Match by normalized phone, not raw string equality — sellers submit in
+  // whatever format they typed (0XX..., +233XX..., 233XX...), so an exact
+  // string match misses returning sellers and silently creates a duplicate
+  // profile for them on every new submission.
   let sellerId = null;
-  const { data: existingSeller } = await sb.from('sellers').select('id').eq('phone', sub.phone).maybeSingle();
+  const normalizedSubPhone = toIntlPhone(sub.phone);
+  const { data: allSellerPhones } = await sb.from('sellers').select('id, phone');
+  const existingSeller = (allSellerPhones || []).find(s => s.phone && toIntlPhone(s.phone) === normalizedSubPhone);
   if (existingSeller) {
     sellerId = existingSeller.id;
   } else {
